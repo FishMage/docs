@@ -4,8 +4,6 @@ sidebarTitle: CLI
 description: Interactive command-line interface for building with Deep Agents
 ---
 
-:::python
-
 A terminal interface for building agents with persistent memory. Agents maintain context across sessions, learn project conventions, and execute code with approval controls.
 
 <Frame>
@@ -60,6 +58,17 @@ export TAVILY_API_KEY="your-key"
 ```
 </Accordion>
 
+## Built-in capabilities
+
+The CLI provides these tools to agents:
+- File operations (read, write, edit)
+- Shell command execution
+- Web search (requires Tavily API key)
+- HTTP requests
+- Task planning and tracking
+- Memory storage and retrieval
+
+
 ## Persistent memory
 
 Agents store information in `~/.deepagents/AGENT_NAME/memories/` as markdown files. The agent searches these files before responding and saves new information automatically.
@@ -78,16 +87,6 @@ It remembers for future sessions:
 # Applies conventions without prompting
 ```
 
-## Built-in capabilities
-
-The CLI provides these tools to agents:
-- File operations (read, write, edit)
-- Shell command execution
-- Web search (requires Tavily API key)
-- HTTP requests
-- Task planning and tracking
-- Memory storage and retrieval
-
 ## Configuration
 
 ### Options
@@ -102,11 +101,11 @@ The CLI provides these tools to agents:
 
 ### Commands
 
-| Command | Description |
-|---------|-------------|
-| `list` | List all agents |
-| `help` | Show help |
-| `reset --agent NAME` | Clear agent memory |
+| Command                              | Description                    |
+|--------------------------------------|--------------------------------|
+| `list`                               | List all agents                |
+| `help`                               | Show help                      |
+| `reset --agent NAME`                 | Clear agent memory             |
 | `reset --agent NAME --target SOURCE` | Copy memory from another agent |
 
 ## Interactive mode
@@ -125,31 +124,3 @@ The CLI provides these tools to agents:
 | `Ctrl+T`    | Toggle auto-approve |
 | `Ctrl+C`    | Interrupt           |
 | `Ctrl+D`    | Exit                |
-
-## Use cases
-
-**Multiple specialized agents**:
-```bash
-uvx deepagents-cli --agent backend-dev
-uvx deepagents-cli --agent frontend-dev
-uvx deepagents-cli --agent researcher
-```
-
-**Research with web search**:
-```bash
-export TAVILY_API_KEY="your-key"
-uvx deepagents-cli --agent researcher
-> Research LangGraph v1.0 and create a report
-```
-
-**Sandboxed code execution**:
-```bash
-uvx deepagents-cli --sandbox modal --auto-approve
-> Test a pandas script on large CSV files
-```
-
-:::js
-
-The Deep Agents CLI is currently Python-only. For JavaScript/TypeScript development, use the [programmatic API](/oss/deepagents/quickstart) to build your own agent interfaces.
-
-:::
