@@ -9,19 +9,19 @@ LangChain provides prebuilt middleware for common use cases. Each middleware is 
 
 These middleware work with any LLM provider.
 
-| Middleware | Category | Use case |
-|------------|----------|----------|
-| [Summarization](#summarization) | Context management | Automatically summarize conversation history when approaching token limits |
-| [Human-in-the-loop](#human-in-the-loop) | Control flow | Pause execution for human approval of tool calls |
-| [Model call limit](#model-call-limit) | Control flow | Limit the number of model calls to prevent excessive costs |
-| [Tool call limit](#tool-call-limit) | Control flow | Control tool execution by limiting call counts |
-| [Model fallback](#model-fallback) | Reliability | Automatically fallback to alternative models when primary fails |
-| [PII detection](#pii-detection) | Security & compliance | Detect and handle Personally Identifiable Information |
-| [To-do list](#to-do-list) | Task planning | Equip agents with task planning and tracking capabilities |
-| [LLM tool selector](#llm-tool-selector) | Tool management | Use an LLM to select relevant tools before calling main model |
-| [Tool retry](#tool-retry) | Reliability | Automatically retry failed tool calls with exponential backoff |
-| [LLM tool emulator](#llm-tool-emulator) | Tool management | Emulate tool execution using LLM for testing purposes |
-| [Context editing](#context-editing) | Context management | Manage conversation context by trimming or clearing tool uses |
+| Middleware | Use case |
+|------------|----------|
+| [Summarization](#summarization) | Automatically summarize conversation history when approaching token limits |
+| [Human-in-the-loop](#human-in-the-loop) | Pause execution for human approval of tool calls |
+| [Model call limit](#model-call-limit) | Limit the number of model calls to prevent excessive costs |
+| [Tool call limit](#tool-call-limit) | Control tool execution by limiting call counts |
+| [Model fallback](#model-fallback) | Automatically fallback to alternative models when primary fails |
+| [PII detection](#pii-detection) | Detect and handle Personally Identifiable Information |
+| [To-do list](#to-do-list) | Equip agents with task planning and tracking capabilities |
+| [LLM tool selector](#llm-tool-selector) | Use an LLM to select relevant tools before calling main model |
+| [Tool retry](#tool-retry) | Automatically retry failed tool calls with exponential backoff |
+| [LLM tool emulator](#llm-tool-emulator) | Emulate tool execution using LLM for testing purposes |
+| [Context editing](#context-editing) | Manage conversation context by trimming or clearing tool uses |
 
 ---
 
@@ -77,17 +77,109 @@ const agent = createAgent({
 
 <Accordion title="Configuration options">
 
-**`model`** (required) - LLM model to use for summarization
+:::python
+<ParamField body="model" type="string | BaseChatModel" required>
+    Model for generating summaries. Can be a model identifier string (e.g., `'openai:gpt-4o-mini'`) or a `BaseChatModel` instance. See @[`init_chat_model`][init_chat_model(model)] for more information.
+</ParamField>
 
-**`trigger`** (required) - When to trigger summarization. Can be a single condition object or array of conditions:
-- `fraction` - Fraction of model's context size (0-1)
-- `tokens` - Absolute token count
-- `messages` - Number of messages
+<ParamField body="trigger" type="dict | list[dict]">
+    Conditions for triggering summarization. Can be:
 
-**`keep`** (required) - How much context to preserve after summarization (specify exactly one):
-- `fraction` - Fraction of model's context size to keep
-- `tokens` - Absolute token count to keep
-- `messages` - Number of recent messages to keep
+    - A single condition dict (all properties must be met - AND logic)
+    - A list of condition dicts (any condition must be met - OR logic)
+
+    Each condition can include:
+    - `fraction` (float): Fraction of model's context size (0-1)
+    - `tokens` (int): Absolute token count
+    - `messages` (int): Message count
+
+    At least one property must be specified per condition. If not provided, summarization will not trigger automatically.
+</ParamField>
+
+<ParamField body="keep" type="dict" default="{messages: 20}">
+    How much context to preserve after summarization. Specify exactly one of:
+
+    - `fraction` (float): Fraction of model's context size to keep (0-1)
+    - `tokens` (int): Absolute token count to keep
+    - `messages` (int): Number of recent messages to keep
+</ParamField>
+
+<ParamField body="token_counter" type="function">
+    Custom token counting function. Defaults to character-based counting.
+</ParamField>
+
+<ParamField body="summary_prompt" type="string">
+    Custom prompt template for summarization. Uses built-in template if not specified. The template should include `{messages}` placeholder where conversation history will be inserted.
+</ParamField>
+
+<ParamField body="trim_tokens_to_summarize" type="number" default="4000">
+    Maximum number of tokens to include when generating the summary. Messages will be trimmed to fit this limit before summarization.
+</ParamField>
+
+<ParamField body="summary_prefix" type="string">
+    Prefix to add to the summary message. If not provided, a default prefix is used.
+</ParamField>
+
+<ParamField body="max_tokens_before_summary" type="number" deprecated>
+    **Deprecated:** Use `trigger: {"tokens": value}` instead. Token threshold for triggering summarization.
+</ParamField>
+
+<ParamField body="messages_to_keep" type="number" deprecated>
+    **Deprecated:** Use `keep: {"messages": value}` instead. Recent messages to preserve.
+</ParamField>
+:::
+
+:::js
+<ParamField body="model" type="string | BaseChatModel" required>
+    Model for generating summaries. Can be a model identifier string (e.g., `'openai:gpt-4o-mini'`) or a `BaseChatModel` instance.
+</ParamField>
+
+<ParamField body="trigger" type="object | object[]">
+    Conditions for triggering summarization. Can be:
+
+    - A single condition object (all properties must be met - AND logic)
+    - An array of condition objects (any condition must be met - OR logic)
+
+    Each condition can include:
+    - `fraction` (number): Fraction of model's context size (0-1)
+    - `tokens` (number): Absolute token count
+    - `messages` (number): Message count
+
+    At least one property must be specified per condition. If not provided, summarization will not trigger automatically.
+</ParamField>
+
+<ParamField body="keep" type="object" default="{messages: 20}">
+    How much context to preserve after summarization. Specify exactly one of:
+
+    - `fraction` (number): Fraction of model's context size to keep (0-1)
+    - `tokens` (number): Absolute token count to keep
+    - `messages` (number): Number of recent messages to keep
+</ParamField>
+
+<ParamField body="tokenCounter" type="function">
+    Custom token counting function. Defaults to character-based counting.
+</ParamField>
+
+<ParamField body="summaryPrompt" type="string">
+    Custom prompt template for summarization. Uses built-in template if not specified. The template should include `{messages}` placeholder where conversation history will be inserted.
+</ParamField>
+
+<ParamField body="trimTokensToSummarize" type="number" default="4000">
+    Maximum number of tokens to include when generating the summary. Messages will be trimmed to fit this limit before summarization.
+</ParamField>
+
+<ParamField body="summaryPrefix" type="string">
+    Prefix to add to the summary message. If not provided, a default prefix is used.
+</ParamField>
+
+<ParamField body="maxTokensBeforeSummary" type="number" deprecated>
+    **Deprecated:** Use `trigger: { tokens: value }` instead. Token threshold for triggering summarization.
+</ParamField>
+
+<ParamField body="messagesToKeep" type="number" deprecated>
+    **Deprecated:** Use `keep: { messages: value }` instead. Recent messages to preserve.
+</ParamField>
+:::
 
 </Accordion>
 
@@ -275,10 +367,45 @@ const agent = createAgent({
 
 <Accordion title="Configuration options">
 
-**`interrupt_on`** (required) - Dictionary mapping tool names to interrupt configuration:
-- `false` - Never interrupt for this tool
-- `true` - Interrupt with all decisions enabled
-- Object with `allowed_decisions` array containing: `"approve"`, `"edit"`, `"reject"`
+:::python
+<ParamField body="interrupt_on" type="dict" required>
+    Mapping of tool names to approval configs. Values can be `True` (interrupt with default config), `False` (auto-approve), or an `InterruptOnConfig` object.
+</ParamField>
+
+<ParamField body="description_prefix" type="string" default="Tool execution requires approval">
+    Prefix for action request descriptions
+</ParamField>
+
+**`InterruptOnConfig` options:**
+
+<ParamField body="allowed_decisions" type="list[string]">
+    List of allowed decisions: `'approve'`, `'edit'`, or `'reject'`
+</ParamField>
+
+<ParamField body="description" type="string | callable">
+    Static string or callable function for custom description
+</ParamField>
+:::
+
+:::js
+<ParamField body="interruptOn" type="object" required>
+    Mapping of tool names to approval configs
+</ParamField>
+
+**Tool approval config options:**
+
+<ParamField body="allowAccept" type="boolean" default="false">
+    Whether approval is allowed
+</ParamField>
+
+<ParamField body="allowEdit" type="boolean" default="false">
+    Whether editing is allowed
+</ParamField>
+
+<ParamField body="allowRespond" type="boolean" default="false">
+    Whether responding/rejection is allowed
+</ParamField>
+:::
 
 </Accordion>
 
@@ -346,13 +473,33 @@ const agent = createAgent({
 
 <Accordion title="Configuration options">
 
-**`thread_limit`** (optional) - Maximum model calls across all runs in a conversation thread (requires checkpointer)
+:::python
+<ParamField body="thread_limit" type="number">
+    Maximum model calls across all runs in a thread. Defaults to no limit.
+</ParamField>
 
-**`run_limit`** (optional) - Maximum model calls per single invocation (resets each turn)
+<ParamField body="run_limit" type="number">
+    Maximum model calls per single invocation. Defaults to no limit.
+</ParamField>
 
-**`exit_behavior`** (optional) - What to do when limit is reached:
-- `"end"` - Gracefully terminate execution (default)
-- `"error"` - Raise/throw exception
+<ParamField body="exit_behavior" type="string" default="end">
+    Behavior when limit is reached. Options: `'end'` (graceful termination) or `'error'` (raise exception)
+</ParamField>
+:::
+
+:::js
+<ParamField body="threadLimit" type="number">
+    Maximum model calls across all runs in a thread. Defaults to no limit.
+</ParamField>
+
+<ParamField body="runLimit" type="number">
+    Maximum model calls per single invocation. Defaults to no limit.
+</ParamField>
+
+<ParamField body="exitBehavior" type="string" default="end">
+    Behavior when limit is reached. Options: `'end'` (graceful termination) or `'error'` (throw exception)
+</ParamField>
+:::
 
 </Accordion>
 
@@ -466,16 +613,53 @@ const agent = createAgent({
 
 <Accordion title="Configuration options">
 
-**`tool_name`** (optional) - Specific tool to limit. If not provided, limits apply globally across all tools
+:::python
+<ParamField body="tool_name" type="string">
+    Name of specific tool to limit. If not provided, limits apply to **all tools globally**.
+</ParamField>
 
-**`thread_limit`** (optional) - Maximum tool calls across all runs in a conversation thread (requires checkpointer)
+<ParamField body="thread_limit" type="number">
+    Maximum tool calls across all runs in a thread (conversation). Persists across multiple invocations with the same thread ID. Requires a checkpointer to maintain state. `None` means no thread limit.
+</ParamField>
 
-**`run_limit`** (optional) - Maximum tool calls per single invocation (resets each turn)
+<ParamField body="run_limit" type="number">
+    Maximum tool calls per single invocation (one user message → response cycle). Resets with each new user message. `None` means no run limit.
 
-**`exit_behavior`** (optional) - What to do when limit is reached:
-- `"continue"` - Block exceeded calls with error message, agent continues (default)
-- `"error"` - Raise/throw exception immediately
-- `"end"` - Stop with ToolMessage + AI message (single-tool scenarios only)
+    **Note:** At least one of `thread_limit` or `run_limit` must be specified.
+</ParamField>
+
+<ParamField body="exit_behavior" type="string" default="continue">
+    Behavior when limit is reached:
+
+    - `'continue'` (default) - Block exceeded tool calls with error messages, let other tools and the model continue. The model decides when to end based on the error messages.
+    - `'error'` - Raise a `ToolCallLimitExceededError` exception, stopping execution immediately
+    - `'end'` - Stop execution immediately with a `ToolMessage` and AI message for the exceeded tool call. Only works when limiting a single tool; raises `NotImplementedError` if other tools have pending calls.
+</ParamField>
+:::
+
+:::js
+<ParamField body="toolName" type="string">
+    Name of specific tool to limit. If not provided, limits apply to **all tools globally**.
+</ParamField>
+
+<ParamField body="threadLimit" type="number">
+    Maximum tool calls across all runs in a thread (conversation). Persists across multiple invocations with the same thread ID. Requires a checkpointer to maintain state. `undefined` means no thread limit.
+</ParamField>
+
+<ParamField body="runLimit" type="number">
+    Maximum tool calls per single invocation (one user message → response cycle). Resets with each new user message. `undefined` means no run limit.
+
+    **Note:** At least one of `threadLimit` or `runLimit` must be specified.
+</ParamField>
+
+<ParamField body="exitBehavior" type="string" default="continue">
+    Behavior when limit is reached:
+
+    - `'continue'` (default) - Block exceeded tool calls with error messages, let other tools and the model continue. The model decides when to end based on the error messages.
+    - `'error'` - Throw a `ToolCallLimitExceededError` exception, stopping execution immediately
+    - `'end'` - Stop execution immediately with a ToolMessage and AI message for the exceeded tool call. Only works when limiting a single tool; throws error if other tools have pending calls.
+</ParamField>
+:::
 
 </Accordion>
 
@@ -580,7 +764,31 @@ const agent = createAgent({
 
 <Accordion title="Configuration options">
 
-**`*models`** (required) - One or more fallback model names to try in order when the primary model fails
+:::python
+<ParamField body="first_model" type="string | BaseChatModel" required>
+    First fallback model to try when the primary model fails. Can be a model identifier string (e.g., `'openai:gpt-4o-mini'`) or a `BaseChatModel` instance.
+</ParamField>
+
+<ParamField body="*additional_models" type="string | BaseChatModel">
+    Additional fallback models to try in order if previous models fail
+</ParamField>
+:::
+
+:::js
+The middleware accepts a variable number of string arguments representing fallback models in order:
+
+<ParamField body="...models" type="string[]" required>
+  One or more fallback model strings to try in order when the primary model fails
+
+  ```typescript
+  modelFallbackMiddleware(
+    "first-fallback-model",
+    "second-fallback-model",
+    // ... more models
+  )
+  ```
+</ParamField>
+:::
 
 </Accordion>
 
@@ -684,20 +892,67 @@ const agent = createAgent({
 
 <Accordion title="Configuration options">
 
-**PII type** (required) - Either a built-in type or custom regex pattern:
-- Built-in types: `"email"`, `"credit_card"`, `"ip"`, `"mac_address"`, `"url"`
-- Custom: `detector` parameter with regex pattern
+:::python
+<ParamField body="pii_type" type="string" required>
+    Type of PII to detect. Can be a built-in type (`email`, `credit_card`, `ip`, `mac_address`, `url`) or a custom type name.
+</ParamField>
 
-**`strategy`** (required) - How to handle detected PII:
-- `"block"` - Raise exception when detected
-- `"redact"` - Replace with `[REDACTED_TYPE]`
-- `"mask"` - Partially mask (e.g., `****-****-****-1234`)
-- `"hash"` - Replace with deterministic hash
+<ParamField body="strategy" type="string" default="redact">
+    How to handle detected PII. Options:
 
-**Application scope** (all optional, default `False`):
-- `apply_to_input` - Check user messages before model call
-- `apply_to_output` - Check AI messages after model call
-- `apply_to_tool_results` - Check tool result messages after execution
+    - `'block'` - Raise exception when detected
+    - `'redact'` - Replace with `[REDACTED_TYPE]`
+    - `'mask'` - Partially mask (e.g., `****-****-****-1234`)
+    - `'hash'` - Replace with deterministic hash
+</ParamField>
+
+<ParamField body="detector" type="function | regex">
+    Custom detector function or regex pattern. If not provided, uses built-in detector for the PII type.
+</ParamField>
+
+<ParamField body="apply_to_input" type="boolean" default="True">
+    Check user messages before model call
+</ParamField>
+
+<ParamField body="apply_to_output" type="boolean" default="False">
+    Check AI messages after model call
+</ParamField>
+
+<ParamField body="apply_to_tool_results" type="boolean" default="False">
+    Check tool result messages after execution
+</ParamField>
+:::
+
+:::js
+<ParamField body="piiType" type="string" required>
+    Type of PII to detect. Can be a built-in type (`email`, `credit_card`, `ip`, `mac_address`, `url`) or a custom type name.
+</ParamField>
+
+<ParamField body="strategy" type="string" default="redact">
+    How to handle detected PII. Options:
+
+    - `'block'` - Throw error when detected
+    - `'redact'` - Replace with `[REDACTED_TYPE]`
+    - `'mask'` - Partially mask (e.g., `****-****-****-1234`)
+    - `'hash'` - Replace with deterministic hash
+</ParamField>
+
+<ParamField body="detector" type="RegExp">
+    Custom detector regex pattern. If not provided, uses built-in detector for the PII type.
+</ParamField>
+
+<ParamField body="applyToInput" type="boolean" default="true">
+    Check user messages before model call
+</ParamField>
+
+<ParamField body="applyToOutput" type="boolean" default="false">
+    Check AI messages after model call
+</ParamField>
+
+<ParamField body="applyToToolResults" type="boolean" default="false">
+    Check tool result messages after execution
+</ParamField>
+:::
 
 </Accordion>
 
@@ -799,7 +1054,19 @@ const agent = createAgent({
 
 <Accordion title="Configuration options">
 
-This middleware has no configuration options. It automatically provides the agent with a `write_todos` tool and system prompts for task planning.
+:::python
+<ParamField body="system_prompt" type="string">
+    Custom system prompt for guiding todo usage. Uses built-in prompt if not specified.
+</ParamField>
+
+<ParamField body="tool_description" type="string">
+    Custom description for the `write_todos` tool. Uses built-in description if not specified.
+</ParamField>
+:::
+
+:::js
+No configuration options available (uses defaults).
+:::
 
 </Accordion>
 
@@ -928,11 +1195,39 @@ const agent = createAgent({
 
 <Accordion title="Configuration options">
 
-**`model`** (required) - LLM model to use for tool selection (typically a cheaper/faster model)
+:::python
+<ParamField body="model" type="string | BaseChatModel">
+    Model for tool selection. Can be a model identifier string (e.g., `'openai:gpt-4o-mini'`) or a `BaseChatModel` instance. See @[`init_chat_model`][init_chat_model(model)] for more information.
 
-**`max_tools`** (optional) - Maximum number of tools to select (default: 5)
+    Defaults to the agent's main model.
+</ParamField>
 
-**`always_include`** (optional) - List of tool names to always include in the selection
+<ParamField body="system_prompt" type="string">
+    Instructions for the selection model. Uses built-in prompt if not specified.
+</ParamField>
+
+<ParamField body="max_tools" type="number">
+    Maximum number of tools to select. Defaults to no limit.
+</ParamField>
+
+<ParamField body="always_include" type="list[string]">
+    List of tool names to always include in the selection
+</ParamField>
+:::
+
+:::js
+<ParamField body="model" type="string | BaseChatModel">
+    Model for tool selection. Can be a model identifier string (e.g., `'openai:gpt-4o-mini'`) or a `BaseChatModel` instance. Defaults to the agent's main model.
+</ParamField>
+
+<ParamField body="maxTools" type="number">
+    Maximum number of tools to select. Defaults to no limit.
+</ParamField>
+
+<ParamField body="alwaysInclude" type="string[]">
+    Array of tool names to always include in the selection
+</ParamField>
+:::
 
 </Accordion>
 
@@ -1025,24 +1320,40 @@ This middleware is only available in Python. For JavaScript/TypeScript, consider
 
 <Accordion title="Configuration options">
 
-**`max_retries`** (optional) - Number of retry attempts (default: 2)
+<ParamField body="max_retries" type="number" default="2">
+    Maximum number of retry attempts after the initial call (3 total attempts with default)
+</ParamField>
 
-**`backoff_factor`** (optional) - Multiplier for exponential backoff (default: 2.0)
+<ParamField body="tools" type="list[BaseTool | str]">
+    Optional list of tools or tool names to apply retry logic to. If `None`, applies to all tools.
+</ParamField>
 
-**`initial_delay`** (optional) - Starting delay in seconds (default: 1.0)
+<ParamField body="retry_on" type="tuple[type[Exception], ...] | callable" default="(Exception,)">
+    Either a tuple of exception types to retry on, or a callable that takes an exception and returns `True` if it should be retried.
+</ParamField>
 
-**`max_delay`** (optional) - Maximum delay between retries in seconds (default: 60.0)
+<ParamField body="on_failure" type="string | callable" default="return_message">
+    Behavior when all retries are exhausted. Options:
+    - `'return_message'` - Return a `ToolMessage` with error details (allows LLM to handle failure)
+    - `'raise'` - Re-raise the exception (stops agent execution)
+    - Custom callable - Function that takes the exception and returns a string for the `ToolMessage` content
+</ParamField>
 
-**`jitter`** (optional) - Add random variation to delays (default: True)
+<ParamField body="backoff_factor" type="number" default="2.0">
+    Multiplier for exponential backoff. Each retry waits `initial_delay * (backoff_factor ** retry_number)` seconds. Set to `0.0` for constant delay.
+</ParamField>
 
-**`tools`** (optional) - List of specific tool names to retry. If not provided, retries all tools
+<ParamField body="initial_delay" type="number" default="1.0">
+    Initial delay in seconds before first retry
+</ParamField>
 
-**`retry_on`** (optional) - Tuple of exception types to retry on. If not provided, retries on all exceptions
+<ParamField body="max_delay" type="number" default="60.0">
+    Maximum delay in seconds between retries (caps exponential backoff growth)
+</ParamField>
 
-**`on_failure`** (optional) - What to do after all retries fail:
-- `"return_message"` - Return error message (default)
-- `"raise"` - Re-raise the exception
-- Custom callable - Function that returns an error message
+<ParamField body="jitter" type="boolean" default="true">
+    Whether to add random jitter (`±25%`) to delay to avoid thundering herd
+</ParamField>
 
 </Accordion>
 
@@ -1125,9 +1436,13 @@ This middleware is only available in Python. For JavaScript/TypeScript, consider
 
 <Accordion title="Configuration options">
 
-**`model`** (optional) - LLM model to use for emulation (default: uses agent's model)
+<ParamField body="tools" type="list[str | BaseTool]">
+    List of tool names (str) or BaseTool instances to emulate. If `None` (default), ALL tools will be emulated. If empty list, no tools will be emulated.
+</ParamField>
 
-**`tools`** (optional) - List of specific tool names to emulate. If not provided, emulates all tools
+<ParamField body="model" type="string | BaseChatModel" default="anthropic:claude-3-5-sonnet-latest">
+    Model to use for generating emulated tool responses. Can be a model identifier string (e.g., `'openai:gpt-4o-mini'`) or a `BaseChatModel` instance. See @[`init_chat_model`][init_chat_model(model)] for more information.
+</ParamField>
 
 </Accordion>
 
@@ -1238,14 +1553,73 @@ const agent = createAgent({
 
 <Accordion title="Configuration options">
 
-**`edits`** (required) - List of edit strategies to apply. Most commonly uses `ClearToolUsesEdit`:
+:::python
+<ParamField body="edits" type="list[ContextEdit]" default="[ClearToolUsesEdit()]">
+    List of @[`ContextEdit`] strategies to apply
+</ParamField>
 
-**ClearToolUsesEdit parameters:**
-- `trigger` - Token count threshold to trigger clearing
-- `keep` - Number of most recent tool results to preserve
-- `clear_tool_inputs` (optional) - Whether to clear tool call arguments (default: False)
-- `exclude_tools` (optional) - List of tool names to never clear
-- `placeholder` (optional) - Text to replace cleared content (default: "[cleared]")
+<ParamField body="token_count_method" type="string" default="approximate">
+    Token counting method. Options: `'approximate'` or `'model'`
+</ParamField>
+
+**@[`ClearToolUsesEdit`] options:**
+
+<ParamField body="trigger" type="number" default="100000">
+    Token count that triggers the edit. When the conversation exceeds this token count, older tool outputs will be cleared.
+</ParamField>
+
+<ParamField body="clear_at_least" type="number" default="0">
+    Minimum number of tokens to reclaim when the edit runs. If set to 0, clears as much as needed.
+</ParamField>
+
+<ParamField body="keep" type="number" default="3">
+    Number of most recent tool results that must be preserved. These will never be cleared.
+</ParamField>
+
+<ParamField body="clear_tool_inputs" type="boolean" default="False">
+    Whether to clear the originating tool call parameters on the AI message. When `True`, tool call arguments are replaced with empty objects.
+</ParamField>
+
+<ParamField body="exclude_tools" type="list[string]" default="()">
+    List of tool names to exclude from clearing. These tools will never have their outputs cleared.
+</ParamField>
+
+<ParamField body="placeholder" type="string" default="[cleared]">
+    Placeholder text inserted for cleared tool outputs. This replaces the original tool message content.
+</ParamField>
+:::
+
+:::js
+<ParamField body="edits" type="ContextEdit[]" default="[new ClearToolUsesEdit()]">
+    Array of @[`ContextEdit`] strategies to apply
+</ParamField>
+
+**@[`ClearToolUsesEdit`] options:**
+
+<ParamField body="triggerTokens" type="number" default="100000">
+    Token count that triggers the edit. When the conversation exceeds this token count, older tool outputs will be cleared.
+</ParamField>
+
+<ParamField body="clearAtLeast" type="number" default="0">
+    Minimum number of tokens to reclaim when the edit runs. If set to 0, clears as much as needed.
+</ParamField>
+
+<ParamField body="keep" type="number" default="3">
+    Number of most recent tool results that must be preserved. These will never be cleared.
+</ParamField>
+
+<ParamField body="clearToolInputs" type="boolean" default="false">
+    Whether to clear the originating tool call parameters on the AI message. When `true`, tool call arguments are replaced with empty objects.
+</ParamField>
+
+<ParamField body="excludeTools" type="string[]" default="[]">
+    List of tool names to exclude from clearing. These tools will never have their outputs cleared.
+</ParamField>
+
+<ParamField body="placeholder" type="string" default="[cleared]">
+    Placeholder text inserted for cleared tool outputs. This replaces the original tool message content.
+</ParamField>
+:::
 
 </Accordion>
 
@@ -1321,9 +1695,9 @@ These middleware are optimized for specific LLM providers.
 
 Middleware specifically designed for Anthropic's Claude models.
 
-| Middleware | Category | Use case |
-|------------|----------|----------|
-| [Prompt caching](#anthropic-prompt-caching) | Context management | Reduce costs by caching repetitive prompt prefixes |
+| Middleware | Use case |
+|------------|----------|
+| [Prompt caching](#anthropic-prompt-caching) | Reduce costs by caching repetitive prompt prefixes |
 
 ---
 
@@ -1372,7 +1746,29 @@ const agent = createAgent({
 
 <Accordion title="Configuration options">
 
-**`ttl`** (optional) - Time-to-live for cached prompts. Accepts duration strings like `"5m"`, `"1h"`, etc. (default: `"5m"`)
+:::python
+<ParamField body="type" type="string" default="ephemeral">
+    Cache type. Only `'ephemeral'` is currently supported.
+</ParamField>
+
+<ParamField body="ttl" type="string" default="5m">
+    Time to live for cached content. Valid values: `'5m'` or `'1h'`
+</ParamField>
+
+<ParamField body="min_messages_to_cache" type="number" default="0">
+    Minimum number of messages before caching starts
+</ParamField>
+
+<ParamField body="unsupported_model_behavior" type="string" default="warn">
+    Behavior when using non-Anthropic models. Options: `'ignore'`, `'warn'`, or `'raise'`
+</ParamField>
+:::
+
+:::js
+<ParamField body="ttl" type="string" default="5m">
+    Time to live for cached content. Valid values: `'5m'` or `'1h'`
+</ParamField>
+:::
 
 </Accordion>
 

@@ -1736,6 +1736,14 @@
     {
       "source": "/langsmith/langgraph-server-changelog",
       "destination": "/langsmith/agent-server-changelog"
+    },
+    {
+      "source": "/oss/python/langchain/middleware",
+      "destination": "/oss/python/langchain/middleware/index"
+    },
+    {
+      "source": "/oss/javascript/langchain/middleware",
+      "destination": "/oss/javascript/langchain/middleware/index"
     }
   ]
 }
