@@ -76,9 +76,9 @@ Pairwise queues are designed for fast A/B comparisons between two experiments (o
     - **Collaborator settings** (reviewer count, reservations, reservation length)
 1. Submit the form to create the queue. LangSmith immediately pairs runs from the two experiments and populates the queue; there is no separate populate step.
 
-    <PICTURE>Popover showing the “Add to Pairwise Annotation Queue” card highlighted after two experiments are selected.</PICTURE>
+    ![Popover showing the “Add to Pairwise Annotation Queue” card highlighted after two experiments are selected.](/langsmith/images/pairwise-annotation-queue-popover.png)
 
-    <PICTURE>Pairwise creation pane with two selected experiments pinned, plus fields for name, description, rubric instructions, and pairwise rubric items.</PICTURE>
+    ![Pairwise creation pane.](/langsmith/images/pairwise-create-form.png)
 
 Key differences for PAQs:
 
@@ -86,8 +86,6 @@ Key differences for PAQs:
 - **Rubric**: Pairwise rubric items only require a feedback key and (optionally) a description. Annotators decide whether Run A, Run B, or both are better for each rubric item.
 - **Dataset**: Pairwise queues do not use a default dataset, because comparisons span two experiments.
 - **Reservations & reviewers**: The same collaborator controls apply. Reservations help prevent two people from judging the same comparison simultaneously.
-
-<PICTURE>Collaborator settings section for pairwise queues highlighting reviewer count, reservations, and reservation duration controls.</PICTURE>
 
 If you prefer to populate a PAQ later or via automation, you can create an empty queue under **Annotation queues** → **Pairwise** and use automation rules (see below) to add comparisons incrementally.
 
@@ -140,7 +138,7 @@ Consider routing runs that already have user feedback (e.g., thumbs-down) into a
 
 ### Review a pairwise annotation queue
 
-1. From **Annotation queues**, switch to the **Pairwise** tab (or open the queue from the dataset where you created it).
+1. From **Annotation queues**, select the pairwise queue you want to review.
 1. Each queue item displays Run A on the left and Run B on the right, along with your rubric.
 1. For every rubric item:
     - Choose **A is better**, **B is better**, or **Equal**. The UI records binary feedback on both runs behind the scenes.
@@ -153,7 +151,9 @@ Consider routing runs that already have user feedback (e.g., thumbs-down) into a
 
 Reservations, reviewer thresholds, and comments behave identically to those in single-run queues, enabling teams to use different queue types without modifying their existing workflow.
 
-    <PICTURE>Pairwise review screen showing runs side-by-side with the floating feedback bar containing A/B/Equal buttons and keyboard shortcuts.</PICTURE>
+    ![Pairwise review screen showing runs side-by-side with the floating feedback bar containing A/B/Equal buttons and keyboard shortcuts.](/langsmith/images/pairwise-annotation-queue-review-screen.png)
+
+    ![Pairwise review screen showing runs side-by-side with the feedback pane containing A/B/Equal buttons and keyboard shortcuts.](/langsmith/images/pairwise-annotation-queue-review-feedback-pane.png)
 
 ## Video guide
 
