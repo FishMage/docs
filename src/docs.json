@@ -1362,7 +1362,13 @@
                     {
                       "group": "Configuration",
                       "pages": [
-                        "langsmith/self-host-scale",
+                        {
+                          "group": "Configuration for scale",
+                          "pages": [
+                            "langsmith/self-host-scale",
+                            "langsmith/deployments-scale"
+                          ]
+                        },
                         "langsmith/self-host-ttl",
                         "langsmith/custom-docker",
                         "langsmith/self-host-playground-environment-settings",
