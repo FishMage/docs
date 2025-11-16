@@ -12,6 +12,7 @@ when they should import from `langchain` instead.
 
 import ast
 import json
+import os
 import shutil
 import subprocess
 import sys
@@ -20,36 +21,27 @@ from pathlib import Path
 from typing import Any
 
 
-def get_latest_version(package_name: str) -> str:
-    """Fetch latest version of a package from PyPI."""
-
-    def _raise_uv_not_found() -> None:
-        msg = "uv not found in PATH"
-        raise FileNotFoundError(msg)
-
+def get_package_version_after_install(temp_dir: Path, package_name: str) -> str:
+    """Get version of installed package using uv pip show."""
     try:
         uv_path = shutil.which("uv")
         if not uv_path:
-            _raise_uv_not_found()
+            return "unknown"
 
-        assert uv_path is not None  # noqa: S101
         result = subprocess.run(  # noqa: S603
-            [uv_path, "pip", "index", "versions", package_name],
+            [uv_path, "pip", "show", package_name],
             capture_output=True,
             text=True,
             check=True,
+            env={**os.environ, "PYTHONPATH": str(temp_dir)},
         )
 
-        lines = result.stdout.strip().split("\n")
-        for line in lines:
-            if line.startswith(package_name):
-                # Extract version from line like "langchain (1.0.0)"
-                return line.split("(")[1].split(")")[0]
-    except Exception as e:  # noqa: BLE001
-        print(f"Error getting latest version of {package_name}: {e}")
-
-    # Fallback: try using uv pip show after installation
-    return "latest"
+        for line in result.stdout.split("\n"):
+            if line.startswith("Version:"):
+                return line.split(":")[1].strip()
+    except Exception:  # noqa: BLE001, S110
+        pass
+    return "unknown"
 
 
 def install_packages(temp_dir: Path, packages: list[str]) -> None:
@@ -169,17 +161,20 @@ def analyze_init_file(init_file: Path) -> dict[str, Any]:
 
 def main():
     """Check import mappings."""
-    langchain_version = get_latest_version("langchain")
-    langchain_core_version = get_latest_version("langchain_core")
-
-    print(f"Latest langchain version: {langchain_version}")
-    print(f"Latest langchain_core version: {langchain_core_version}")
-
     with tempfile.TemporaryDirectory() as temp_dir:
         temp_path = Path(temp_dir)
 
         install_packages(temp_path, ["langchain", "langchain_core"])
         sys.path.insert(0, str(temp_path))
+
+        # Get versions after installation
+        langchain_version = get_package_version_after_install(temp_path, "langchain")
+        langchain_core_version = get_package_version_after_install(
+            temp_path, "langchain_core"
+        )
+
+        print(f"Installed langchain version: {langchain_version}")
+        print(f"Installed langchain_core version: {langchain_core_version}")
 
         init_files = find_init_files(temp_path)
         print(f"Found {len(init_files)} __init__.py files")
