@@ -12,6 +12,7 @@ when they should import from `langchain` instead.
 
 import ast
 import json
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -21,9 +22,19 @@ from typing import Any
 
 def get_latest_version(package_name: str) -> str:
     """Fetch latest version of a package from PyPI."""
+
+    def _raise_uv_not_found() -> None:
+        msg = "uv not found in PATH"
+        raise FileNotFoundError(msg)
+
     try:
+        uv_path = shutil.which("uv")
+        if not uv_path:
+            _raise_uv_not_found()
+
+        assert uv_path is not None  # noqa: S101
         result = subprocess.run(  # noqa: S603
-            [sys.executable, "-m", "pip", "index", "versions", package_name],
+            [uv_path, "pip", "index", "versions", package_name],
             capture_output=True,
             text=True,
             check=True,
@@ -37,15 +48,24 @@ def get_latest_version(package_name: str) -> str:
     except Exception as e:  # noqa: BLE001
         print(f"Error getting latest version of {package_name}: {e}")
 
-    # Fallback: try using pip show after installation
+    # Fallback: try using uv pip show after installation
     return "latest"
 
 
 def install_packages(temp_dir: Path, packages: list[str]) -> None:
     """Install packages in the temporary directory."""
-    pip_cmd = [
-        sys.executable,
-        "-m",
+
+    def _raise_uv_not_found() -> None:
+        msg = "uv not found in PATH"
+        raise FileNotFoundError(msg)
+
+    uv_path = shutil.which("uv")
+    if not uv_path:
+        _raise_uv_not_found()
+
+    assert uv_path is not None  # noqa: S101
+    uv_cmd = [
+        uv_path,
         "pip",
         "install",
         "--target",
@@ -55,7 +75,7 @@ def install_packages(temp_dir: Path, packages: list[str]) -> None:
     ]
 
     print(f"Installing packages: {packages}")
-    result = subprocess.run(pip_cmd, check=False, capture_output=True, text=True)  # noqa: S603
+    result = subprocess.run(uv_cmd, check=False, capture_output=True, text=True)  # noqa: S603
     if result.returncode != 0:
         print(f"Error installing packages: {result.stderr}")
         msg = f"Failed to install packages: {result.stderr}"
