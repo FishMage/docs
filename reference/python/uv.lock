@@ -753,7 +753,7 @@ wheels = [
 [[package]]
 name = "deepagents"
 version = "0.2.8"
-source = { git = "https://github.com/langchain-ai/deepagents.git?subdirectory=libs%2Fdeepagents#267b8bf593b34a19e0ecf7bd73318ad920eabf15" }
+source = { git = "https://github.com/langchain-ai/deepagents.git?subdirectory=libs%2Fdeepagents#95ae1385523a4b68248f0c0267941b6aa85135a7" }
 dependencies = [
     { name = "langchain", marker = "platform_python_implementation != 'PyPy'" },
     { name = "langchain-anthropic", marker = "platform_python_implementation != 'PyPy'" },
@@ -1777,7 +1777,7 @@ wheels = [
 [[package]]
 name = "langchain"
 version = "1.1.0"
-source = { git = "https://github.com/langchain-ai/langchain.git?subdirectory=libs%2Flangchain_v1#c63f23d2339b2604edc9ae1d9f7faf7d6cc7dc78" }
+source = { git = "https://github.com/langchain-ai/langchain.git?subdirectory=libs%2Flangchain_v1#5a7cf87626c920004a3c3ae991a76b8a7db92366" }
 dependencies = [
     { name = "langchain-core", marker = "platform_python_implementation != 'PyPy'" },
     { name = "langgraph", marker = "platform_python_implementation != 'PyPy'" },
@@ -1787,7 +1787,7 @@ dependencies = [
 [[package]]
 name = "langchain-anthropic"
 version = "1.2.0"
-source = { git = "https://github.com/langchain-ai/langchain.git?subdirectory=libs%2Fpartners%2Fanthropic#c63f23d2339b2604edc9ae1d9f7faf7d6cc7dc78" }
+source = { git = "https://github.com/langchain-ai/langchain.git?subdirectory=libs%2Fpartners%2Fanthropic#5a7cf87626c920004a3c3ae991a76b8a7db92366" }
 dependencies = [
     { name = "anthropic", marker = "platform_python_implementation != 'PyPy'" },
     { name = "langchain-core", marker = "platform_python_implementation != 'PyPy'" },
@@ -1847,7 +1847,7 @@ dependencies = [
 [[package]]
 name = "langchain-cerebras"
 version = "0.8.2"
-source = { git = "https://github.com/langchain-ai/langchain-cerebras.git?subdirectory=libs%2Fcerebras#b69f9f0f3d8b518241faf1112aeb43bb8ef131a5" }
+source = { git = "https://github.com/langchain-ai/langchain-cerebras.git?subdirectory=libs%2Fcerebras#5c5a9a6c3db9aeee2fa8f1ff6b36c0ae9c31396e" }
 dependencies = [
     { name = "langchain-core", marker = "platform_python_implementation != 'PyPy'" },
     { name = "langchain-openai", marker = "platform_python_implementation != 'PyPy'" },
@@ -1856,7 +1856,7 @@ dependencies = [
 [[package]]
 name = "langchain-chroma"
 version = "1.0.0"
-source = { git = "https://github.com/langchain-ai/langchain.git?subdirectory=libs%2Fpartners%2Fchroma#c63f23d2339b2604edc9ae1d9f7faf7d6cc7dc78" }
+source = { git = "https://github.com/langchain-ai/langchain.git?subdirectory=libs%2Fpartners%2Fchroma#5a7cf87626c920004a3c3ae991a76b8a7db92366" }
 dependencies = [
     { name = "chromadb", marker = "platform_python_implementation != 'PyPy'" },
     { name = "langchain-core", marker = "platform_python_implementation != 'PyPy'" },
@@ -1866,7 +1866,7 @@ dependencies = [
 [[package]]
 name = "langchain-classic"
 version = "1.0.0"
-source = { git = "https://github.com/langchain-ai/langchain.git?subdirectory=libs%2Flangchain#c63f23d2339b2604edc9ae1d9f7faf7d6cc7dc78" }
+source = { git = "https://github.com/langchain-ai/langchain.git?subdirectory=libs%2Flangchain#5a7cf87626c920004a3c3ae991a76b8a7db92366" }
 dependencies = [
     { name = "langchain-core", marker = "platform_python_implementation != 'PyPy'" },
     { name = "langchain-text-splitters", marker = "platform_python_implementation != 'PyPy'" },
@@ -1892,7 +1892,7 @@ dependencies = [
 [[package]]
 name = "langchain-community"
 version = "0.4.1"
-source = { git = "https://github.com/langchain-ai/langchain-community.git?subdirectory=libs%2Fcommunity#94ecc96e7bce650163ae7b0e05cfb8a8b98f2820" }
+source = { git = "https://github.com/langchain-ai/langchain-community.git?subdirectory=libs%2Fcommunity#a94b1a6f10e43d9ffe20686deb1fc3565ead7d2e" }
 dependencies = [
     { name = "aiohttp", marker = "platform_python_implementation != 'PyPy'" },
     { name = "httpx-sse", marker = "platform_python_implementation != 'PyPy'" },
@@ -1910,7 +1910,7 @@ dependencies = [
 [[package]]
 name = "langchain-core"
 version = "1.1.0"
-source = { git = "https://github.com/langchain-ai/langchain.git?subdirectory=libs%2Fcore#c63f23d2339b2604edc9ae1d9f7faf7d6cc7dc78" }
+source = { git = "https://github.com/langchain-ai/langchain.git?subdirectory=libs%2Fcore#5a7cf87626c920004a3c3ae991a76b8a7db92366" }
 dependencies = [
     { name = "jsonpatch", marker = "platform_python_implementation != 'PyPy'" },
     { name = "langsmith", marker = "platform_python_implementation != 'PyPy'" },
@@ -1934,7 +1934,7 @@ dependencies = [
 [[package]]
 name = "langchain-deepseek"
 version = "1.1.0"
-source = { git = "https://github.com/langchain-ai/langchain.git?subdirectory=libs%2Fpartners%2Fdeepseek#c63f23d2339b2604edc9ae1d9f7faf7d6cc7dc78" }
+source = { git = "https://github.com/langchain-ai/langchain.git?subdirectory=libs%2Fpartners%2Fdeepseek#5a7cf87626c920004a3c3ae991a76b8a7db92366" }
 dependencies = [
     { name = "langchain-core", marker = "platform_python_implementation != 'PyPy'" },
     { name = "langchain-openai", marker = "platform_python_implementation != 'PyPy'" },
@@ -1943,7 +1943,7 @@ dependencies = [
 [[package]]
 name = "langchain-exa"
 version = "1.0.0"
-source = { git = "https://github.com/langchain-ai/langchain.git?subdirectory=libs%2Fpartners%2Fexa#c63f23d2339b2604edc9ae1d9f7faf7d6cc7dc78" }
+source = { git = "https://github.com/langchain-ai/langchain.git?subdirectory=libs%2Fpartners%2Fexa#5a7cf87626c920004a3c3ae991a76b8a7db92366" }
 dependencies = [
     { name = "exa-py", marker = "platform_python_implementation != 'PyPy'" },
     { name = "langchain-core", marker = "platform_python_implementation != 'PyPy'" },
@@ -1952,7 +1952,7 @@ dependencies = [
 [[package]]
 name = "langchain-fireworks"
 version = "1.1.0"
-source = { git = "https://github.com/langchain-ai/langchain.git?subdirectory=libs%2Fpartners%2Ffireworks#c63f23d2339b2604edc9ae1d9f7faf7d6cc7dc78" }
+source = { git = "https://github.com/langchain-ai/langchain.git?subdirectory=libs%2Fpartners%2Ffireworks#5a7cf87626c920004a3c3ae991a76b8a7db92366" }
 dependencies = [
     { name = "aiohttp", marker = "platform_python_implementation != 'PyPy'" },
     { name = "fireworks-ai", marker = "platform_python_implementation != 'PyPy'" },
@@ -1964,7 +1964,7 @@ dependencies = [
 [[package]]
 name = "langchain-google-community"
 version = "3.0.1"
-source = { git = "https://github.com/langchain-ai/langchain-google.git?subdirectory=libs%2Fcommunity#9b0353e28171935333e6e6b492bc2603f8452d28" }
+source = { git = "https://github.com/langchain-ai/langchain-google.git?subdirectory=libs%2Fcommunity#865d51635ff606d8df461c300965977ed0fae6d4" }
 dependencies = [
     { name = "google-api-core", marker = "platform_python_implementation != 'PyPy'" },
     { name = "google-api-python-client", marker = "platform_python_implementation != 'PyPy'" },
@@ -1978,7 +1978,7 @@ dependencies = [
 [[package]]
 name = "langchain-google-genai"
 version = "3.2.0"
-source = { git = "https://github.com/langchain-ai/langchain-google.git?subdirectory=libs%2Fgenai#9b0353e28171935333e6e6b492bc2603f8452d28" }
+source = { git = "https://github.com/langchain-ai/langchain-google.git?subdirectory=libs%2Fgenai#865d51635ff606d8df461c300965977ed0fae6d4" }
 dependencies = [
     { name = "filetype", marker = "platform_python_implementation != 'PyPy'" },
     { name = "google-ai-generativelanguage", marker = "platform_python_implementation != 'PyPy'" },
@@ -1988,8 +1988,8 @@ dependencies = [
 
 [[package]]
 name = "langchain-google-vertexai"
-version = "3.1.0"
-source = { git = "https://github.com/langchain-ai/langchain-google.git?subdirectory=libs%2Fvertexai#9b0353e28171935333e6e6b492bc2603f8452d28" }
+version = "3.1.1"
+source = { git = "https://github.com/langchain-ai/langchain-google.git?subdirectory=libs%2Fvertexai#865d51635ff606d8df461c300965977ed0fae6d4" }
 dependencies = [
     { name = "bottleneck", marker = "platform_python_implementation != 'PyPy'" },
     { name = "google-cloud-aiplatform", marker = "platform_python_implementation != 'PyPy'" },
@@ -2006,7 +2006,7 @@ dependencies = [
 [[package]]
 name = "langchain-groq"
 version = "1.1.0"
-source = { git = "https://github.com/langchain-ai/langchain.git?subdirectory=libs%2Fpartners%2Fgroq#c63f23d2339b2604edc9ae1d9f7faf7d6cc7dc78" }
+source = { git = "https://github.com/langchain-ai/langchain.git?subdirectory=libs%2Fpartners%2Fgroq#5a7cf87626c920004a3c3ae991a76b8a7db92366" }
 dependencies = [
     { name = "groq", marker = "platform_python_implementation != 'PyPy'" },
     { name = "langchain-core", marker = "platform_python_implementation != 'PyPy'" },
@@ -2015,7 +2015,7 @@ dependencies = [
 [[package]]
 name = "langchain-huggingface"
 version = "1.1.0"
-source = { git = "https://github.com/langchain-ai/langchain.git?subdirectory=libs%2Fpartners%2Fhuggingface#c63f23d2339b2604edc9ae1d9f7faf7d6cc7dc78" }
+source = { git = "https://github.com/langchain-ai/langchain.git?subdirectory=libs%2Fpartners%2Fhuggingface#5a7cf87626c920004a3c3ae991a76b8a7db92366" }
 dependencies = [
     { name = "huggingface-hub", marker = "platform_python_implementation != 'PyPy'" },
     { name = "langchain-core", marker = "platform_python_implementation != 'PyPy'" },
@@ -2034,7 +2034,7 @@ dependencies = [
 [[package]]
 name = "langchain-mcp-adapters"
 version = "0.1.14"
-source = { git = "https://github.com/langchain-ai/langchain-mcp-adapters.git#20842c2de1da777fe2a930e344a92a157e53ae7e" }
+source = { git = "https://github.com/langchain-ai/langchain-mcp-adapters.git#93b028375bab7aae7dc789db504ff49bb3b3e992" }
 dependencies = [
     { name = "langchain-core", marker = "platform_python_implementation != 'PyPy'" },
     { name = "mcp", marker = "platform_python_implementation != 'PyPy'" },
@@ -2044,7 +2044,7 @@ dependencies = [
 [[package]]
 name = "langchain-milvus"
 version = "0.3.0"
-source = { git = "https://github.com/langchain-ai/langchain-milvus.git?subdirectory=libs%2Fmilvus#dc35686ed62edbf6b82f9140bc344f0cb224f3fa" }
+source = { git = "https://github.com/langchain-ai/langchain-milvus.git?subdirectory=libs%2Fmilvus#5c98e7217ce9696163287886854aba9ee9f565a7" }
 dependencies = [
     { name = "langchain-core", marker = "platform_python_implementation != 'PyPy'" },
     { name = "pymilvus", marker = "platform_python_implementation != 'PyPy'" },
@@ -2053,7 +2053,7 @@ dependencies = [
 [[package]]
 name = "langchain-mistralai"
 version = "1.1.0"
-source = { git = "https://github.com/langchain-ai/langchain.git?subdirectory=libs%2Fpartners%2Fmistralai#c63f23d2339b2604edc9ae1d9f7faf7d6cc7dc78" }
+source = { git = "https://github.com/langchain-ai/langchain.git?subdirectory=libs%2Fpartners%2Fmistralai#5a7cf87626c920004a3c3ae991a76b8a7db92366" }
 dependencies = [
     { name = "httpx", marker = "platform_python_implementation != 'PyPy'" },
     { name = "httpx-sse", marker = "platform_python_implementation != 'PyPy'" },
@@ -2076,7 +2076,7 @@ dependencies = [
 [[package]]
 name = "langchain-nomic"
 version = "1.0.1"
-source = { git = "https://github.com/langchain-ai/langchain.git?subdirectory=libs%2Fpartners%2Fnomic#c63f23d2339b2604edc9ae1d9f7faf7d6cc7dc78" }
+source = { git = "https://github.com/langchain-ai/langchain.git?subdirectory=libs%2Fpartners%2Fnomic#5a7cf87626c920004a3c3ae991a76b8a7db92366" }
 dependencies = [
     { name = "langchain-core", marker = "platform_python_implementation != 'PyPy'" },
     { name = "nomic", marker = "platform_python_implementation != 'PyPy'" },
@@ -2086,7 +2086,7 @@ dependencies = [
 [[package]]
 name = "langchain-nvidia-ai-endpoints"
 version = "1.0.0"
-source = { git = "https://github.com/langchain-ai/langchain-nvidia.git?subdirectory=libs%2Fai-endpoints#4b655a06b28f43dc3deae7f1265a3c74c214a4d3" }
+source = { git = "https://github.com/langchain-ai/langchain-nvidia.git?subdirectory=libs%2Fai-endpoints#dd669044488eb1e1914fb4710352fd3f26547d3f" }
 dependencies = [
     { name = "aiohttp", marker = "platform_python_implementation != 'PyPy'" },
     { name = "filetype", marker = "platform_python_implementation != 'PyPy'" },
@@ -2096,7 +2096,7 @@ dependencies = [
 [[package]]
 name = "langchain-ollama"
 version = "1.0.0"
-source = { git = "https://github.com/langchain-ai/langchain.git?subdirectory=libs%2Fpartners%2Follama#c63f23d2339b2604edc9ae1d9f7faf7d6cc7dc78" }
+source = { git = "https://github.com/langchain-ai/langchain.git?subdirectory=libs%2Fpartners%2Follama#5a7cf87626c920004a3c3ae991a76b8a7db92366" }
 dependencies = [
     { name = "langchain-core", marker = "platform_python_implementation != 'PyPy'" },
     { name = "ollama", marker = "platform_python_implementation != 'PyPy'" },
@@ -2105,7 +2105,7 @@ dependencies = [
 [[package]]
 name = "langchain-openai"
 version = "1.1.0"
-source = { git = "https://github.com/langchain-ai/langchain.git?subdirectory=libs%2Fpartners%2Fopenai#c63f23d2339b2604edc9ae1d9f7faf7d6cc7dc78" }
+source = { git = "https://github.com/langchain-ai/langchain.git?subdirectory=libs%2Fpartners%2Fopenai#5a7cf87626c920004a3c3ae991a76b8a7db92366" }
 dependencies = [
     { name = "langchain-core", marker = "platform_python_implementation != 'PyPy'" },
     { name = "openai", marker = "platform_python_implementation != 'PyPy'" },
@@ -2127,7 +2127,7 @@ dependencies = [
 [[package]]
 name = "langchain-perplexity"
 version = "1.1.0"
-source = { git = "https://github.com/langchain-ai/langchain.git?subdirectory=libs%2Fpartners%2Fperplexity#c63f23d2339b2604edc9ae1d9f7faf7d6cc7dc78" }
+source = { git = "https://github.com/langchain-ai/langchain.git?subdirectory=libs%2Fpartners%2Fperplexity#5a7cf87626c920004a3c3ae991a76b8a7db92366" }
 dependencies = [
     { name = "langchain-core", marker = "platform_python_implementation != 'PyPy'" },
     { name = "openai", marker = "platform_python_implementation != 'PyPy'" },
@@ -2150,7 +2150,7 @@ dependencies = [
 [[package]]
 name = "langchain-prompty"
 version = "1.0.0"
-source = { git = "https://github.com/langchain-ai/langchain.git?subdirectory=libs%2Fpartners%2Fprompty#c63f23d2339b2604edc9ae1d9f7faf7d6cc7dc78" }
+source = { git = "https://github.com/langchain-ai/langchain.git?subdirectory=libs%2Fpartners%2Fprompty#5a7cf87626c920004a3c3ae991a76b8a7db92366" }
 dependencies = [
     { name = "langchain-core", marker = "platform_python_implementation != 'PyPy'" },
     { name = "pyyaml", marker = "platform_python_implementation != 'PyPy'" },
@@ -2159,7 +2159,7 @@ dependencies = [
 [[package]]
 name = "langchain-qdrant"
 version = "1.1.0"
-source = { git = "https://github.com/langchain-ai/langchain.git?subdirectory=libs%2Fpartners%2Fqdrant#c63f23d2339b2604edc9ae1d9f7faf7d6cc7dc78" }
+source = { git = "https://github.com/langchain-ai/langchain.git?subdirectory=libs%2Fpartners%2Fqdrant#5a7cf87626c920004a3c3ae991a76b8a7db92366" }
 dependencies = [
     { name = "langchain-core", marker = "platform_python_implementation != 'PyPy'" },
     { name = "pydantic", marker = "platform_python_implementation != 'PyPy'" },
@@ -2342,7 +2342,7 @@ dependencies = [
 [[package]]
 name = "langchain-tests"
 version = "1.0.2"
-source = { git = "https://github.com/langchain-ai/langchain.git?subdirectory=libs%2Fstandard-tests#c63f23d2339b2604edc9ae1d9f7faf7d6cc7dc78" }
+source = { git = "https://github.com/langchain-ai/langchain.git?subdirectory=libs%2Fstandard-tests#5a7cf87626c920004a3c3ae991a76b8a7db92366" }
 dependencies = [
     { name = "httpx", marker = "platform_python_implementation != 'PyPy'" },
     { name = "langchain-core", marker = "platform_python_implementation != 'PyPy'" },
@@ -2360,7 +2360,7 @@ dependencies = [
 [[package]]
 name = "langchain-text-splitters"
 version = "1.0.0"
-source = { git = "https://github.com/langchain-ai/langchain.git?subdirectory=libs%2Ftext-splitters#c63f23d2339b2604edc9ae1d9f7faf7d6cc7dc78" }
+source = { git = "https://github.com/langchain-ai/langchain.git?subdirectory=libs%2Ftext-splitters#5a7cf87626c920004a3c3ae991a76b8a7db92366" }
 dependencies = [
     { name = "langchain-core", marker = "platform_python_implementation != 'PyPy'" },
 ]
@@ -2391,7 +2391,7 @@ dependencies = [
 [[package]]
 name = "langchain-xai"
 version = "1.1.0"
-source = { git = "https://github.com/langchain-ai/langchain.git?subdirectory=libs%2Fpartners%2Fxai#c63f23d2339b2604edc9ae1d9f7faf7d6cc7dc78" }
+source = { git = "https://github.com/langchain-ai/langchain.git?subdirectory=libs%2Fpartners%2Fxai#5a7cf87626c920004a3c3ae991a76b8a7db92366" }
 dependencies = [
     { name = "aiohttp", marker = "platform_python_implementation != 'PyPy'" },
     { name = "langchain-core", marker = "platform_python_implementation != 'PyPy'" },
@@ -2402,7 +2402,7 @@ dependencies = [
 [[package]]
 name = "langgraph"
 version = "1.0.4"
-source = { git = "https://github.com/langchain-ai/langgraph?subdirectory=libs%2Flanggraph#2b78bf3bad994fa48d1a3f6eb09db96d1999a3b4" }
+source = { git = "https://github.com/langchain-ai/langgraph?subdirectory=libs%2Flanggraph#7f08a6dafda133f0b4db9d169b0445a3dee7b466" }
 dependencies = [
     { name = "langchain-core", marker = "platform_python_implementation != 'PyPy'" },
     { name = "langgraph-checkpoint", marker = "platform_python_implementation != 'PyPy'" },
@@ -2415,7 +2415,7 @@ dependencies = [
 [[package]]
 name = "langgraph-checkpoint"
 version = "3.0.1"
-source = { git = "https://github.com/langchain-ai/langgraph?subdirectory=libs%2Fcheckpoint#2b78bf3bad994fa48d1a3f6eb09db96d1999a3b4" }
+source = { git = "https://github.com/langchain-ai/langgraph?subdirectory=libs%2Fcheckpoint#7f08a6dafda133f0b4db9d169b0445a3dee7b466" }
 dependencies = [
     { name = "langchain-core", marker = "platform_python_implementation != 'PyPy'" },
     { name = "ormsgpack", marker = "platform_python_implementation != 'PyPy'" },
@@ -2434,7 +2434,7 @@ dependencies = [
 [[package]]
 name = "langgraph-checkpoint-postgres"
 version = "3.0.1"
-source = { git = "https://github.com/langchain-ai/langgraph?subdirectory=libs%2Fcheckpoint-postgres#2b78bf3bad994fa48d1a3f6eb09db96d1999a3b4" }
+source = { git = "https://github.com/langchain-ai/langgraph?subdirectory=libs%2Fcheckpoint-postgres#7f08a6dafda133f0b4db9d169b0445a3dee7b466" }
 dependencies = [
     { name = "langgraph-checkpoint", marker = "platform_python_implementation != 'PyPy'" },
     { name = "orjson", marker = "platform_python_implementation != 'PyPy'" },
@@ -2445,7 +2445,7 @@ dependencies = [
 [[package]]
 name = "langgraph-checkpoint-sqlite"
 version = "3.0.0"
-source = { git = "https://github.com/langchain-ai/langgraph?subdirectory=libs%2Fcheckpoint-sqlite#2b78bf3bad994fa48d1a3f6eb09db96d1999a3b4" }
+source = { git = "https://github.com/langchain-ai/langgraph?subdirectory=libs%2Fcheckpoint-sqlite#7f08a6dafda133f0b4db9d169b0445a3dee7b466" }
 dependencies = [
     { name = "aiosqlite", marker = "platform_python_implementation != 'PyPy'" },
     { name = "langgraph-checkpoint", marker = "platform_python_implementation != 'PyPy'" },
@@ -2455,7 +2455,7 @@ dependencies = [
 [[package]]
 name = "langgraph-prebuilt"
 version = "1.0.5"
-source = { git = "https://github.com/langchain-ai/langgraph?subdirectory=libs%2Fprebuilt#2b78bf3bad994fa48d1a3f6eb09db96d1999a3b4" }
+source = { git = "https://github.com/langchain-ai/langgraph?subdirectory=libs%2Fprebuilt#7f08a6dafda133f0b4db9d169b0445a3dee7b466" }
 dependencies = [
     { name = "langchain-core", marker = "platform_python_implementation != 'PyPy'" },
     { name = "langgraph-checkpoint", marker = "platform_python_implementation != 'PyPy'" },
@@ -2463,8 +2463,8 @@ dependencies = [
 
 [[package]]
 name = "langgraph-sdk"
-version = "0.2.11"
-source = { git = "https://github.com/langchain-ai/langgraph?subdirectory=libs%2Fsdk-py#2b78bf3bad994fa48d1a3f6eb09db96d1999a3b4" }
+version = "0.2.12"
+source = { git = "https://github.com/langchain-ai/langgraph?subdirectory=libs%2Fsdk-py#7f08a6dafda133f0b4db9d169b0445a3dee7b466" }
 dependencies = [
     { name = "httpx", marker = "platform_python_implementation != 'PyPy'" },
     { name = "orjson", marker = "platform_python_implementation != 'PyPy'" },
@@ -2481,8 +2481,8 @@ dependencies = [
 
 [[package]]
 name = "langsmith"
-version = "0.4.49"
-source = { git = "https://github.com/langchain-ai/langsmith-sdk.git?subdirectory=python#3cc5aa49c726198cb8351659d7ae3b031c03994d" }
+version = "0.4.50"
+source = { git = "https://github.com/langchain-ai/langsmith-sdk.git?subdirectory=python#adb114458de5598544ab44a847432b5452d5d4ee" }
 dependencies = [
     { name = "httpx", marker = "platform_python_implementation != 'PyPy'" },
     { name = "orjson", marker = "platform_python_implementation != 'PyPy'" },
