@@ -1,5 +1,6 @@
 ---
-title: Robocorp Toolkit
+title: "Robocorp toolkit integration"
+description: "Integrate with the Robocorp toolkit using LangChain Python."
 ---
 
 This notebook covers how to get started with [Robocorp Action Server](https://github.com/robocorp/robocorp) action toolkit and LangChain.
@@ -21,7 +22,7 @@ When you create the new `Action Server` following the above quickstart.
 
 It will create a directory with files, including `action.py`.
 
-We can add python function as actions as shown [here](https://github.com/robocorp/robocorp/tree/master/actions#describe-your-action).
+We can add python function as actions as shown in the [Robocorp actions documentation](https://github.com/robocorp/robocorp/tree/master/actions#describe-your-action).
 
 Let's add a dummy function to `action.py`.
 
@@ -57,11 +58,11 @@ Found new action: get_weather_forecast
 
 Test locally by going to the server running at `http://localhost:8080` and use the UI to run the function.
 
-## Environment Setup
+## Environment setup
 
 Optionally you can set the following environment variables:
 
-- `LANGSMITH_TRACING=true`: To enable LangSmith log run tracing that can also be bind to respective Action Server action run logs. See [LangSmith documentation](https://docs.smith.langchain.com/tracing#log-runs) for more.
+- `LANGSMITH_TRACING=true`: To enable LangSmith log run tracing that can also be bind to respective Action Server action run logs. See [LangSmith documentation](/langsmith/observability-quickstart) for more.
 
 ## Usage
 
@@ -90,7 +91,7 @@ executor = AgentExecutor(agent=agent, tools=tools, verbose=True)
 executor.invoke("What is the current weather today in San Francisco in fahrenheit?")
 ```
 
-```output
+```text
 > Entering new AgentExecutor chain...
 
 Invoking: `robocorp_action_server_get_weather_forecast` with `{'city': 'San Francisco', 'days': 1, 'scale': 'fahrenheit'}`
@@ -101,7 +102,7 @@ Invoking: `robocorp_action_server_get_weather_forecast` with `{'city': 'San Fran
 > Finished chain.
 ```
 
-```output
+```text
 {'input': 'What is the current weather today in San Francisco in fahrenheit?',
  'output': 'The current weather today in San Francisco is 75F and sunny.'}
 ```
@@ -120,9 +121,11 @@ tools = toolkit.get_tools(llm=llm)
 
 ---
 
-<Callout icon="pen-to-square" iconType="regular">
-    [Edit the source of this page on GitHub.](https://github.com/langchain-ai/docs/edit/main/src/oss/python/integrations/tools/robocorp.mdx)
+<div className="source-links">
+<Callout icon="terminal-2">
+    [Connect these docs](/use-these-docs) to Claude, VSCode, and more via MCP for real-time answers.
 </Callout>
-<Tip icon="terminal" iconType="regular">
-    [Connect these docs programmatically](/use-these-docs) to Claude, VSCode, and more via MCP for    real-time answers.
-</Tip>
+<Callout icon="edit">
+    [Edit this page on GitHub](https://github.com/langchain-ai/docs/edit/main/src/oss/python/integrations/tools/robocorp.mdx) or [file an issue](https://github.com/langchain-ai/docs/issues/new/choose).
+</Callout>
+</div>

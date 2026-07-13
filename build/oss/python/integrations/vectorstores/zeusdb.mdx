@@ -1,35 +1,35 @@
 ---
-title: ZeusDB
+title: "ZeusDB integration"
+description: "Integrate with the ZeusDB vector store using LangChain Python."
 ---
 
->[ZeusDB](https://www.zeusdb.com) is a high-performance vector database powered by Rust, offering advanced features like product quantization, persistent storage, and enterprise-grade logging.
+> [ZeusDB](https://www.zeusdb.com) is a vector database written in Rust. It supports product quantization, persistent storage, and logging for operational use.
 
-This documentation shows how to use ZeusDB to bring enterprise-grade vector search capabilities to your LangChain applications.
+The following sections show how to use ZeusDB with LangChain.
 
 ---
 
 ## Setup
 
-Install the ZeusDB LangChain integration package from PyPi:
+Install the ZeusDB LangChain integration package from PyPI:
 
 ```python
 pip install -qU langchain-zeusdb
 ```
 
 Setup in Jupyter Notebooks
-> 💡 Tip: If you are working inside Jupyter or Google Colab, use the %pip magic command so the package is installed into the active kernel:
->
+
 ```python
 pip install -qU langchain-zeusdb
 ```
 
 ---
 
-## Getting Started
+## Getting started
 
 This example uses OpenAIEmbeddings, which requires an OpenAI API key: [Get your OpenAI API key here](https://platform.openai.com/api-keys)
 If you prefer, you can also use this package with any other embedding provider (Hugging Face, Cohere, custom functions, etc.).
-Install the LangChain OpenAI integration package from PyPi:
+Install the LangChain OpenAI integration package from PyPI:
 
 ```python
 pip install -qU langchain-openai
@@ -89,7 +89,7 @@ vector_store = ZeusDBVectorStore(zeusdb_index=index, embedding=embeddings)
 
 ## Manage vector store
 
-### 2.1 Add items to vector store
+### 2.1 add items to vector store
 
 ```python
 from langchain_core.documents import Document
@@ -114,7 +114,7 @@ documents = [document_1, document_2, document_3]
 vector_store.add_documents(documents=documents, ids=["1", "2", "3"])
 ```
 
-### 2.2 Update items in vector store
+### 2.2 update items in vector store
 
 ```python
 updated_document = Document(
@@ -125,7 +125,7 @@ updated_document = Document(
 vector_store.add_documents([updated_document], ids=["1"])
 ```
 
-### 2.3 Delete items from vector store
+### 2.3 delete items from vector store
 
 ```python
 vector_store.delete(ids=["3"])
@@ -135,7 +135,7 @@ vector_store.delete(ids=["3"])
 
 ## Query vector store
 
-### 3.1 Query directly
+### 3.1 query directly
 
 Performing a simple similarity search:
 
@@ -155,7 +155,7 @@ for doc, score in results:
     print(f"* [SIM={score:.3f}] {doc.page_content} [{doc.metadata}]")
 ```
 
-### 3.2 Query by turning into retriever
+### 3.2 query by turning into retriever
 
 You can also transform the vector store into a retriever for easier usage in your chains:
 
@@ -167,9 +167,9 @@ retriever.invoke("vector database features")
 
 ---
 
-## ZeusDB-Specific Features
+## ZeusDB-Specific features
 
-### 4.1 Memory-Efficient Setup with Product Quantization
+### 4.1 Memory-Efficient setup with product quantization
 
 For large datasets, use Product Quantization to reduce memory usage:
 
@@ -189,7 +189,7 @@ quantized_vector_store = ZeusDBVectorStore(
 print(f"Created quantized store: {quantized_index.info()}")
 ```
 
-### 4.2 Persistence
+### 4.2 persistence
 
 Save and load your vector store to disk:
 How to Save your vector store
@@ -216,20 +216,23 @@ print(f"Loaded store with {loaded_store.get_vector_count()} vectors")
 
 For guides on how to use this vector store for retrieval-augmented generation (RAG), see the following sections:
 
-- [How-to: Question and answer with RAG](https://python.langchain.com/docs/how_to/#qa-with-rag)
-- [Retrieval conceptual docs](https://python.langchain.com/docs/concepts/retrieval/)
+- [Retrieval docs](/oss/python/langchain/retrieval)
+- [Build a RAG app with LangChain](/oss/python/deepagents/rag)
+- [Agentic RAG](/oss/python/langgraph/agentic-rag)
 
 ---
 
 ## API reference
 
-For detailed documentation of all ZeusDBVectorStore features and configurations head to [ZeusDB Docs](https://docs.zeusdb.com/en/latest/vector_database/integrations/langchain.html).
+For detailed documentation of all `ZeusDBVectorStore` features and configurations head to [ZeusDB Docs](https://docs.zeusdb.com/en/latest/vector_database/integrations/langchain.html).
 
 ---
 
-<Callout icon="pen-to-square" iconType="regular">
-    [Edit the source of this page on GitHub.](https://github.com/langchain-ai/docs/edit/main/src/oss/python/integrations/vectorstores/zeusdb.mdx)
+<div className="source-links">
+<Callout icon="terminal-2">
+    [Connect these docs](/use-these-docs) to Claude, VSCode, and more via MCP for real-time answers.
 </Callout>
-<Tip icon="terminal" iconType="regular">
-    [Connect these docs programmatically](/use-these-docs) to Claude, VSCode, and more via MCP for    real-time answers.
-</Tip>
+<Callout icon="edit">
+    [Edit this page on GitHub](https://github.com/langchain-ai/docs/edit/main/src/oss/python/integrations/vectorstores/zeusdb.mdx) or [file an issue](https://github.com/langchain-ai/docs/issues/new/choose).
+</Callout>
+</div>

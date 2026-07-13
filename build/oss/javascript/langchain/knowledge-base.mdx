@@ -3,8 +3,6 @@ title: Build a semantic search engine with LangChain
 sidebarTitle: Semantic search
 ---
 
-
-
 import EmbeddingsTabsPy from '/snippets/embeddings-tabs-py.mdx';
 import EmbeddingsTabsJS from '/snippets/embeddings-tabs-js.mdx';
 import VectorstoreTabsPy from '/snippets/vectorstore-tabs-py.mdx';
@@ -12,7 +10,7 @@ import VectorstoreTabsJS from '/snippets/vectorstore-tabs-js.mdx';
 
 ## Overview
 
-This tutorial will familiarize you with LangChain's [document loader](/oss/javascript/langchain/retrieval#document-loaders), [embedding](/oss/javascript/langchain/retrieval#embedding-models), and [vector store](/oss/javascript/langchain/retrieval#vector-store) abstractions. These abstractions are designed to support retrieval of data--  from (vector) databases and other sources -- for integration with LLM workflows. They are important for applications that fetch data to be reasoned over as part of model inference, as in the case of retrieval-augmented generation, or [RAG](/oss/javascript/langchain/retrieval).
+This tutorial will familiarize you with LangChain's [embedding](/oss/javascript/integrations/embeddings) and [vector store](/oss/javascript/integrations/vectorstores) abstractions. These abstractions are designed to support retrieval of data--  from (vector) databases and other sources -- for integration with LLM workflows. They are important for applications that fetch data to be reasoned over as part of model inference, as in the case of retrieval-augmented generation, or [RAG](/oss/javascript/langchain/retrieval).
 
 Here we will build a search engine over a PDF document. This will allow us to retrieve passages in the PDF that are similar to an input query. The guide also includes a minimal RAG implementation on top of the search engine.
 
@@ -20,9 +18,9 @@ Here we will build a search engine over a PDF document. This will allow us to re
 
 This guide focuses on retrieval of text data. We will cover the following concepts:
 
-- [Documents and document loaders](/oss/javascript/integrations/document_loaders);
+- [Documents](https://reference.langchain.com/python/langchain-core/documents);
 - [Text splitters](/oss/javascript/integrations/splitters);
-- [Embeddings](/oss/javascript/integrations/text_embedding);
+- [Embeddings](/oss/javascript/integrations/embeddings);
 - [Vector stores](/oss/javascript/integrations/vectorstores) and [retrievers](/oss/javascript/integrations/retrievers).
 
 ## Setup
@@ -31,17 +29,17 @@ This guide focuses on retrieval of text data. We will cover the following concep
 
 
 
-This guide requires `@langchain/community` and `pdf-parse`:
+This guide reads a PDF using the `pdf-parse` package:
 
 <CodeGroup>
 ```bash npm
-npm i @langchain/community pdf-parse
+npm i pdf-parse
 ```
 ```bash yarn
-yarn add @langchain/community pdf-parse
+yarn add pdf-parse
 ```
 ```bash pnpm
-pnpm add @langchain/community pdf-parse
+pnpm add pdf-parse
 ```
 </CodeGroup>
 
@@ -53,7 +51,7 @@ For more details, see our [Installation guide](/oss/javascript/langchain/install
 
 Many of the applications you build with LangChain will contain multiple steps with multiple invocations of LLM calls.
 As these applications get more and more complex, it becomes crucial to be able to inspect what exactly is going on inside your chain or agent.
-The best way to do this is with [LangSmith](https://smith.langchain.com).
+The best way to do this is with [LangSmith](https://smith.langchain.com?utm_source=docs&utm_medium=cta&utm_campaign=langsmith-signup&utm_content=oss-langchain-knowledge-base).
 
 After you sign up at the link above, make sure to set your environment variables to start logging traces:
 
@@ -64,9 +62,9 @@ export LANGSMITH_API_KEY="..."
 
 
 
-## 1. Documents and Document Loaders
+## 1. Documents
 
-LangChain implements a [Document](https://v03.api.js.langchain.com/classes/_langchain_core.documents.Document.html) abstraction, which is intended to represent a unit of text and associated metadata. It has three attributes:
+LangChain implements a [Document](https://reference.langchain.com/javascript/langchain-core/documents/Document) abstraction, which is intended to represent a unit of text and associated metadata. It has three attributes:
 
 
 - `pageContent`: a string representing the content;
@@ -74,7 +72,7 @@ LangChain implements a [Document](https://v03.api.js.langchain.com/classes/_lang
 - `id`: (optional) a string identifier for the document.
 
 
-The `metadata` attribute can capture information about the source of the document, its relationship to other documents, and other information. Note that an individual [`Document`](https://v03.api.js.langchain.com/classes/_langchain_core.documents.Document.html) object often represents a chunk of a larger document.
+The `metadata` attribute can capture information about the source of the document, its relationship to other documents, and other information. Note that an individual [`Document`](https://reference.langchain.com/javascript/langchain-core/documents/Document) object often represents a chunk of a larger document.
 
 We can generate sample documents when desired:
 
@@ -96,86 +94,82 @@ const documents = [
 ```
 
 
-However, the LangChain ecosystem implements [document loaders](/oss/javascript/langchain/retrieval#document-loaders) that [integrate with hundreds of common sources](/oss/javascript/integrations/document_loaders/). This makes it easy to incorporate data from these sources into your AI application.
+## 2. Embeddings
 
-### Loading documents
+Vector search is a common way to store and search over unstructured data (such as unstructured text). The idea is to store numeric vectors that are associated with the text. Given a query, we can [embed](/oss/javascript/integrations/embeddings) it as a vector of the same dimension and use vector similarity metrics (such as cosine similarity) to identify related text.
 
-Let's load a PDF into a sequence of [`Document`](https://v03.api.js.langchain.com/classes/_langchain_core.documents.Document.html) objects. [Here is a sample PDF](https://github.com/langchain-ai/langchain/blob/v0.3/docs/docs/example_data/nke-10k-2023.pdf) -- a 10-k filing for Nike from 2023. We can consult the LangChain documentation for [available PDF document loaders](/oss/javascript/integrations/document_loaders/#pdfs).
+LangChain supports embeddings from [dozens of providers](/oss/javascript/integrations/embeddings/). These models specify how text should be converted into a numeric vector. Let's select a model:
+
+
+<EmbeddingsTabsJS />
+
+```typescript
+const vector1 = await embeddings.embedQuery(documents[0].pageContent);
+const vector2 = await embeddings.embedQuery(documents[1].pageContent);
+
+assert vector1.length === vector2.length;
+console.log(`Generated vectors of length ${vector1.length}\n`);
+console.log(vector1.slice(0, 10));
+```
+
+
+```text
+Generated vectors of length 1536
+
+[-0.008586574345827103, -0.03341241180896759, -0.008936782367527485, -0.0036674530711025, 0.010564599186182022, 0.009598285891115665, -0.028587326407432556, -0.015824200585484505, 0.0030416189692914486, -0.012899317778646946]
+```
+Armed with a model for generating text embeddings, we can next store them in a special data structure that supports efficient similarity search.
+
+## 3. Vector stores
+
+LangChain [VectorStore](https://reference.langchain.com/javascript/langchain-core/vectorstores/VectorStore) objects contain methods for adding text and [`Document`](https://reference.langchain.com/javascript/langchain-core/documents/Document) objects to the store, and querying them using various similarity metrics. They are often initialized with [embedding](/oss/javascript/integrations/embeddings) models, which determine how text data is translated to numeric vectors.
+
+LangChain includes a suite of [integrations](/oss/javascript/integrations/vectorstores) with different vector store technologies. Some vector stores are hosted by a provider and require specific credentials to use; some run in separate infrastructure that can be run locally or via a third-party; others can run in-memory for lightweight workloads. Let's select a vector store:
+
+
+<VectorstoreTabsJS />
+
+
+### Seeding the vector store
+
+Let's seed the store with content from a PDF. [Here is a sample PDF](https://github.com/langchain-ai/langchain/blob/v0.3/docs/docs/example_data/nke-10k-2023.pdf) -- a 10-k filing for Nike from 2023. We'll read the PDF directly with a small helper and split it into smaller chunks before indexing.
 
 
 ```typescript
-import { PDFLoader } from "@langchain/community/document_loaders/fs/pdf";
+import { readFileSync } from "node:fs";
+import { Document } from "@langchain/core/documents";
+import { PDFParse } from "pdf-parse";
 
-const loader = new PDFLoader("../../data/nke-10k-2023.pdf");
+// Below is a minimal helper for demonstration purposes.
+async function loadPdfPages(filePath: string): Promise<Document[]> {
+  const parser = new PDFParse({
+    data: new Uint8Array(readFileSync(filePath)),
+  });
+  try {
+    const { pages } = await parser.getText();
+    return pages.map(
+      (page) =>
+        new Document({
+          pageContent: page.text,
+          metadata: { source: filePath, page: page.num - 1 },
+        })
+    );
+  } finally {
+    await parser.destroy();
+  }
+}
 
-const docs = await loader.load();
+const filePath = "../../data/nke-10k-2023.pdf";
+const docs = await loadPdfPages(filePath);
 console.log(docs.length);
 ```
-```output
+
+
+```text
 107
 ```
 
-`PDFLoader` loads one [`Document`](https://v03.api.js.langchain.com/classes/_langchain_core.documents.Document.html) object per PDF page. For each, we can easily access:
-
-- The string content of the page;
-- Metadata containing the file name and page number.
-
-
-
-```typescript
-console.log(docs[0].pageContent.slice(0, 200));
-```
-```output
-Table of Contents
-UNITED STATES
-SECURITIES AND EXCHANGE COMMISSION
-Washington, D.C. 20549
-FORM 10-K
-(Mark One)
-☑ ANNUAL REPORT PURSUANT TO SECTION 13 OR 15(D) OF THE SECURITIES EXCHANGE ACT OF 1934
-FO
-```
-```typescript
-console.log(docs[0].metadata);
-```
-```output
-{
-  source: '../../data/nke-10k-2023.pdf',
-  pdf: {
-    version: '1.10.100',
-    info: {
-      PDFFormatVersion: '1.4',
-      IsAcroFormPresent: false,
-      IsXFAPresent: false,
-      Title: '0000320187-23-000039',
-      Author: 'EDGAR Online, a division of Donnelley Financial Solutions',
-      Subject: 'Form 10-K filed on 2023-07-20 for the period ending 2023-05-31',
-      Keywords: '0000320187-23-000039; ; 10-K',
-      Creator: 'EDGAR Filing HTML Converter',
-      Producer: 'EDGRpdf Service w/ EO.Pdf 22.0.40.0',
-      CreationDate: "D:20230720162200-04'00'",
-      ModDate: "D:20230720162208-04'00'"
-    },
-    metadata: null,
-    totalPages: 107
-  },
-  loc: { pageNumber: 1 }
-}
-```
-
-
-### Splitting
-
-For both information retrieval and downstream question-answering purposes, a page may be too coarse a representation. Our goal in the end will be to retrieve [`Document`](https://v03.api.js.langchain.com/classes/_langchain_core.documents.Document.html) objects that answer an input query, and further splitting our PDF will help ensure that the meanings of relevant portions of the document are not "washed out" by surrounding text.
-
-We can use [text splitters](/oss/javascript/langchain/retrieval#text_splitters) for this purpose. Here we will use a simple text splitter that partitions based on characters. We will split our documents into chunks of 1000 characters
-with 200 characters of overlap between chunks. The overlap helps
-mitigate the possibility of separating a statement from important
-context related to it. We use the
-`RecursiveCharacterTextSplitter`,
-which will recursively split the document using common separators like
-new lines until each chunk is the appropriate size. This is the
-recommended text splitter for generic text use cases.
+A page may be too coarse a representation for retrieval and downstream question-answering. Further splitting helps ensure that the meanings of relevant portions of the document are not "washed out" by surrounding text. We use [`RecursiveCharacterTextSplitter`](/oss/javascript/integrations/splitters), which recursively splits a document using common separators like new lines until each chunk is the appropriate size. This is the recommended text splitter for generic text use cases.
 
 
 ```typescript
@@ -192,48 +186,11 @@ console.log(allSplits.length);
 ```
 
 
-```output
-514
+```text
+516
 ```
 
-
-## 2. Embeddings
-
-Vector search is a common way to store and search over unstructured data (such as unstructured text). The idea is to store numeric vectors that are associated with the text. Given a query, we can [embed](/oss/javascript/langchain/retrieval#embedding_models) it as a vector of the same dimension and use vector similarity metrics (such as cosine similarity) to identify related text.
-
-LangChain supports embeddings from [dozens of providers](/oss/javascript/integrations/text_embedding/). These models specify how text should be converted into a numeric vector. Let's select a model:
-
-
-<EmbeddingsTabsJS />
-
-```typescript
-const vector1 = await embeddings.embedQuery(allSplits[0].pageContent);
-const vector2 = await embeddings.embedQuery(allSplits[1].pageContent);
-
-assert vector1.length === vector2.length;
-console.log(`Generated vectors of length ${vector1.length}\n`);
-console.log(vector1.slice(0, 10));
-```
-
-
-```output
-Generated vectors of length 1536
-
-[-0.008586574345827103, -0.03341241180896759, -0.008936782367527485, -0.0036674530711025, 0.010564599186182022, 0.009598285891115665, -0.028587326407432556, -0.015824200585484505, 0.0030416189692914486, -0.012899317778646946]
-```
-Armed with a model for generating text embeddings, we can next store them in a special data structure that supports efficient similarity search.
-
-## 3. Vector stores
-
-LangChain @[VectorStore] objects contain methods for adding text and [`Document`](https://v03.api.js.langchain.com/classes/_langchain_core.documents.Document.html) objects to the store, and querying them using various similarity metrics. They are often initialized with [embedding](/oss/javascript/langchain/retrieval#embedding_models) models, which determine how text data is translated to numeric vectors.
-
-LangChain includes a suite of [integrations](/oss/javascript/integrations/vectorstores) with different vector store technologies. Some vector stores are hosted by a provider (e.g., various cloud providers) and require specific credentials to use; some (such as [Postgres](/oss/javascript/integrations/vectorstores/pgvector)) run in separate infrastructure that can be run locally or via a third-party; others can run in-memory for lightweight workloads. Let's select a vector store:
-
-
-<VectorstoreTabsJS />
-
-
-Having instantiated our vector store, we can now index the documents.
+We can now index the chunks into the vector store.
 
 
 ```typescript
@@ -243,13 +200,17 @@ await vectorStore.addDocuments(allSplits);
 
 Note that most vector store implementations will allow you to connect to an existing vector store--  e.g., by providing a client, index name, or other information. See the documentation for a specific [integration](/oss/javascript/integrations/vectorstores) for more detail.
 
-Once we've instantiated a @[`VectorStore`] that contains documents, we can query it. @[VectorStore] includes methods for querying:
+
+
+Once we've instantiated a [`VectorStore`](https://reference.langchain.com/javascript/langchain-core/vectorstores/VectorStore) that contains documents, we can query it. [VectorStore](https://reference.langchain.com/javascript/langchain-core/vectorstores/VectorStore) includes methods for querying:
 - Synchronously and asynchronously;
 - By string query and by vector;
 - With and without returning similarity scores;
-- By similarity and @[maximum marginal relevance][VectorStore.max_marginal_relevance_search] (to balance similarity with query to diversity in retrieved results).
+- By similarity and [maximum marginal relevance](https://reference.langchain.com/javascript/classes/_langchain_core.vectorstores.VectorStore.html#maxMarginalRelevanceSearch) (to balance similarity with query to diversity in retrieved results).
 
-The methods will generally include a list of [Document](https://v03.api.js.langchain.com/classes/_langchain_core.documents.Document.html) objects in their outputs.
+
+
+The methods will generally include a list of [Document](https://reference.langchain.com/javascript/langchain-core/documents/Document) objects in their outputs.
 
 **Usage**
 
@@ -265,7 +226,7 @@ const results1 = await vectorStore.similaritySearch(
 
 console.log(results1[0]);
 ```
-```output
+```javascript
 Document {
     pageContent: 'direct to consumer operations sell products...',
     metadata: {'page': 4, 'source': '../example_data/nke-10k-2023.pdf', 'start_index': 3125}
@@ -285,7 +246,7 @@ const results2 = await vectorStore.similaritySearchWithScore(
 
 console.log(results2[0]);
 ```
-```output
+```javascript
 Score: 0.23699893057346344
 
 Document {
@@ -310,7 +271,7 @@ const results3 = await vectorStore.similaritySearchVectorWithScore(
 
 console.log(results3[0]);
 ```
-```output
+```javascript
 Document {
     pageContent: 'FISCAL 2023 COMPARED TO FISCAL 2022...',
     metadata: {
@@ -324,16 +285,16 @@ Document {
 
 Learn more:
 
-- @[API Reference][VectorStore]
+- [API Reference](https://reference.langchain.com/javascript/langchain-core/vectorstores/VectorStore)
 - [Integration-specific docs](/oss/javascript/integrations/vectorstores)
 
 ## 4. Retrievers
 
-LangChain @[`VectorStore`] objects do not subclass @[Runnable]. LangChain @[Retrievers] are Runnables, so they implement a standard set of methods (e.g., synchronous and asynchronous `invoke` and `batch` operations). Although we can construct retrievers from vector stores, retrievers can interface with non-vector store sources of data, as well (such as external APIs).
+LangChain [`VectorStore`](https://reference.langchain.com/javascript/langchain-core/vectorstores/VectorStore) objects do not subclass [Runnable](https://reference.langchain.com/javascript/langchain-core/runnables/Runnable). LangChain [Retrievers](https://reference.langchain.com/javascript/interfaces/_langchain_core.retrievers.BaseRetriever.html) are Runnables, so they implement a standard set of methods (e.g., synchronous and asynchronous `invoke` and `batch` operations). Although we can construct retrievers from vector stores, retrievers can interface with non-vector store sources of data, as well (such as external APIs).
 
 
 
-Vectorstores implement an `as_retriever` method that will generate a Retriever, specifically a [VectorStoreRetriever](https://python.langchain.com/api_reference/core/vectorstores/langchain_core.vectorstores.base.VectorStoreRetriever.html). These retrievers include specific `search_type` and `search_kwargs` attributes that identify what methods of the underlying vector store to call, and how to parameterize them. For instance, we can replicate the above with the following:
+Vectorstores implement an `as_retriever` method that will generate a Retriever, specifically a [`VectorStoreRetriever`](https://reference.langchain.com/python/langchain-core/vectorstores/base/VectorStoreRetriever). These retrievers include specific `search_type` and `search_kwargs` attributes that identify what methods of the underlying vector store to call, and how to parameterize them. For instance, we can replicate the above with the following:
 
 
 ```typescript
@@ -349,7 +310,7 @@ await retriever.batch([
   "What was Nike's revenue in 2023?",
 ]);
 ```
-```output
+```javascript
 [
     [Document {
         metadata: {'page': 4, 'source': '../example_data/nke-10k-2023.pdf', 'start_index': 3125},
@@ -363,37 +324,34 @@ await retriever.batch([
 ```
 
 
-Retrievers can easily be incorporated into more complex applications, such as [retrieval-augmented generation (RAG)](/oss/javascript/langchain/retrieval) applications that combine a given question with retrieved context into a prompt for a LLM. To learn more about building such an application, check out the [RAG tutorial](/oss/javascript/langchain/rag) tutorial.
+Retrievers can easily be incorporated into more complex applications, such as [retrieval-augmented generation (RAG)](/oss/javascript/langchain/retrieval) applications that combine a given question with retrieved context into a prompt for a LLM. To learn more about building such an application, check out the [RAG tutorial](/oss/javascript/deepagents/rag) tutorial.
 
 
 ## Next steps
 
 You've now seen how to build a semantic search engine over a PDF document.
 
-For more on document loaders:
-
-- [Overview](/oss/javascript/langchain/retrieval#document_loaders)
-- [Available integrations](/oss/javascript/integrations/document_loaders/)
-
 For more on embeddings:
 
-- [Overview](/oss/javascript/langchain/retrieval#embedding_models/)
-- [Available integrations](/oss/javascript/integrations/text_embedding/)
+- [Overview](/oss/javascript/langchain/retrieval)
+- [Available integrations](/oss/javascript/integrations/embeddings/)
 
 For more on vector stores:
 
-- [Overview](/oss/javascript/langchain/retrieval#vectorstores/)
+- [Overview](/oss/javascript/langchain/retrieval)
 - [Available integrations](/oss/javascript/integrations/vectorstores/)
 
 For more on RAG, see:
 
-- [Build a Retrieval Augmented Generation (RAG) App](/oss/javascript/langchain/rag/)
+- [Build a Retrieval Augmented Generation (RAG) App](/oss/javascript/deepagents/rag)
 
 ---
 
-<Callout icon="pen-to-square" iconType="regular">
-    [Edit the source of this page on GitHub.](https://github.com/langchain-ai/docs/edit/main/src/oss/langchain/knowledge-base.mdx)
+<div className="source-links">
+<Callout icon="terminal-2">
+    [Connect these docs](/use-these-docs) to Claude, VSCode, and more via MCP for real-time answers.
 </Callout>
-<Tip icon="terminal" iconType="regular">
-    [Connect these docs programmatically](/use-these-docs) to Claude, VSCode, and more via MCP for    real-time answers.
-</Tip>
+<Callout icon="edit">
+    [Edit this page on GitHub](https://github.com/langchain-ai/docs/edit/main/src/oss/langchain/knowledge-base.mdx) or [file an issue](https://github.com/langchain-ai/docs/issues/new/choose).
+</Callout>
+</div>

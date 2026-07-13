@@ -1,6 +1,6 @@
 ---
-title: What's new in v1
-sidebarTitle: Release notes
+title: What's new in LangGraph v1
+sidebarTitle: LangGraph v1
 ---
 
 **LangGraph v1 is a stability-focused release for the agent runtime.** It keeps the core graph APIs and execution model unchanged, while refining type safety, docs, and developer ergonomics.
@@ -8,7 +8,7 @@ sidebarTitle: Release notes
 It's designed to work hand-in-hand with [LangChain v1](/oss/javascript/releases/langchain-v1) (whose `createAgent` is built on LangGraph) so you can start high-level and drop down to granular control when needed.
 
 <CardGroup cols={1}>
-    <Card title="Stable core APIs" icon="diagram-project">
+    <Card title="Stable core APIs" icon="sitemap">
         Graph primitives (state, nodes, edges) and the execution/runtime model are unchanged, making upgrades straightforward.
     </Card>
     <Card title="Reliability, by default" icon="database">
@@ -47,7 +47,7 @@ The LangGraph `createReactAgent` prebuilt has been deprecated in favor of LangCh
 
 ## Typed interrupts
 
-[`StateGraph`](https://langchain-ai.github.io/langgraphjs/reference/classes/langgraph.StateGraph.html) now accepts a map of interrupt types in the constructor to more closely constrain the types of interrupts that can be used within a graph.
+[`StateGraph`](https://reference.langchain.com/javascript/langchain-langgraph/index/StateGraph) now accepts a map of interrupt types in the constructor to more closely constrain the types of interrupts that can be used within a graph.
 
 ```typescript expandable
 import { StateGraph, MemorySaver, interrupt } from "@langchain/langgraph";
@@ -97,7 +97,7 @@ LangGraph v1 comes with a few enhancements when interacting with a LangGraph app
 
 The low-level `toLangGraphEventStream` helper has been removed. Streaming responses are now handled natively by the SDK, and you can select the wire format via passing in the `encoding` format to `graph.stream`. This makes switching between SSE and normal JSON responses straightforward without changing UI logic.
 
-See the [migration guide](/oss/javascript/migrate/langgraph-v1#stream-encoding) for more information.
+See the [migration guide](/oss/javascript/migrate/langgraph-v1#event-stream-encoding) for more information.
 
 ### Custom transports in `useStream`
 
@@ -126,30 +126,32 @@ Please report any issues discovered with 1.0 on [GitHub](https://github.com/lang
     <Card title="Overview" icon="book" href="/oss/javascript/langgraph/overview" arrow>
         What LangGraph is and when to use it
     </Card>
-    <Card title="Graph API" icon="diagram-project" href="/oss/javascript/langgraph/graph-api" arrow>
+    <Card title="Graph API" icon="sitemap" href="/oss/javascript/langgraph/graph-api" arrow>
         Build graphs with state, nodes, and edges
     </Card>
     <Card title="LangChain Agents" icon="robot" href="/oss/javascript/langchain/agents" arrow>
         High-level agents built on LangGraph
     </Card>
-    <Card title="Migration guide" icon="arrow-right-arrow-left" href="/oss/javascript/migrate/langgraph-v1" arrow>
+    <Card title="Migration guide" icon="arrows-exchange" href="/oss/javascript/migrate/langgraph-v1" arrow>
         How to migrate to LangGraph v1
     </Card>
-    <Card title="GitHub" icon="github" href="https://github.com/langchain-ai/langgraphjs">
+    <Card title="GitHub" icon="brand-github" href="https://github.com/langchain-ai/langgraphjs">
         Report issues or contribute
     </Card>
 </CardGroup>
 
 ## See also
 
-- [Versioning](/oss/javascript/versioning) - Understanding version numbers
-- [Release policy](/oss/javascript/release-policy) - Detailed release policies
+- [Versioning](/oss/javascript/versioning) – Understanding version numbers
+- [Release policy](/oss/javascript/release-policy) – Detailed release policies
 
 ---
 
-<Callout icon="pen-to-square" iconType="regular">
-    [Edit the source of this page on GitHub.](https://github.com/langchain-ai/docs/edit/main/src/oss/javascript/releases/langgraph-v1.mdx)
+<div className="source-links">
+<Callout icon="terminal-2">
+    [Connect these docs](/use-these-docs) to Claude, VSCode, and more via MCP for real-time answers.
 </Callout>
-<Tip icon="terminal" iconType="regular">
-    [Connect these docs programmatically](/use-these-docs) to Claude, VSCode, and more via MCP for    real-time answers.
-</Tip>
+<Callout icon="edit">
+    [Edit this page on GitHub](https://github.com/langchain-ai/docs/edit/main/src/oss/javascript/releases/langgraph-v1.mdx) or [file an issue](https://github.com/langchain-ai/docs/issues/new/choose).
+</Callout>
+</div>

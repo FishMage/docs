@@ -1,8 +1,9 @@
 ---
-title: ChatBaseten
+title: "ChatBaseten integration"
+description: "Integrate with the ChatBaseten chat model using LangChain Python."
 ---
 
-This guide provides a quick overview for getting started with the Baseten [chat model](/oss/python/langchain/models). For a detailed listing of all ChatBaseten features, parameters, and configurations, head to the [ChatBaseten API reference](https://python.langchain.com/api_reference/baseten/chat_models/langchain_baseten.chat_models.ChatBaseten.html).
+This guide provides a quick overview for getting started with `ChatBaseten` [chat models](/oss/python/langchain/models).
 
 Baseten provides inference designed for production applications. Built on the Baseten Inference Stack, these APIs deliver enterprise-grade performance and reliability for leading open-source or custom models: https://www.baseten.co/library/.
 
@@ -10,15 +11,15 @@ Baseten provides inference designed for production applications. Built on the Ba
 
 ### Details
 
-| Class | Package | Local | Serializable | JS support | Downloads | Version |
-| :--- | :--- | :---: | :---: |  :---: | :---: | :---: |
-| [ChatBaseten](https://python.langchain.com/api_reference/baseten/chat_models/langchain_baseten.chat_models.ChatBaseten.html) | [langchain-baseten](https://python.langchain.com/api_reference/baseten/index.html) | ❌ | beta | ❌ | ![PyPI - Downloads](https://img.shields.io/pypi/dm/langchain-baseten?style=flat-square&label=%20) | ![PyPI - Version](https://img.shields.io/pypi/v/langchain-baseten?style=flat-square&label=%20) |
+| Class | Package | Serializable | JS support | Downloads | Version |
+| :--- | :--- | :---: |  :---: | :---: | :---: |
+| `ChatBaseten` | `langchain-baseten` | beta | ❌ | ![PyPI - Downloads](https://img.shields.io/pypi/dm/langchain-baseten?style=flat-square&label=%20) | ![PyPI - Version](https://img.shields.io/pypi/v/langchain-baseten?style=flat-square&label=%20) |
 
 ### Features
 
-| [Tool calling](/oss/python/langchain/tools) | [Structured output](/oss/python/langchain/structured-output) | JSON mode | [Image input](/oss/python/langchain/messages#multimodal) | Audio input | Video input | [Token-level streaming](/oss/python/langchain/streaming/) | Native async | [Token usage](/oss/python/langchain/models#token-usage) | [Logprobs](/oss/python/langchain/models#log-probabilities) |
-| :---: | :---: | :---: | :---: |  :---: | :---: | :---: | :---: | :---: | :---: |
-| ✅ | ✅ | ✅ | ✅ | ✅ | ❌ | ✅ | ✅ | ✅ | ❌ |
+| [Tool calling](/oss/python/langchain/tools) | [Structured output](/oss/python/langchain/structured-output) | [Image input](/oss/python/langchain/messages#multimodal) | Audio input | Video input | [Token-level streaming](/oss/python/langchain/streaming/) | Native async | [Token usage](/oss/python/langchain/models#token-usage) | [Logprobs](/oss/python/langchain/models#log-probabilities) |
+| :---: | :---: | :---: |  :---: | :---: | :---: | :---: | :---: | :---: |
+| ✅ | ✅ | ✅ | ✅ | ❌ | ✅ | ✅ | ✅ | ❌ |
 
 Model APIs only support text input, while some dedicated deployments support image and audio input depending on model. Check the Baseten model library for details: https://www.baseten.co/library/
 
@@ -28,7 +29,7 @@ Model APIs only support text input, while some dedicated deployments support ima
 
 To access Baseten models, you'll need to create a Baseten account, get an API key, and install the `langchain-baseten` integration package.
 
-Head to [this page](https://app.baseten.co) to create an account with Baseten and generate an API key. Once you've done this, set the BASETEN_API_KEY environment variable:
+Head to [the Baseten website](https://app.baseten.co) to create an account and generate an API key. Once you've done this, set the `BASETEN_API_KEY` environment variable:
 
 ### Credentials
 
@@ -40,7 +41,7 @@ if "BASETEN_API_KEY" not in os.environ:
     os.environ["BASETEN_API_KEY"] = getpass.getpass("Enter your Baseten API key: ")
 ```
 
-To enable automated <Tooltip tip="Log each step of a model's execution to debug and improve it">tracing</Tooltip> of your model calls, set your [LangSmith](https://docs.smith.langchain.com/) API key:
+To enable automated <Tooltip tip="Log each step of a model's execution to debug and improve it">tracing</Tooltip> of your model calls, set your [LangSmith](/langsmith/observability) API key:
 
 ```python Enable tracing icon="flask"
 os.environ["LANGSMITH_API_KEY"] = getpass.getpass("Enter your LangSmith API key: ")
@@ -96,14 +97,14 @@ model = ChatBaseten(
 
 ## Invocation
 
-```python Basic invocation icon="play"
+```python Basic invocation icon="player-play"
 # Use the chat model
 response = model.invoke("Hello, how are you?")
 print(response.content)
 ```
 
-```output
-content="Hello! I'm doing well, thank you for asking! How about you?" additional_kwargs={} response_metadata={'finish_reason': 'stop'} id='run--908651ec-00d7-4992-a320-864397c14e37-0'
+```text
+Hello! I'm doing well, thank you for asking! How about you?
 ```
 
 You can also use message objects for more complex conversations:
@@ -118,8 +119,8 @@ You can also use message objects for more complex conversations:
     print(response)
     ```
 </CodeGroup>
-```output
-content='Buds yawn open wide—  \na robin stitches the hush  \nwith threads of first light.' additional_kwargs={} response_metadata={'finish_reason': 'stop'} id='run--6f7d1db7-daae-4628-a40a-2ab7323e8f15-0'
+```text
+content='Buds yawn open wide—\na robin stitches the hush\nwith threads of first light.' additional_kwargs={} response_metadata={'token_usage': {'completion_tokens': 26, 'prompt_tokens': 14, 'total_tokens': 40}, 'model_name': 'moonshotai/Kimi-K2-Instruct-0905', 'finish_reason': 'stop', 'model_provider': 'baseten'} id='run--6f7d1db7-daae-4628-a40a-2ab7323e8f15-0'
 ```
 
 
@@ -129,15 +130,11 @@ content='Buds yawn open wide—  \na robin stitches the hush  \nwith threads of 
 
 ---
 
-## API reference
-
-For detailed documentation of all ChatBaseten features and configurations, head to the [API reference](https://python.langchain.com/api_reference/baseten/chat_models/langchain_baseten.chat_models.ChatBaseten.html).
-
----
-
-<Callout icon="pen-to-square" iconType="regular">
-    [Edit the source of this page on GitHub.](https://github.com/langchain-ai/docs/edit/main/src/oss/python/integrations/chat/baseten.mdx)
+<div className="source-links">
+<Callout icon="terminal-2">
+    [Connect these docs](/use-these-docs) to Claude, VSCode, and more via MCP for real-time answers.
 </Callout>
-<Tip icon="terminal" iconType="regular">
-    [Connect these docs programmatically](/use-these-docs) to Claude, VSCode, and more via MCP for    real-time answers.
-</Tip>
+<Callout icon="edit">
+    [Edit this page on GitHub](https://github.com/langchain-ai/docs/edit/main/src/oss/python/integrations/chat/baseten.mdx) or [file an issue](https://github.com/langchain-ai/docs/issues/new/choose).
+</Callout>
+</div>

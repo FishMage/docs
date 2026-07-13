@@ -33,7 +33,7 @@ Before we begin, ensure you have the following set up:
    * Click **Generate token** and **copy it immediately** — it won't be shown again.
    * Store the token securely and provide it as an environment variable to your server.
 
-## Understanding LangSmith "Prompt Commits" and webhooks
+## Understanding LangSmith "Prompt commits" and webhooks
 
 In LangSmith, when you save changes to a prompt, you're essentially creating a new version or a "Prompt Commit." These commits are what can trigger webhooks.
 
@@ -130,7 +130,7 @@ The webhook will send a JSON payload containing the new **prompt manifest**.
                 "top_p": 1,
                 "presence_penalty": 0,
                 "frequency_penalty": 0,
-                "model": "gpt-4.1-mini",
+                "model": "gpt-5.4-mini",
                 "extra_headers": {},
                 "openai_api_key": {
                   "id": ["OPENAI_API_KEY"],
@@ -390,7 +390,7 @@ Now, with everything set up, here's what happens:
 
 6. **Confirmation:** You should see the new commit appear in your GitHub repository.
 
-   ![Manifest commited to Github](/langsmith/images/prompt-commit-github.png)
+   ![Manifest committed to GitHub](/langsmith/images/prompt-commit-github.png)
 
 You've now successfully synced your LangSmith prompts with GitHub!
 
@@ -406,9 +406,11 @@ Our example FastAPI server performs a direct commit of the entire prompt manifes
 
 ---
 
-<Callout icon="pen-to-square" iconType="regular">
-    [Edit the source of this page on GitHub.](https://github.com/langchain-ai/docs/edit/main/src/langsmith/prompt-commit.mdx)
+<div className="source-links">
+<Callout icon="terminal-2">
+    [Connect these docs](/use-these-docs) to Claude, VSCode, and more via MCP for real-time answers.
 </Callout>
-<Tip icon="terminal" iconType="regular">
-    [Connect these docs programmatically](/use-these-docs) to Claude, VSCode, and more via MCP for    real-time answers.
-</Tip>
+<Callout icon="edit">
+    [Edit this page on GitHub](https://github.com/langchain-ai/docs/edit/main/src/langsmith/prompt-commit.mdx) or [file an issue](https://github.com/langchain-ai/docs/issues/new/choose).
+</Callout>
+</div>

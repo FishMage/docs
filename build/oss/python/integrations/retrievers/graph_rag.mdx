@@ -1,5 +1,6 @@
 ---
-title: Graph RAG
+title: "Graph RAG integration"
+description: "Integrate with the Graph RAG retriever using LangChain Python."
 ---
 
 This guide provides an introduction to Graph RAG. For detailed documentation of all
@@ -17,8 +18,7 @@ retrieval over an **existing** vector store.
 
 | Retriever | Source | PyPI Package | Latest | Project Page |
 | :--- | :--- | :---: | :---: | :---: |
-| GraphRetriever | [github.com/datastax/graph-rag](https://github.com/datastax/graph-rag/tree/main/packages/langchain-graph-retriever) | [langchain-graph-retriever](https://pypi.org/project/langchain-graph-retriever/) | ![PyPI - Version](https://img.shields.io/pypi/v/langchain-graph-retriever?style=flat-square&label=%20&color=orange) | [Graph RAG](https://datastax.github.io/graph-rag/) |
-
+| `GraphRetriever` | [github.com/datastax/graph-rag](https://github.com/datastax/graph-rag/tree/main/packages/langchain-graph-retriever) | [`langchain-graph-retriever`](https://pypi.org/project/langchain-graph-retriever/) | ![PyPI - Version](https://img.shields.io/pypi/v/langchain-graph-retriever?style=flat-square&label=%20&color=orange) | [Graph RAG](https://datastax.github.io/graph-rag/) |
 
 ## Benefits
 
@@ -29,7 +29,6 @@ retrieval over an **existing** vector store.
 * [**Change links on demand:**](https://datastax.github.io/graph-rag/guide/edges/)
   Edges can be specified on-the-fly, allowing different relationships to be traversed
   based on the question.
-
 
 * [**Pluggable Traversal Strategies:**](https://datastax.github.io/graph-rag/guide/strategies/)
   Use built-in traversal strategies like Eager or MMR, or define custom logic to select
@@ -81,7 +80,7 @@ Documents about animals.
     </div>
 </details>
 
-### Populating the Vector store
+### Populating the vector store
 
 This section shows how to populate a variety of vector stores with the sample data.
 
@@ -119,64 +118,6 @@ vector store, consult the documentation about
       :::
         </div>
     </Tab>
-    <Tab title="Apache Cassandra">
-        <div style={{ paddingLeft: '30px' }}>
-      Install the `langchain-graph-retriever` package with the `cassandra` extra:
-
-      ```bash
-      pip install "langchain-graph-retriever[cassandra]"
-      ```
-
-      Then create a vector store and load the test documents:
-
-      ```python
-      from langchain_community.vectorstores.cassandra import Cassandra
-      from langchain_graph_retriever.transformers import ShreddingTransformer
-
-      vector_store = Cassandra.from_documents(
-          documents=list(ShreddingTransformer().transform_documents(animals)),
-          embedding=embeddings,
-          table_name="animals",
-      )
-      ```
-
-      For help creating a Cassandra connection, consult the
-      [Apache Cassandra Vector Store Guide](/oss/python/integrations/vectorstores/cassandra#connection-parameters)
-
-      :::note
-      Apache Cassandra doesn't support searching in nested metadata. Because of this
-      it is necessary to use the [`ShreddingTransformer`](https://datastax.github.io/graph-rag/reference/langchain_graph_retriever/transformers/#langchain_graph_retriever.transformers.shredding.ShreddingTransformer)
-      when inserting documents.
-      :::
-        </div>
-    </Tab>
-    <Tab title="OpenSearch">
-        <div style={{ paddingLeft: '30px' }}>
-      Install the `langchain-graph-retriever` package with the `opensearch` extra:
-
-      ```bash
-      pip install "langchain-graph-retriever[opensearch]"
-      ```
-
-      Then create a vector store and load the test documents:
-
-      ```python
-      from langchain_community.vectorstores import OpenSearchVectorSearch
-
-      vector_store = OpenSearchVectorSearch.from_documents(
-          documents=animals,
-          embedding=embeddings,
-          engine="faiss",
-          index_name="animals",
-          opensearch_url=OPEN_SEARCH_URL,
-          bulk_size=500,
-      )
-      ```
-
-      For help creating an OpenSearch connection, consult the
-      [OpenSearch Vector Store Guide](/oss/python/integrations/vectorstores/opensearch).
-        </div>
-    </Tab>
     <Tab title="Chroma">
         <div style={{ paddingLeft: '30px' }}>
       Install the `langchain-graph-retriever` package with the `chroma` extra:
@@ -198,8 +139,7 @@ vector store, consult the documentation about
       )
       ```
 
-      For help creating an Chroma connection, consult the
-      [Chroma Vector Store Guide](/oss/python/integrations/vectorstores/chroma).
+      For help creating an Chroma connection, consult the [Chroma Vector Store Guide](/oss/python/integrations/vectorstores/chroma).
 
       :::note
       Chroma doesn't support searching in nested metadata. Because of this
@@ -236,7 +176,7 @@ vector store, consult the documentation about
     </Tab>
 </Tabs>
 
-### Graph Traversal
+### Graph traversal
 
 This graph retriever starts with a single animal that best matches the query, then
 traverses to other animals sharing the same `habitat` and/or `origin`.
@@ -265,7 +205,7 @@ results = traversal_retriever.invoke("what animals could be found near a capybar
 for doc in results:
     print(f"{doc.id}: {doc.page_content}")
 ```
-```output
+```text
 capybara: capybaras are the largest rodents in the world and are highly social animals.
 heron: herons are wading birds known for their long legs and necks, often seen near water.
 crocodile: crocodiles are large reptiles with powerful jaws and a long lifespan, often living over 70 years.
@@ -281,7 +221,7 @@ In this case, the documents `capybara`, `heron`, `frog`, `crocodile`, and `newt`
 share the same `habitat=wetlands`, as defined by their metadata. This should increase
 Document Relevance and the quality of the answer from the LLM.
 
-### Comparison to Standard Retrieval
+### Comparison to standard retrieval
 
 When `max_depth=0`, the graph traversing retriever behaves like a standard retriever:
 
@@ -312,7 +252,7 @@ for doc in results:
     print(f"{doc.id}: {doc.page_content}")
 ```
 
-```output
+```text
 capybara: capybaras are the largest rodents in the world and are highly social animals.
 iguana: iguanas are large herbivorous lizards often found basking in trees and near water.
 guinea pig: guinea pigs are small rodents often kept as pets due to their gentle and social nature.
@@ -338,9 +278,11 @@ To explore all available parameters and advanced configurations, refer to the
 
 ---
 
-<Callout icon="pen-to-square" iconType="regular">
-    [Edit the source of this page on GitHub.](https://github.com/langchain-ai/docs/edit/main/src/oss/python/integrations/retrievers/graph_rag.mdx)
+<div className="source-links">
+<Callout icon="terminal-2">
+    [Connect these docs](/use-these-docs) to Claude, VSCode, and more via MCP for real-time answers.
 </Callout>
-<Tip icon="terminal" iconType="regular">
-    [Connect these docs programmatically](/use-these-docs) to Claude, VSCode, and more via MCP for    real-time answers.
-</Tip>
+<Callout icon="edit">
+    [Edit this page on GitHub](https://github.com/langchain-ai/docs/edit/main/src/oss/python/integrations/retrievers/graph_rag.mdx) or [file an issue](https://github.com/langchain-ai/docs/issues/new/choose).
+</Callout>
+</div>

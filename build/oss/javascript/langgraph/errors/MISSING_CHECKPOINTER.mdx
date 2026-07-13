@@ -4,13 +4,19 @@ title: MISSING_CHECKPOINTER
 
 You are attempting to use built-in LangGraph persistence without providing a checkpointer.
 
-This happens when a `checkpointer` is missing in the `compile()` method of [`StateGraph`](https://langchain-ai.github.io/langgraphjs/reference/classes/langgraph.StateGraph.html) or @[`@entrypoint`].
+
+
+This happens when a `checkpointer` is missing in the `compile()` method of [`StateGraph`](https://reference.langchain.com/javascript/langchain-langgraph/index/StateGraph) or [`entrypoint`](https://reference.langchain.com/javascript/langchain-langgraph/index/entrypoint).
+
+
 
 ## Troubleshooting
 
 The following may help resolve this error:
 
--   Initialize and pass a checkpointer to the `compile()` method of [`StateGraph`](https://langchain-ai.github.io/langgraphjs/reference/classes/langgraph.StateGraph.html) or @[`@entrypoint`].
+
+-   Initialize and pass a checkpointer to the `compile()` method of [`StateGraph`](https://reference.langchain.com/javascript/langchain-langgraph/index/StateGraph) or [`entrypoint`](https://reference.langchain.com/javascript/langchain-langgraph/index/entrypoint).
+
 
 
 
@@ -42,9 +48,11 @@ const workflow = entrypoint(
 
 ---
 
-<Callout icon="pen-to-square" iconType="regular">
-    [Edit the source of this page on GitHub.](https://github.com/langchain-ai/docs/edit/main/src/oss/langgraph/errors/MISSING_CHECKPOINTER.mdx)
+<div className="source-links">
+<Callout icon="terminal-2">
+    [Connect these docs](/use-these-docs) to Claude, VSCode, and more via MCP for real-time answers.
 </Callout>
-<Tip icon="terminal" iconType="regular">
-    [Connect these docs programmatically](/use-these-docs) to Claude, VSCode, and more via MCP for    real-time answers.
-</Tip>
+<Callout icon="edit">
+    [Edit this page on GitHub](https://github.com/langchain-ai/docs/edit/main/src/oss/langgraph/errors/MISSING_CHECKPOINTER.mdx) or [file an issue](https://github.com/langchain-ai/docs/issues/new/choose).
+</Callout>
+</div>

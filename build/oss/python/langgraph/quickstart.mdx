@@ -3,8 +3,14 @@ title: Quickstart
 ---
 
 
-
 This quickstart demonstrates how to build a calculator agent using the LangGraph Graph API or the Functional API.
+
+<Tip>
+    **Using an AI coding assistant?**
+
+    - Install the [LangChain Docs MCP server](/use-these-docs) to give your agent access to up-to-date LangChain documentation and examples.
+    - Install [LangChain Skills](https://github.com/langchain-ai/langchain-skills) to improve your agent's performance on LangChain ecosystem tasks.
+</Tip>
 
 - [Use the Graph API](#use-the-graph-api) if you prefer to define your agent as a graph of nodes and edges.
 - [Use the Functional API](#use-the-functional-api) if you prefer to define your agent as a single function.
@@ -28,7 +34,7 @@ from langchain.chat_models import init_chat_model
 
 
 model = init_chat_model(
-    "claude-sonnet-4-5-20250929",
+    "claude-sonnet-4-6",
     temperature=0
 )
 
@@ -85,6 +91,10 @@ The graph's state is used to store the messages and the number of LLM calls.
 
     The `Annotated` type with `operator.add` ensures that new messages are appended to the existing list rather than replacing it.
 </Tip>
+
+
+
+
 
 ```python
 from langchain.messages import AnyMessage
@@ -179,7 +189,7 @@ def should_continue(state: MessagesState) -> Literal["tool_node", END]:
 
 ## 6. Build and compile the agent
 
-The agent is built using the [`StateGraph`](https://reference.langchain.com/python/langgraph/graphs/#langgraph.graph.state.StateGraph) class and compiled using the [`compile`](https://reference.langchain.com/python/langgraph/graphs/#langgraph.graph.state.StateGraph.compile) method.
+The agent is built using the [`StateGraph`](https://reference.langchain.com/python/langgraph/graph/state/StateGraph) class and compiled using the [`compile`](https://reference.langchain.com/python/langgraph/graph/state/StateGraph/compile) method.
 
 ```python
 # Build workflow
@@ -217,7 +227,9 @@ for m in messages["messages"]:
 
 
 <Tip>
-    To learn how to trace your agent with LangSmith, see the [LangSmith documentation](/langsmith/trace-with-langgraph).
+Trace and debug your agent with [LangSmith](https://smith.langchain.com?utm_source=docs&utm_medium=cta&utm_campaign=langsmith-signup&utm_content=oss-langgraph-quickstart). Follow the [tracing quickstart](/langsmith/trace-with-langgraph) to get set up. When ready for production, see [Deploy](/langsmith/deployment) for hosting options.
+
+We recommend you also set up [LangSmith Engine](/langsmith/engine) which monitors your traces, detects issues, and proposes fixes.
 </Tip>
 
 Congratulations! You've built your first agent using the LangGraph Graph API.
@@ -231,7 +243,7 @@ from langchain.chat_models import init_chat_model
 
 
 model = init_chat_model(
-    "claude-sonnet-4-5-20250929",
+    "claude-sonnet-4-6",
     temperature=0
 )
 
@@ -290,7 +302,7 @@ class MessagesState(TypedDict):
 from langchain.messages import SystemMessage
 
 
-def llm_call(state: dict):
+def llm_call(state: MessagesState):
     """LLM decides whether to call a tool or not"""
 
     return {
@@ -313,7 +325,7 @@ def llm_call(state: dict):
 from langchain.messages import ToolMessage
 
 
-def tool_node(state: dict):
+def tool_node(state: MessagesState):
     """Performs the tool call"""
 
     result = []
@@ -395,7 +407,7 @@ from langchain.chat_models import init_chat_model
 
 
 model = init_chat_model(
-    "claude-sonnet-4-5-20250929",
+    "claude-sonnet-4-6",
     temperature=0
 )
 
@@ -457,7 +469,7 @@ from langgraph.func import entrypoint, task
 The model node is used to call the LLM and decide whether to call a tool or not.
 
 <Tip>
-    The [`@task`](https://reference.langchain.com/python/langgraph/func/#langgraph.func.task) decorator marks a function as a task that can be executed as part of the agent. Tasks can be called synchronously or asynchronously within your entrypoint function.
+    The [`@task`](https://reference.langchain.com/python/langgraph/func/task) decorator marks a function as a task that can be executed as part of the agent. Tasks can be called synchronously or asynchronously within your entrypoint function.
 </Tip>
 
 ```python
@@ -495,7 +507,7 @@ def call_tool(tool_call: ToolCall):
 
 ## 4. Define agent
 
-The agent is built using the [`@entrypoint`](https://reference.langchain.com/python/langgraph/func/#langgraph.func.entrypoint) function.
+The agent is built using the [`@entrypoint`](https://reference.langchain.com/python/langgraph/func/entrypoint) function.
 
 <Note>
     In the Functional API, instead of defining nodes and edges explicitly, you write standard control flow logic (loops, conditionals) within a single function.
@@ -523,8 +535,9 @@ def agent(messages: list[BaseMessage]):
 
 # Invoke
 messages = [HumanMessage(content="Add 3 and 4.")]
-for chunk in agent.stream(messages, stream_mode="updates"):
-    print(chunk)
+stream = agent.stream_events(messages, version="v3")
+for snapshot in stream.values:
+    print(snapshot)
     print("\n")
 ```
 
@@ -532,7 +545,9 @@ for chunk in agent.stream(messages, stream_mode="updates"):
 
 
 <Tip>
-    To learn how to trace your agent with LangSmith, see the [LangSmith documentation](/langsmith/trace-with-langgraph).
+Trace and debug your agent with [LangSmith](https://smith.langchain.com?utm_source=docs&utm_medium=cta&utm_campaign=langsmith-signup&utm_content=oss-langgraph-quickstart). Follow the [tracing quickstart](/langsmith/trace-with-langgraph) to get set up. When ready for production, see [Deploy](/langsmith/deployment) for hosting options.
+
+We recommend you also set up [LangSmith Engine](/langsmith/engine) which monitors your traces, detects issues, and proposes fixes.
 </Tip>
 
 Congratulations! You've built your first agent using the LangGraph Functional API.
@@ -546,7 +561,7 @@ from langchain.chat_models import init_chat_model
 
 
 model = init_chat_model(
-    "claude-sonnet-4-5-20250929",
+    "claude-sonnet-4-6",
     temperature=0
 )
 
@@ -647,8 +662,9 @@ def agent(messages: list[BaseMessage]):
 
 # Invoke
 messages = [HumanMessage(content="Add 3 and 4.")]
-for chunk in agent.stream(messages, stream_mode="updates"):
-    print(chunk)
+stream = agent.stream_events(messages, version="v3")
+for snapshot in stream.values:
+    print(snapshot)
     print("\n")
 ```
 
@@ -660,9 +676,11 @@ for chunk in agent.stream(messages, stream_mode="updates"):
 
 ---
 
-<Callout icon="pen-to-square" iconType="regular">
-    [Edit the source of this page on GitHub.](https://github.com/langchain-ai/docs/edit/main/src/oss/langgraph/quickstart.mdx)
+<div className="source-links">
+<Callout icon="terminal-2">
+    [Connect these docs](/use-these-docs) to Claude, VSCode, and more via MCP for real-time answers.
 </Callout>
-<Tip icon="terminal" iconType="regular">
-    [Connect these docs programmatically](/use-these-docs) to Claude, VSCode, and more via MCP for    real-time answers.
-</Tip>
+<Callout icon="edit">
+    [Edit this page on GitHub](https://github.com/langchain-ai/docs/edit/main/src/oss/langgraph/quickstart.mdx) or [file an issue](https://github.com/langchain-ai/docs/issues/new/choose).
+</Callout>
+</div>

@@ -1,6 +1,6 @@
 ---
 title: LangChain v1 migration guide
-sidebarTitle: Migration guide
+sidebarTitle: LangChain v1
 ---
 
 This migration guide outlines the major changes in LangChain v1. To learn more about the new features of v1, see the [introductory post](/oss/javascript/releases/langchain-v1).
@@ -38,7 +38,7 @@ In v1, the react agent prebuilt is now in the langchain package. The table below
 | [Structured output](#structured-output) | prompted output removed, use `toolStrategy`/`providerStrategy` |
 | [Streaming node name](#streaming-node-name-rename) | Node name changed from `"agent"` to `"model"` |
 | [Runtime context](#runtime-context) | `context` property instead of `config.configurable` |
-| [Namespace](#simplified-namespace) | Streamlined to focus on agent building blocks, legacy code moved to `@langchain/classic` |
+| [Namespace](#simplified-package) | Streamlined to focus on agent building blocks, legacy code moved to `@langchain/classic` |
 
 ### Import path
 
@@ -103,7 +103,7 @@ const agent = createReactAgent({
 
 #### Dynamic prompts
 
-Dynamic prompts are a core context engineering pattern— they adapt what you tell the model based on the current conversation state. To do this, use `dynamicSystemPromptMiddleware`:
+Dynamic prompts are a core context engineering pattern—they adapt what you tell the model based on the current conversation state. To do this, use `dynamicSystemPromptMiddleware`:
 
 <CodeGroup>
 ```typescript v1 (new)
@@ -111,20 +111,22 @@ import { createAgent, dynamicSystemPromptMiddleware } from "langchain";
 import * as z from "zod";
 
 const contextSchema = z.object({
-  userRole: z.enum(["expert", "beginner"]).default("user"),
+  userRole: z.enum(["expert", "beginner"]).default("beginner"),
 });
 
-const userRolePrompt = dynamicSystemPromptMiddleware((request) => { // [!code highlight]
-  const userRole = request.runtime.context.userRole;
-  const basePrompt = "You are a helpful assistant.";
+const userRolePrompt = dynamicSystemPromptMiddleware<z.infer<typeof contextSchema>>( // [!code highlight]
+    (_state, runtime) => {
+        const userRole = runtime.context.userRole;
+        const basePrompt = "You are a helpful assistant.";
 
-  if (userRole === "expert") {
-    return `${basePrompt} Provide detailed technical responses.`;
-  } else if (userRole === "beginner") {
-    return `${basePrompt} Explain concepts simply and avoid jargon.`;
-  }
-  return basePrompt; // [!code highlight]
-});
+        if (userRole === "expert") {
+            return `${basePrompt} Provide detailed technical responses.`;
+        } else if (userRole === "beginner") {
+            return `${basePrompt} Explain concepts simply and avoid jargon.`;
+        }
+        return basePrompt; // [!code highlight]
+    }
+);
 
 const agent = createAgent({
   model,
@@ -133,19 +135,23 @@ const agent = createAgent({
   contextSchema,
 });
 
-await agent.invoke({
-  messages: [new HumanMessage("Explain async programming")],
-  context: {
-    userRole: "expert",
+await agent.invoke(
+  {
+    messages: [new HumanMessage("Explain async programming")],
   },
-})
+  {
+    context: {
+      userRole: "expert",
+    },
+  }
+);
 ```
 
 ```typescript v0 (old)
 import { createReactAgent } from "@langchain/langgraph/prebuilts";
 
 const contextSchema = z.object({
-  userRole: z.enum(["expert", "beginner"]).default("user"),
+  userRole: z.enum(["expert", "beginner"]),
 });
 
 const agent = createReactAgent({
@@ -165,11 +171,17 @@ const agent = createReactAgent({
   contextSchema,
 });
 
-// Use with context
-await agent.invoke({
-  messages: [new HumanMessage("Explain async programming")],
-  context: { userRole: "expert" },
-});
+// Use with context via config.configurable
+await agent.invoke(
+  {
+    messages: [new HumanMessage("Explain async programming")],
+  },
+  {
+    config: {
+      configurable: { userRole: "expert" },
+    },
+  }
+);
 ```
 </CodeGroup>
 
@@ -190,12 +202,12 @@ v1 includes built-in summarization middleware:
 import { createAgent, summarizationMiddleware } from "langchain";
 
 const agent = createAgent({
-  model: "claude-sonnet-4-5-20250929",
+  model: "claude-sonnet-4-6",
   tools,
   middleware: [
     summarizationMiddleware({
-      model: "claude-sonnet-4-5-20250929",
-      maxTokensBeforeSummary: 1000,
+      model: "claude-sonnet-4-6",
+      trigger: { tokens: 1000 },
     }),
   ],
 });
@@ -208,7 +220,7 @@ function customSummarization(state) {
 }
 
 const agent = createReactAgent({
-  model: "claude-sonnet-4-5-20250929",
+  model: "claude-sonnet-4-6",
   tools,
   preModelHook: customSummarization,
 });
@@ -230,7 +242,7 @@ v1 includes a built-in human-in-the-loop middleware:
 import { createAgent, humanInTheLoopMiddleware } from "langchain";
 
 const agent = createAgent({
-  model: "claude-sonnet-4-5-20250929",
+  model: "claude-sonnet-4-6",
   tools: [readEmail, sendEmail],
   middleware: [
     humanInTheLoopMiddleware({
@@ -249,7 +261,7 @@ function customHumanInTheLoopHook(state) {
 }
 
 const agent = createReactAgent({
-  model: "claude-sonnet-4-5-20250929",
+  model: "claude-sonnet-4-6",
   tools: [readEmail, sendEmail],
   postModelHook: customHumanInTheLoopHook,
 });
@@ -292,7 +304,7 @@ const greet = tool(
 );
 
 const agent = createAgent({
-  model: "claude-sonnet-4-5-20250929",
+  model: "claude-sonnet-4-6",
   tools: [greet],
   middleware: [userState],
 });
@@ -321,7 +333,7 @@ const greet = tool(
 
 // Custom state was provided via agent-level state schema or accessed ad hoc in hooks
 const agent = createReactAgent({
-  model: "claude-sonnet-4-5-20250929",
+  model: "claude-sonnet-4-6",
   tools: [greet],
   stateSchema: UserState,
 });
@@ -344,7 +356,7 @@ const dynamicModel = createMiddleware({
   name: "DynamicModel",
   wrapModelCall: (request, handler) => {
     const messageCount = request.state.messages.length;
-    const model = messageCount > 10 ? "openai:gpt-5" : "openai:gpt-5-nano";
+    const model = messageCount > 10 ? "openai:gpt-5.5" : "openai:gpt-5-nano";
     return handler({ ...request, model });
   },
 });
@@ -359,7 +371,7 @@ const agent = createAgent({
 import { createReactAgent } from "@langchain/langgraph/prebuilts";
 
 function selectModel(state) {
-  return state.messages.length > 10 ? "openai:gpt-5" : "openai:gpt-5-nano";
+  return state.messages.length > 10 ? "openai:gpt-5.5" : "openai:gpt-5-nano";
 }
 
 const agent = createReactAgent({
@@ -375,11 +387,11 @@ To better support structured output, `createAgent` should receive a plain model 
 
 ```typescript
 // No longer supported
-// const modelWithTools = new ChatOpenAI({ model: "gpt-4o-mini" }).bindTools([someTool]);
+// const modelWithTools = new ChatOpenAI({ model: "gpt-5.4-mini" }).bindTools([someTool]);
 // const agent = createAgent({ model: modelWithTools, tools: [] });
 
 // Use instead
-const agent = createAgent({ model: "gpt-4o-mini", tools: [someTool] });
+const agent = createAgent({ model: "gpt-5.4-mini", tools: [someTool] });
 ```
 
 ### Tools
@@ -390,36 +402,51 @@ The `tools` argument to `createAgent` accepts:
 - LangChain tool instances
 - Objects that represent built-in provider tools
 
-Use middleware `wrapToolCall` to centralize error handling and logging for tools.
+#### Handling tool errors
+
+You can now configure the handling of tool errors with middleware implementing the `wrapToolCall` method.
 
 <CodeGroup>
 ```typescript v1 (new)
-import { createAgent, createMiddleware } from "langchain";
+import { createAgent, createMiddleware, ToolMessage } from "langchain";
 
-const errorHandling = createMiddleware({
-  name: "ToolErrors",
+const handleToolErrors = createMiddleware({
+  name: "HandleToolErrors",
   wrapToolCall: async (request, handler) => {
     try {
       return await handler(request);
-    } catch (err) {
-      return `Error executing ${request.toolName}: ${String(err)}`;
+    } catch (error) {
+      // Only handle errors that occur during tool execution due to invalid inputs
+      // that pass schema validation but fail at runtime (e.g., invalid SQL syntax).
+      // Do NOT handle:
+      // - Network failures (use tool retry middleware instead)
+      // - Incorrect tool implementation errors (should bubble up)
+      // - Schema mismatch errors (already auto-handled by the framework)
+      //
+      // Return a custom error message to the model
+      return new ToolMessage({
+        content: `Tool error: Please check your input and try again. (${error})`,
+        tool_call_id: request.toolCall.id!,
+      });
     }
   },
 });
 
 const agent = createAgent({
-  model: "claude-sonnet-4-5-20250929",
+  model: "claude-sonnet-4-6",
   tools: [checkWeather, searchWeb],
-  middleware: [errorHandling],
+  middleware: [handleToolErrors],
 });
 ```
 ```typescript v0 (old)
-import { createReactAgent } from "@langchain/langgraph/prebuilts";
+import { createReactAgent, ToolNode } from "@langchain/langgraph/prebuilts";
 
 const agent = createReactAgent({
-  model: "claude-sonnet-4-5-20250929",
-  tools: [checkWeather, searchWeb],
-  // Error handling commonly implemented inside tool code or post hooks
+  model: "claude-sonnet-4-6",
+  tools: new ToolNode(
+    [checkWeather, searchWeb],
+    { handleToolErrors: true } // [!code highlight]
+  ),
 });
 ```
 </CodeGroup>
@@ -448,7 +475,7 @@ const OutputSchema = z.object({
 });
 
 const agent = createAgent({
-  model: "gpt-4o-mini",
+  model: "gpt-5.4-mini",
   tools,
   // explicitly using tool strategy
   responseFormat: toolStrategy(OutputSchema), // [!code highlight]
@@ -464,7 +491,7 @@ const OutputSchema = z.object({
 });
 
 const agent = createReactAgent({
-  model: "gpt-4o-mini",
+  model: "gpt-5.4-mini",
   tools,
   // Structured output was driven primarily via tool-calling with fewer options
   responseFormat: OutputSchema,
@@ -490,7 +517,7 @@ import { createAgent, HumanMessage } from "langchain";
 import * as z from "zod";
 
 const agent = createAgent({
-  model: "gpt-4o",
+  model: "gpt-5.5",
   tools,
   contextSchema: z.object({ userId: z.string(), sessionId: z.string() }),
 });
@@ -685,7 +712,7 @@ import { ... } from "langchain/chains";
 
 ### Dropped Node 18 support
 
-All LangChain packages now require **Node.js 20 or higher**. Node.js 18 reached [end of life](https://nodejs.org/en/about/releases/) in March 2025.
+All LangChain packages now require **Node.js 22 or higher**. Node.js 18 reached [end of life](https://nodejs.org/en/about/releases/) in March 2025.
 
 ### New build outputs
 
@@ -754,9 +781,11 @@ The following deprecated APIs have been removed in v1:
 
 ---
 
-<Callout icon="pen-to-square" iconType="regular">
-    [Edit the source of this page on GitHub.](https://github.com/langchain-ai/docs/edit/main/src/oss/javascript/migrate/langchain-v1.mdx)
+<div className="source-links">
+<Callout icon="terminal-2">
+    [Connect these docs](/use-these-docs) to Claude, VSCode, and more via MCP for real-time answers.
 </Callout>
-<Tip icon="terminal" iconType="regular">
-    [Connect these docs programmatically](/use-these-docs) to Claude, VSCode, and more via MCP for    real-time answers.
-</Tip>
+<Callout icon="edit">
+    [Edit this page on GitHub](https://github.com/langchain-ai/docs/edit/main/src/oss/javascript/migrate/langchain-v1.mdx) or [file an issue](https://github.com/langchain-ai/docs/issues/new/choose).
+</Callout>
+</div>

@@ -1,5 +1,6 @@
 ---
-title: CDP Agentkit Toolkit
+title: "Cdp agentkit toolkit integration"
+description: "Integrate with the Cdp agentkit toolkit using LangChain Python."
 ---
 
 The `CDP Agentkit` toolkit contains tools that enable an LLM agent to interact with the [Coinbase Developer Platform](https://docs.cdp.coinbase.com/). The toolkit provides a wrapper around the CDP SDK, allowing agents to perform onchain operations like transfers, trades, and smart contract interactions.
@@ -10,7 +11,7 @@ The `CDP Agentkit` toolkit contains tools that enable an LLM agent to interact w
 
 | Class | Package | Serializable | JS support |  Version |
 | :--- | :--- | :---: | :---: | :---: |
-| CdpToolkit | `cdp-langchain` | ❌ | ❌ |  ![PyPI - Version](https://img.shields.io/pypi/v/cdp-langchain?style=flat-square&label=%20) |
+| `CdpToolkit` | `cdp-langchain` | ❌ | ❌ |  ![PyPI - Version](https://img.shields.io/pypi/v/cdp-langchain?style=flat-square&label=%20) |
 
 ### Tool features
 
@@ -37,7 +38,7 @@ At a high-level, we will:
 3. Initialize the CDP wrapper and toolkit
 4. Pass the tools to your agent with `toolkit.get_tools()`
 
-To enable automated tracing of individual tools, set your [LangSmith](https://docs.smith.langchain.com/) API key:
+To enable automated tracing of individual tools, set your [LangSmith](/langsmith/observability) API key:
 
 ```python
 os.environ["LANGSMITH_API_KEY"] = getpass.getpass("Enter your LangSmith API key: ")
@@ -103,7 +104,7 @@ We will need a LLM or chat model:
 ```python
 from langchain_openai import ChatOpenAI
 
-llm = ChatOpenAI(model="gpt-4o-mini")
+llm = ChatOpenAI(model="gpt-5.4-mini")
 ```
 
 Initialize the agent with the tools:
@@ -121,12 +122,12 @@ Example usage:
 ```python
 example_query = "Send 0.005 ETH to john2879.base.eth"
 
-events = agent_executor.stream(
+stream = agent_executor.stream_events(
     {"messages": [("user", example_query)]},
-    stream_mode="values",
+    version="v3",
 )
-for event in events:
-    event["messages"][-1].pretty_print()
+for snapshot in stream.values:
+    snapshot["messages"][-1].pretty_print()
 ```
 
 Expected output:
@@ -137,9 +138,9 @@ Transaction hash for the transfer: 0x78c7c2878659a0de216d0764fc87eff0d38b47f3315
 Transaction link for the transfer: https://sepolia.basescan.org/tx/0x78c7c2878659a0de216d0764fc87eff0d38b47f3315fa02ba493a83d8e782d1
 ```
 
-## CDP Toolkit Specific Features
+## CDP toolkit specific features
 
-### Wallet Management
+### Wallet management
 
 The toolkit maintains an MPC wallet. The wallet data can be exported and imported to persist between sessions:
 
@@ -152,11 +153,11 @@ values = {"cdp_wallet_data": wallet_data}
 cdp = CdpAgentkitWrapper(**values)
 ```
 
-### Network Support
+### Network support
 
 The toolkit supports [multiple networks](https://docs.cdp.coinbase.com/cdp-sdk/docs/networks)
 
-### Gasless Transactions
+### Gasless transactions
 
 Some operations support gasless transactions on Base Mainnet:
 
@@ -172,9 +173,11 @@ For detailed documentation of all CDP features and configurations head to the [C
 
 ---
 
-<Callout icon="pen-to-square" iconType="regular">
-    [Edit the source of this page on GitHub.](https://github.com/langchain-ai/docs/edit/main/src/oss/python/integrations/tools/cdp_agentkit.mdx)
+<div className="source-links">
+<Callout icon="terminal-2">
+    [Connect these docs](/use-these-docs) to Claude, VSCode, and more via MCP for real-time answers.
 </Callout>
-<Tip icon="terminal" iconType="regular">
-    [Connect these docs programmatically](/use-these-docs) to Claude, VSCode, and more via MCP for    real-time answers.
-</Tip>
+<Callout icon="edit">
+    [Edit this page on GitHub](https://github.com/langchain-ai/docs/edit/main/src/oss/python/integrations/tools/cdp_agentkit.mdx) or [file an issue](https://github.com/langchain-ai/docs/issues/new/choose).
+</Callout>
+</div>

@@ -1,24 +1,25 @@
 ---
-title: PineconeStore
+title: "PineconeStore integration"
+description: "Integrate with the PineconeStore using LangChain JavaScript."
 ---
 
 [Pinecone](https://www.pinecone.io/) is a vector database that helps power AI for some of the world’s best companies.
 
-This guide provides a quick overview for getting started with Pinecone [vector stores](/oss/javascript/integrations/vectorstores). For detailed documentation of all `PineconeStore` features and configurations head to the [API reference](https://api.js.langchain.com/classes/langchain_pinecone.PineconeStore.html).
+This guide provides a quick overview for getting started with Pinecone [vector stores](/oss/javascript/integrations/vectorstores). For detailed documentation of all `PineconeStore` features and configurations head to the [API reference](https://reference.langchain.com/javascript/langchain-pinecone/PineconeStore).
 
 ## Overview
 
 ### Integration details
 
-| Class | Package | [PY support](https://python.langchain.com/docs/integrations/vectorstores/pinecone/) | Version |
-| :--- | :--- | :---: | :---: |
-| [`PineconeStore`](https://api.js.langchain.com/classes/langchain_pinecone.PineconeStore.html) | [`@langchain/pinecone`](https://npmjs.com/@langchain/pinecone) | ✅ |  ![NPM - Version](https://img.shields.io/npm/v/@langchain/pinecone?style=flat-square&label=%20&) |
+| Class | Package | [PY support](https://python.langchain.com/docs/integrations/vectorstores/pinecone/) | Downloads | Version |
+| :--- | :--- | :---: | :---: | :---: |
+| [`PineconeStore`](https://reference.langchain.com/javascript/langchain-pinecone/PineconeStore) | [`@langchain/pinecone`](https://www.npmjs.com/package/@langchain/pinecone) | ✅ | ![NPM - Downloads](https://img.shields.io/npm/dm/@langchain/pinecone?style=flat-square&label=%20&) | ![NPM - Version](https://img.shields.io/npm/v/@langchain/pinecone?style=flat-square&label=%20&) |
 
 ## Setup
 
-To use Pinecone vector stores, you'll need to create a Pinecone account, initialize an index, and install the `@langchain/pinecone` integration package. You'll also want to install the [official Pinecone SDK](https://www.npmjs.com/package/@pinecone-database/pinecone) to initialize a client to pass into the `PineconeStore` instance.
+To use Pinecone vector stores, create a Pinecone account, initialize an index, and install `@langchain/pinecone`, `@langchain/core`, and the [official Pinecone SDK](https://www.npmjs.com/package/@pinecone-database/pinecone) (`@pinecone-database/pinecone` v5.x) to initialize a client for `PineconeStore`.
 
-This guide will also use [OpenAI embeddings](/oss/javascript/integrations/text_embedding/openai), which require you to install the `@langchain/openai` integration package. You can also use [other supported embeddings models](/oss/javascript/integrations/text_embedding) if you wish.
+This guide uses [OpenAI embeddings](/oss/javascript/integrations/embeddings/openai) as an example. You can use [other supported embeddings models](/oss/javascript/integrations/embeddings) instead.
 
 <CodeGroup>
 ```bash npm
@@ -44,13 +45,13 @@ process.env.PINECONE_INDEX = "your-pinecone-index";
 process.env.PINECONE_ENVIRONMENT = "your-pinecone-environment";
 ```
 
-If you are using OpenAI embeddings for this guide, you'll need to set your OpenAI key as well:
+If you are using OpenAI embeddings for this guide, set your OpenAI key as well:
 
 ```typescript
 process.env.OPENAI_API_KEY = "YOUR_API_KEY";
 ```
 
-If you want to get automated tracing of your model calls you can also set your [LangSmith](https://docs.smith.langchain.com/) API key by uncommenting below:
+If you want to get automated tracing of your model calls you can also set your [LangSmith](/langsmith/observability) API key by uncommenting below:
 
 ```typescript
 // process.env.LANGSMITH_TRACING="true"
@@ -117,7 +118,7 @@ const documents = [document1, document2, document3, document4];
 await vectorStore.addDocuments(documents, { ids: ["1", "2", "3", "4"] });
 ```
 
-```output
+```text
 [ '1', '2', '3', '4' ]
 ```
 
@@ -148,7 +149,7 @@ for (const doc of similaritySearchResults) {
 }
 ```
 
-```output
+```text
 * The powerhouse of the cell is the mitochondria [{"source":"https://example.com"}]
 * Mitochondria are made out of lipids [{"source":"https://example.com"}]
 ```
@@ -163,7 +164,7 @@ for (const [doc, score] of similaritySearchWithScoreResults) {
 }
 ```
 
-```output
+```text
 * [SIM=0.165] The powerhouse of the cell is the mitochondria [{"source":"https://example.com"}]
 * [SIM=0.148] Mitochondria are made out of lipids [{"source":"https://example.com"}]
 ```
@@ -182,7 +183,7 @@ const retriever = vectorStore.asRetriever({
 await retriever.invoke("biology");
 ```
 
-```output
+```javascript
 [
   Document {
     pageContent: 'The powerhouse of the cell is the mitochondria',
@@ -201,7 +202,7 @@ await retriever.invoke("biology");
 
 For guides on how to use this vector store for retrieval-augmented generation (RAG), see the following sections:
 
-- [Build a RAG app with LangChain](/oss/javascript/langchain/rag).
+- [Build a RAG app with LangChain](/oss/javascript/deepagents/rag).
 - [Agentic RAG](/oss/javascript/langgraph/agentic-rag)
 - [Retrieval docs](/oss/javascript/langchain/retrieval)
 
@@ -209,13 +210,15 @@ For guides on how to use this vector store for retrieval-augmented generation (R
 
 ## API reference
 
-For detailed documentation of all `PineconeStore` features and configurations head to the [API reference](https://api.js.langchain.com/classes/langchain_pinecone.PineconeStore.html).
+For detailed documentation of all `PineconeStore` features and configurations head to the [API reference](https://reference.langchain.com/javascript/langchain-pinecone/PineconeStore).
 
 ---
 
-<Callout icon="pen-to-square" iconType="regular">
-    [Edit the source of this page on GitHub.](https://github.com/langchain-ai/docs/edit/main/src/oss/javascript/integrations/vectorstores/pinecone.mdx)
+<div className="source-links">
+<Callout icon="terminal-2">
+    [Connect these docs](/use-these-docs) to Claude, VSCode, and more via MCP for real-time answers.
 </Callout>
-<Tip icon="terminal" iconType="regular">
-    [Connect these docs programmatically](/use-these-docs) to Claude, VSCode, and more via MCP for    real-time answers.
-</Tip>
+<Callout icon="edit">
+    [Edit this page on GitHub](https://github.com/langchain-ai/docs/edit/main/src/oss/javascript/integrations/vectorstores/pinecone.mdx) or [file an issue](https://github.com/langchain-ai/docs/issues/new/choose).
+</Callout>
+</div>

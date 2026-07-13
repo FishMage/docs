@@ -11,14 +11,16 @@ This guide covers how to set up few-shot examples as part of your LLM-as-a-judge
 
 ## How few-shot examples work
 
-* Few-shot examples are added to your evaluator prompt using the `{{Few-shot examples}}` variable
-* Creating an evaluator with few-shot examples, will automatically create a dataset for you, which will be auto-populated with few-shot examples once you start making corrections
-* At runtime, these examples will inserted into the evaluator to serve as a guide for its outputs - this will help the evaluator to better align with human preferences
+* Few-shot examples are added to your evaluator prompt using the `{{Few-shot examples}}` variable.
+* Creating an evaluator with few-shot examples, will automatically create a dataset for you, which will be auto-populated with few-shot examples once you start making corrections.
+* At runtime, these examples will be inserted into the evaluator to serve as a guide for its outputs. This will help the evaluator to better align with human preferences.
 
 ## Configure your evaluator
 
 <Note>
 Few-shot examples are not currently supported in LLM-as-a-judge evaluators that use the prompt hub and are only compatible with prompts that use mustache formatting.
+
+Few-shot examples are only supported for run-level evaluators, not thread-level. Toggle on **Runs** in the [**Configure Evaluator** panel](/langsmith/evaluators#edit-an-evaluator).
 </Note>
 
 Before enabling few-shot examples, set up your LLM-as-a-judge evaluator. If you haven't done this yet, follow the steps in the [LLM-as-a-judge evaluator guide](/langsmith/llm-as-judge).
@@ -27,7 +29,7 @@ Before enabling few-shot examples, set up your LLM-as-a-judge evaluator. If you 
 
 Each few-shot example is formatted according to the variable mapping specified in the configuration. The variable mapping for few-shot examples, should contain the same variables as your main prompt, plus a `few_shot_explanation` and a `score` variable which should have the same name as your feedback key.
 
-For example, if your main prompt has variables `question` and `response`, and your evaluator outputs a `correctness` score, then your few-shot prompt should have the vartiables `question`, `response`, `few_shot_explanation`, and `correctness`.
+For example, if your main prompt has variables `question` and `response`, and your evaluator outputs a `correctness` score, then your few-shot prompt should have the variables `question`, `response`, `few_shot_explanation`, and `correctness`.
 
 ### 2. Specify the number of few-shot examples to use
 
@@ -56,15 +58,17 @@ In order to view your corrections dataset:
 
 ![Edit Evaluator](/langsmith/images/edit-evaluator.png)
 
-Head to your dataset of corrections linked in the the **Improve evaluator accuracy using few-shot examples** section. You can view and update your few-shot examples in the dataset.
+Head to your dataset of corrections linked in the **Improve evaluator accuracy using few-shot examples** section. You can view and update your few-shot examples in the dataset.
 
 ![View few-shot dataset](/langsmith/images/view-few-shot-ds.png)
 
 ---
 
-<Callout icon="pen-to-square" iconType="regular">
-    [Edit the source of this page on GitHub.](https://github.com/langchain-ai/docs/edit/main/src/langsmith/create-few-shot-evaluators.mdx)
+<div className="source-links">
+<Callout icon="terminal-2">
+    [Connect these docs](/use-these-docs) to Claude, VSCode, and more via MCP for real-time answers.
 </Callout>
-<Tip icon="terminal" iconType="regular">
-    [Connect these docs programmatically](/use-these-docs) to Claude, VSCode, and more via MCP for    real-time answers.
-</Tip>
+<Callout icon="edit">
+    [Edit this page on GitHub](https://github.com/langchain-ai/docs/edit/main/src/langsmith/create-few-shot-evaluators.mdx) or [file an issue](https://github.com/langchain-ai/docs/issues/new/choose).
+</Callout>
+</div>

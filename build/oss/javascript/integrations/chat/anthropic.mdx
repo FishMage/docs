@@ -1,26 +1,28 @@
 ---
-title: ChatAnthropic
+title: "ChatAnthropic integration"
+sidebarTitle: "Chat"
+description: "Integrate with the ChatAnthropic chat model using LangChain JavaScript."
 ---
 
 [Anthropic](https://www.anthropic.com/) is an AI safety and research company. They are the creator of Claude.
 
-This will help you getting started with Anthropic [chat models](/oss/javascript/langchain/models). For detailed documentation of all `ChatAnthropic` features and configurations head to the [API reference](https://api.js.langchain.com/classes/langchain_anthropic.ChatAnthropic.html).
+This will help you getting started with `ChatAnthropic` [chat models](/oss/javascript/langchain/models). For detailed documentation of all `ChatAnthropic` features and configurations head to the [API reference](https://reference.langchain.com/javascript/langchain-anthropic/ChatAnthropic).
 
 ## Overview
 
 ### Integration details
 
-| Class | Package | Local | Serializable | [PY support](https://python.langchain.com/docs/integrations/chat/anthropic/) | Downloads | Version |
-| :--- | :--- | :---: | :---: |  :---: | :---: | :---: |
-| [ChatAnthropic](https://api.js.langchain.com/classes/langchain_anthropic.ChatAnthropic.html) | [`@langchain/anthropic`](https://www.npmjs.com/package/@langchain/anthropic) | ❌ | ✅ | ✅ | ![NPM - Downloads](https://img.shields.io/npm/dm/@langchain/anthropic?style=flat-square&label=%20&) | ![NPM - Version](https://img.shields.io/npm/v/@langchain/anthropic?style=flat-square&label=%20&) |
+| Class | Package | Serializable | [PY support](https://python.langchain.com/docs/integrations/chat/anthropic/) | Downloads | Version |
+| :--- | :--- | :---: |  :---: | :---: | :---: |
+| [`ChatAnthropic`](https://reference.langchain.com/javascript/langchain-anthropic/ChatAnthropic) | [`@langchain/anthropic`](https://www.npmjs.com/package/@langchain/anthropic) | ✅ | ✅ | ![NPM - Downloads](https://img.shields.io/npm/dm/@langchain/anthropic?style=flat-square&label=%20&) | ![NPM - Version](https://img.shields.io/npm/v/@langchain/anthropic?style=flat-square&label=%20&) |
 
 ### Model features
 
 See the links in the table headers below for guides on how to use specific features.
 
-| [Tool calling](/oss/javascript/langchain/tools) | [Structured output](/oss/javascript/langchain/structured-output) | JSON mode | [Image input](/oss/javascript/langchain/messages#multimodal) | Audio input | Video input | [Token-level streaming](/oss/javascript/langchain/streaming/) | [Token usage](/oss/javascript/langchain/models#token-usage) | [Logprobs](/oss/javascript/langchain/models#log-probabilities) |
-| :---: | :---: | :---: | :---: |  :---: | :---: | :---: | :---: | :---: |
-| ✅ | ✅ | ❌ | ✅ | ❌ | ❌ | ✅ | ✅ | ❌ |
+| [Tool calling](/oss/javascript/langchain/tools) | [Structured output](/oss/javascript/langchain/structured-output) | [Image input](/oss/javascript/langchain/messages#multimodal) | Audio input | Video input | [Token-level streaming](/oss/javascript/langchain/streaming/) | [Token usage](/oss/javascript/langchain/models#token-usage) | [Logprobs](/oss/javascript/langchain/models#log-probabilities) |
+| :---: | :---: | :---: |  :---: | :---: | :---: | :---: | :---: |
+| ✅ | ✅ | ✅ | ❌ | ❌ | ✅ | ✅ | ❌ |
 
 ## Setup
 
@@ -34,7 +36,7 @@ Head to [Anthropic's website](https://www.anthropic.com/) to sign up to Anthropi
 export ANTHROPIC_API_KEY="your-api-key"
 ```
 
-If you want to get automated tracing of your model calls you can also set your [LangSmith](https://docs.smith.langchain.com/) API key by uncommenting below:
+If you want to get automated tracing of your model calls you can also set your [LangSmith](/langsmith/observability) API key by uncommenting below:
 
 ```bash
 # export LANGSMITH_TRACING="true"
@@ -86,7 +88,7 @@ const aiMsg = await llm.invoke([
 aiMsg
 ```
 
-```output
+```text
 AIMessage {
   "id": "msg_013WBXXiggy6gMbAUY6NpsuU",
   "content": "Voici la traduction en français :\n\nJ'adore la programmation.",
@@ -128,7 +130,7 @@ AIMessage {
 console.log(aiMsg.content)
 ```
 
-```output
+```text
 Voici la traduction en français :
 
 J'adore la programmation.
@@ -136,7 +138,7 @@ J'adore la programmation.
 
 ## Content blocks
 
-One key difference to note between Anthropic models and most others is that the contents of a single Anthropic [`AIMessage`](https://v03.api.js.langchain.com/classes/_langchain_core.messages_ai_message.AIMessage.html) can either be a single string or a **list of content blocks**. For example when an Anthropic model [calls a tool](/oss/javascript/langchain/tools), the tool invocation is part of the message content (as well as being exposed in the standardized `AIMessage.tool_calls` field):
+One key difference to note between Anthropic models and most others is that the contents of a single Anthropic [`AIMessage`](https://reference.langchain.com/javascript/langchain-core/messages/AIMessage) can either be a single string or a **list of content blocks**. For example when an Anthropic model [calls a tool](/oss/javascript/langchain/tools), the tool invocation is part of the message content (as well as being exposed in the standardized `AIMessage.tool_calls` field):
 
 ```typescript
 import { ChatAnthropic } from "@langchain/anthropic";
@@ -178,7 +180,7 @@ await toolCallChain.invoke({
 });
 ```
 
-```output
+```text
 AIMessage {
   "id": "msg_01DZGs9DyuashaYxJ4WWpWUP",
   "content": [
@@ -250,7 +252,7 @@ You can pass custom headers in your requests like this:
 import { ChatAnthropic } from "@langchain/anthropic";
 
 const llmWithCustomHeaders = new ChatAnthropic({
-  model: "claude-sonnet-4-5-20250929",
+  model: "claude-sonnet-4-6",
   maxTokens: 1024,
   clientOptions: {
     defaultHeaders: {
@@ -262,7 +264,7 @@ const llmWithCustomHeaders = new ChatAnthropic({
 await llmWithCustomHeaders.invoke("Why is the sky blue?");
 ```
 
-```output
+```text
 AIMessage {
   "id": "msg_019z4nWpShzsrbSHTWXWQh6z",
   "content": "The sky appears blue due to a phenomenon called Rayleigh scattering. Here's a brief explanation:\n\n1) Sunlight is made up of different wavelengths of visible light, including all the colors of the rainbow.\n\n2) As sunlight passes through the atmosphere, the gases (mostly nitrogen and oxygen) cause the shorter wavelengths of light, such as violet and blue, to be scattered more easily than the longer wavelengths like red and orange.\n\n3) This scattering of the shorter blue wavelengths occurs in all directions by the gas molecules in the atmosphere.\n\n4) Our eyes are more sensitive to the scattered blue light than the scattered violet light, so we perceive the sky as having a blue color.\n\n5) The scattering is more pronounced for light traveling over longer distances through the atmosphere. This is why the sky appears even darker blue when looking towards the horizon.\n\nSo in essence, the selective scattering of the shorter blue wavelengths of sunlight by the gases in the atmosphere is what causes the sky to appear blue to our eyes during the daytime.",
@@ -302,23 +304,19 @@ AIMessage {
 
 ## Prompt caching
 
-<Warning>
-**Compatibility**: This feature is currently in beta.
-</Warning>
+Anthropic supports [caching parts of your prompt](https://platform.claude.com/docs/en/build-with-claude/prompt-caching) in order to reduce costs for use-cases that require long context. You can cache tools and both entire messages and individual blocks.
 
-Anthropic supports [caching parts of your prompt](https://docs.claude.com/en/docs/build-with-claude/prompt-caching) in order to reduce costs for use-cases that require long context. You can cache tools and both entire messages and individual blocks.
+The initial request containing one or more blocks or tool definitions with a `"cache_control": { "type": "ephemeral" }` field will automatically cache that part of the prompt. This initial caching step will cost extra, but subsequent requests will be billed at a reduced rate. The cache has a lifetime of 5 minutes, but this is refreshed each time the cache is hit. For longer caching, specify `"ttl": "1h"` in the `cache_control` field.
 
-The initial request containing one or more blocks or tool definitions with a `"cache_control": { "type": "ephemeral" }` field will automatically cache that part of the prompt. This initial caching step will cost extra, but subsequent requests will be billed at a reduced rate. The cache has a lifetime of 5 minutes, but this is refereshed each time the cache is hit.
+There is a minimum cacheable prompt length, which varies according to model. For more information, see [prompt caching details](https://platform.claude.com/docs/en/build-with-claude/prompt-caching#cache-limitations).
 
-There is also currently a minimum cacheable prompt length, which varies according to model. You can see this information [here](https://docs.claude.com/en/docs/build-with-claude/prompt-caching#structuring-your-prompt).
-
-This currently requires you to initialize your model with a beta header. Here's an example of caching part of a system message that contains the LangChain [conceptual docs](/oss/javascript/concepts/):
+Here's an example of caching part of a system message that contains the LangChain [conceptual docs](/oss/javascript/concepts/):
 
 ```typescript
 let CACHED_TEXT = "...";
 ```
 
-```typescript
+```typescript expandable wrap
 // @lc-docs-hide-cell
 
 CACHED_TEXT = `## Components
@@ -552,7 +550,7 @@ For specifics on how to use example selectors, see the [relevant how-to guides h
 
 More and more models are supporting function (or tool) calling, which handles this automatically.
 It is recommended to use function/tool calling rather than output parsing.
-See documentation for that [here](/oss/javascript/langchain/tools).
+See the [LangChain tools documentation](/oss/javascript/langchain/tools).
 
 </Note>
 
@@ -592,12 +590,7 @@ void 0;
 import { ChatAnthropic } from "@langchain/anthropic";
 
 const modelWithCaching = new ChatAnthropic({
-  model: "claude-haiku-4-5-20251001",
-  clientOptions: {
-    defaultHeaders: {
-      "anthropic-beta": "prompt-caching-2024-07-31",
-    },
-  },
+  model: "claude-sonnet-4-6",
 });
 
 const LONG_TEXT = `You are a pirate. Always respond in pirate dialect.
@@ -629,12 +622,15 @@ const res = await modelWithCaching.invoke(messages);
 console.log("USAGE:", res.response_metadata.usage);
 ```
 
-```output
+```text
 USAGE: {
-  input_tokens: 19,
-  cache_creation_input_tokens: 2921,
+  input_tokens: 18,
+  cache_creation_input_tokens: 2960,
   cache_read_input_tokens: 0,
-  output_tokens: 355
+  cache_creation: { ephemeral_5m_input_tokens: 2960, ephemeral_1h_input_tokens: 0 },
+  output_tokens: 433,
+  service_tier: 'standard',
+  inference_geo: 'global'
 }
 ```
 
@@ -648,18 +644,21 @@ const res2 = await modelWithCaching.invoke(messages);
 console.log("USAGE:", res2.response_metadata.usage);
 ```
 
-```output
+```text
 USAGE: {
-  input_tokens: 19,
+  input_tokens: 18,
   cache_creation_input_tokens: 0,
-  cache_read_input_tokens: 2921,
-  output_tokens: 357
+  cache_read_input_tokens: 2960,
+  cache_creation: { ephemeral_5m_input_tokens: 0, ephemeral_1h_input_tokens: 0 },
+  output_tokens: 393,
+  service_tier: 'standard',
+  inference_geo: 'global'
 }
 ```
 
 ### Tool caching
 
-You can also cache tools by setting the same `"cache_control": { "type": "ephemeral" }` within a tool definition. This currently requires you to bind a tool in [Anthropic's raw tool format](https://docs.claude.com/en/docs/agents-and-tools/tool-use/overview) Here's an example:
+You can also cache tools by setting the same `"cache_control": { "type": "ephemeral" }` within a tool definition. This currently requires you to bind a tool in [Anthropic's raw tool format](https://platform.claude.com/docs/en/agents-and-tools/tool-use/overview) Here's an example:
 
 ```typescript
 const SOME_LONG_DESCRIPTION = "...";
@@ -691,11 +690,11 @@ const modelWithCachedTools = modelWithCaching.bindTools(anthropicTools);
 await modelWithCachedTools.invoke("what is the weather in SF?");
 ```
 
-For more on how prompt caching works, see [Anthropic's docs](https://docs.claude.com/en/docs/build-with-claude/prompt-caching#how-prompt-caching-works).
+For more on how prompt caching works, see [Anthropic's docs](https://platform.claude.com/docs/en/build-with-claude/prompt-caching#how-prompt-caching-works).
 
 ## Custom clients
 
-Anthropic models [may be hosted on cloud services such as Google Vertex](https://docs.claude.com/en/api/claude-on-vertex-ai) that rely on a different underlying client with the same interface as the primary Anthropic client. You can access these services by providing a `createClient` method that returns an initialized instance of an Anthropic client. Here's an example:
+Anthropic models [may be hosted on cloud services such as Google Vertex](https://platform.claude.com/docs/en/build-with-claude/claude-on-vertex-ai) that rely on a different underlying client with the same interface as the primary Anthropic client. You can access these services by providing a `createClient` method that returns an initialized instance of an Anthropic client. Here's an example:
 
 ```typescript
 import { AnthropicVertex } from "@anthropic-ai/vertex-sdk";
@@ -703,7 +702,7 @@ import { AnthropicVertex } from "@anthropic-ai/vertex-sdk";
 const customClient = new AnthropicVertex();
 
 const modelWithCustomClient = new ChatAnthropic({
-  modelName: "claude-3-sonnet@20240229",
+  modelName: "claude-sonnet-4-6",
   maxRetries: 0,
   createClient: () => customClient,
 });
@@ -713,11 +712,11 @@ await modelWithCustomClient.invoke([{ role: "user", content: "Hello!" }]);
 
 ## Citations
 
-Anthropic supports a [citations](https://docs.claude.com/en/docs/build-with-claude/citations) feature that lets Claude attach context to its answers based on source material supplied by the user. This source material can be provided either as [document content blocks](https://docs.claude.com/en/docs/build-with-claude/citations#document-types), which describe full documents, or as [search results](https://docs.claude.com/en/docs/build-with-claude/search-results), which describe relevant passages or snippets returned from a retrieval system. When `"citations": { "enabled": true }` is included in a query, Claude may generate direct citations to the provided material in its response.
+Anthropic supports a [citations](https://platform.claude.com/docs/en/build-with-claude/citations) feature that lets Claude attach context to its answers based on source material supplied by the user. This source material can be provided either as [document content blocks](https://platform.claude.com/docs/en/build-with-claude/citations#document-types), which describe full documents, or as [search results](https://platform.claude.com/docs/en/build-with-claude/search-results), which describe relevant passages or snippets returned from a retrieval system. When `"citations": { "enabled": true }` is included in a query, Claude may generate direct citations to the provided material in its response.
 
 ### Document example
 
-In this example we pass a [plain text document](https://docs.claude.com/en/docs/build-with-claude/citations#plain-text-documents). In the background, Claude [automatically chunks](https://docs.claude.com/en/docs/build-with-claude/citations#plain-text-documents) the input text into sentences, which are used when generating citations.
+In this example we pass a [plain text document](https://platform.claude.com/docs/en/build-with-claude/citations#plain-text-documents). In the background, Claude [automatically chunks](https://platform.claude.com/docs/en/build-with-claude/citations#plain-text-documents) the input text into sentences, which are used when generating citations.
 
 ```typescript
 import { ChatAnthropic } from "@langchain/anthropic";
@@ -756,7 +755,7 @@ const responseWithCitations = await citationsModel.invoke(messagesWithCitations)
 console.log(JSON.stringify(responseWithCitations.content, null, 2));
 ```
 
-```output
+```json
 [
   {
     "type": "text",
@@ -799,7 +798,7 @@ console.log(JSON.stringify(responseWithCitations.content, null, 2));
 
 ### Search results example
 
-In this example, we pass in [search results](https://docs.claude.com/en/docs/build-with-claude/search-results) as part of our message content. This allows Claude to cite specific passages or snippets from your own retrieval system in its response.
+In this example, we pass in [search results](https://platform.claude.com/docs/en/build-with-claude/search-results) as part of our message content. This allows Claude to cite specific passages or snippets from your own retrieval system in its response.
 
 This approach is helpful when you want Claude to cite information from a specific set of knowledge, but you want to bring your own pre-fetched/cached content directly rather than having the model search or retrieve them automatically.
 
@@ -845,7 +844,7 @@ console.log(JSON.stringify(responseWithCitations.content, null, 2));
 
 #### Search results from a tool
 
-You can also use a tool to provide search results that the model can cite in its responses. This is well suited for RAG (or [Retrieval-Augmented Generation](https://en.wikipedia.org/wiki/Retrieval-augmented_generation)) workflows where Claude can decide when and where to retrieve information from. When returning this information as [search results](https://docs.claude.com/en/docs/build-with-claude/search-results), it gives Claude the ability to create citations from the material returned from the tool.
+You can also use a tool to provide search results that the model can cite in its responses. This is well suited for RAG (or [Retrieval-Augmented Generation](https://en.wikipedia.org/wiki/Retrieval-augmented_generation)) workflows where Claude can decide when and where to retrieve information from. When returning this information as [search results](https://platform.claude.com/docs/en/build-with-claude/search-results), it gives Claude the ability to create citations from the material returned from the tool.
 
 Here's how you can create a tool that returns search results in the format expected by Anthropic's citations API:
 
@@ -914,13 +913,13 @@ console.log(JSON.stringify(result.content, null, 2));
 
 ```
 
-Learn more about how RAG works in LangChain [here](https://js.langchain.com/docs/concepts/rag/)
+Learn more about [how RAG works in LangChain](https://js.langchain.com/docs/concepts/rag/)
 
-Learn more about tool calling [here](https://js.langchain.com/docs/how_to/tool_calling/)
+[Learn more about tool calling](/oss/javascript/langchain/tools)
 
 ### Using with text splitters
 
-Anthropic also lets you specify your own splits using [custom document](https://docs.claude.com/en/docs/build-with-claude/citations#custom-content-documents) types. LangChain text splitters can be used to generate meaningful splits for this purpose. See the below example, where we split the LangChain.js README (a markdown document) and pass it to Claude as context:
+Anthropic also lets you specify your own splits using [custom document](https://platform.claude.com/docs/en/build-with-claude/citations#custom-content-documents) types. LangChain text splitters can be used to generate meaningful splits for this purpose. See the below example, where we split the LangChain.js README (a markdown document) and pass it to Claude as context:
 
 ```typescript
 import { ChatAnthropic } from "@langchain/anthropic";
@@ -962,14 +961,14 @@ const messageWithSplitDocuments = {
 
 // Query LLM
 const citationsModelWithSplits = new ChatAnthropic({
-  model: "claude-sonnet-4-5-20250929",
+  model: "claude-sonnet-4-6",
 });
 const resWithSplits = await citationsModelWithSplits.invoke([messageWithSplitDocuments]);
 
 console.log(JSON.stringify(resWithSplits.content, null, 2));
 ```
 
-```output
+```json
 [
   {
     "type": "text",
@@ -996,7 +995,7 @@ console.log(JSON.stringify(resWithSplits.content, null, 2));
 
 Anthropic supports a context editing feature that will automatically manage the model's context window (e.g., by clearing tool results).
 
-See [Anthropic documentation](https://docs.claude.com/en/docs/build-with-claude/context-editing) for details and configuration options.
+See [Anthropic documentation](https://platform.claude.com/docs/en/build-with-claude/context-editing) for details and configuration options.
 
 <Info>
     **Context management is supported since `@langchain/anthropic@0.3.29`**
@@ -1006,7 +1005,7 @@ See [Anthropic documentation](https://docs.claude.com/en/docs/build-with-claude/
 import { ChatAnthropic } from "@langchain/anthropic";
 
 const llm = new ChatAnthropic({
-  model: "claude-sonnet-4-5-20250929",
+  model: "claude-sonnet-4-6",
   clientOptions: {
     defaultHeaders: {
       "anthropic-beta": "context-management-2025-06-27",
@@ -1022,13 +1021,15 @@ const response = await llmWithTools.invoke("Search for recent developments in AI
 
 ## API reference
 
-For detailed documentation of all ChatAnthropic features and configurations head to the [API reference](https://api.js.langchain.com/classes/langchain_anthropic.ChatAnthropic.html).
+For detailed documentation of all `ChatAnthropic` features and configurations head to the [API reference](https://reference.langchain.com/javascript/langchain-anthropic/ChatAnthropic).
 
 ---
 
-<Callout icon="pen-to-square" iconType="regular">
-    [Edit the source of this page on GitHub.](https://github.com/langchain-ai/docs/edit/main/src/oss/javascript/integrations/chat/anthropic.mdx)
+<div className="source-links">
+<Callout icon="terminal-2">
+    [Connect these docs](/use-these-docs) to Claude, VSCode, and more via MCP for real-time answers.
 </Callout>
-<Tip icon="terminal" iconType="regular">
-    [Connect these docs programmatically](/use-these-docs) to Claude, VSCode, and more via MCP for    real-time answers.
-</Tip>
+<Callout icon="edit">
+    [Edit this page on GitHub](https://github.com/langchain-ai/docs/edit/main/src/oss/javascript/integrations/chat/anthropic.mdx) or [file an issue](https://github.com/langchain-ai/docs/issues/new/choose).
+</Callout>
+</div>

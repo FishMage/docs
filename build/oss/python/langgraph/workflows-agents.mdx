@@ -3,7 +3,8 @@ title: Workflows and agents
 sidebarTitle: Workflows + agents
 ---
 
-
+import WorkflowsAgentsToolRuntimeStateContextPy from "/snippets/code-samples/workflows-agents-tool-runtime-state-context-py.mdx";
+import WorkflowsAgentsToolRuntimeStateContextJs from "/snippets/code-samples/workflows-agents-tool-runtime-state-context-js.mdx";
 
 This guide reviews common workflow and agent patterns.
 
@@ -13,6 +14,10 @@ This guide reviews common workflow and agent patterns.
 ![Agent Workflow](/oss/images/agent_workflow.png)
 
 LangGraph offers several benefits when building agents and workflows, including [persistence](/oss/python/langgraph/persistence), [streaming](/oss/python/langgraph/streaming), and support for debugging as well as [deployment](/oss/python/langgraph/deploy).
+
+<Tip>
+Trace and compare these workflow patterns with [LangSmith](https://smith.langchain.com?utm_source=docs&utm_medium=cta&utm_campaign=langsmith-signup&utm_content=oss-langgraph-workflows-agents). Follow the [tracing quickstart](/langsmith/trace-with-langgraph) to see how data flows through each step. We recommend you also set up [LangSmith Engine](/langsmith/engine) which monitors your traces, detects issues, and proposes fixes.
+</Tip>
 
 ## Setup
 
@@ -38,7 +43,7 @@ def _set_env(var: str):
 
 _set_env("ANTHROPIC_API_KEY")
 
-llm = ChatAnthropic(model="claude-sonnet-4-5-20250929")
+llm = ChatAnthropic(model="claude-sonnet-4-6")
 ```
 
 
@@ -173,7 +178,8 @@ if "improved_joke" in state:
     print("Final joke:")
     print(state["final_joke"])
 else:
-    print("Joke failed quality gate - no punchline detected!")
+    print("Final joke:")
+    print(state["joke"])
 ```
 ```python Functional API
 from langgraph.func import entrypoint, task
@@ -220,8 +226,9 @@ def prompt_chaining_workflow(topic: str):
     return polish_joke(improved_joke).result()
 
 # Invoke
-for step in prompt_chaining_workflow.stream("cats", stream_mode="updates"):
-    print(step)
+stream = prompt_chaining_workflow.stream_events("cats", version="v3")
+for snapshot in stream.values:
+    print(snapshot)
     print("\n")
 ```
 </CodeGroup>
@@ -277,7 +284,7 @@ def call_llm_3(state: State):
 
 
 def aggregator(state: State):
-    """Combine the joke and story into a single output"""
+    """Combine the joke, story and poem into a single output"""
 
     combined = f"Here's a story, joke, and poem about {state['topic']}!\n\n"
     combined += f"STORY:\n{state['story']}\n\n"
@@ -356,8 +363,9 @@ def parallel_workflow(topic: str):
     ).result()
 
 # Invoke
-for step in parallel_workflow.stream("cats", stream_mode="updates"):
-    print(step)
+stream = parallel_workflow.stream_events("cats", version="v3")
+for snapshot in stream.values:
+    print(snapshot)
     print("\n")
 ```
 </CodeGroup>
@@ -544,8 +552,9 @@ def router_workflow(input_: str):
     return llm_call(input_).result()
 
 # Invoke
-for step in router_workflow.stream("Write me a joke about cats", stream_mode="updates"):
-    print(step)
+stream = router_workflow.stream_events("Write me a joke about cats", version="v3")
+for snapshot in stream.values:
+    print(snapshot)
     print("\n")
 ```
 </CodeGroup>
@@ -920,8 +929,9 @@ def optimizer_workflow(topic: str):
     return joke
 
 # Invoke
-for step in optimizer_workflow.stream("Cats", stream_mode="updates"):
-    print(step)
+stream = optimizer_workflow.stream_events("Cats", version="v3")
+for snapshot in stream.values:
+    print(snapshot)
     print("\n")
 ```
 </CodeGroup>
@@ -1007,7 +1017,7 @@ def llm_call(state: MessagesState):
     }
 
 
-def tool_node(state: dict):
+def tool_node(state: MessagesState):
     """Performs the tool call"""
 
     result = []
@@ -1066,9 +1076,9 @@ from langgraph.graph import add_messages
 from langchain.messages import (
     SystemMessage,
     HumanMessage,
-    BaseMessage,
     ToolCall,
 )
+from langchain_core.messages import BaseMessage
 
 
 @task
@@ -1112,17 +1122,77 @@ def agent(messages: list[BaseMessage]):
 
 # Invoke
 messages = [HumanMessage(content="Add 3 and 4.")]
-for chunk in agent.stream(messages, stream_mode="updates"):
-    print(chunk)
+stream = agent.stream_events(messages, version="v3")
+for snapshot in stream.values:
+    print(snapshot)
     print("\n")
 ```
 </CodeGroup>
 
+
+
+
+### ToolNode
+
+[`ToolNode`](https://reference.langchain.com/python/langgraph/agents/#langgraph.prebuilt.tool_node.ToolNode) is a prebuilt node that executes tools in LangGraph workflows. It handles parallel tool execution, error handling, and state injection automatically.
+
+Use [`ToolNode`](https://reference.langchain.com/python/langgraph/agents/#langgraph.prebuilt.tool_node.ToolNode) when you need fine-grained control over how your graph executes tools. This is the building block that powers tool execution in many LangGraph agent patterns.
+
+```python
+from langchain.tools import tool
+from langgraph.prebuilt import ToolNode
+from langgraph.graph import MessagesState, StateGraph
+
+@tool
+def search(query: str) -> str:
+    """Search for information."""
+    return f"Results for: {query}"
+
+@tool
+def calculator(expression: str) -> str:
+    """Evaluate a math expression."""
+    return str(eval(expression))
+
+builder = StateGraph(MessagesState)
+builder.add_node("tools", ToolNode([search, calculator]))
+# ... add other nodes and edges
+graph = builder.compile()
+```
+
+
+
+
+
+#### Access graph state and context from tools
+
+Tools executed by `ToolNode` receive the arguments generated by the model as
+their first argument. To read graph-side data that was not generated by the
+model, use one of these options:
+
+- In Python, read state and run-scoped context from the injected
+  [`ToolRuntime`](https://reference.langchain.com/python/langchain/tools/#langchain.tools.ToolRuntime) argument.
+- In JavaScript, read state and run-scoped context from the tool's second
+  argument, typed as [`ToolRuntime`](https://reference.langchain.com/python/langchain/tools/#langchain.tools.ToolRuntime).
+
+<Note>
+Tools can only access the state values passed to the `ToolNode`. When
+`ToolNode` is added directly as a `StateGraph` node, that input is the current
+graph state. If you invoke a `ToolNode` manually from another node, pass the
+full state when tools need custom state fields. For example, `tool_node.invoke(state)`
+or `toolNode.invoke(state, config)` exposes the full state, while passing only
+`{"messages": state["messages"]}` or `{ messages: state.messages }` only exposes
+`messages`.
+</Note>
+
+<WorkflowsAgentsToolRuntimeStateContextPy />
+
 ---
 
-<Callout icon="pen-to-square" iconType="regular">
-    [Edit the source of this page on GitHub.](https://github.com/langchain-ai/docs/edit/main/src/oss/langgraph/workflows-agents.mdx)
+<div className="source-links">
+<Callout icon="terminal-2">
+    [Connect these docs](/use-these-docs) to Claude, VSCode, and more via MCP for real-time answers.
 </Callout>
-<Tip icon="terminal" iconType="regular">
-    [Connect these docs programmatically](/use-these-docs) to Claude, VSCode, and more via MCP for    real-time answers.
-</Tip>
+<Callout icon="edit">
+    [Edit this page on GitHub](https://github.com/langchain-ai/docs/edit/main/src/oss/langgraph/workflows-agents.mdx) or [file an issue](https://github.com/langchain-ai/docs/issues/new/choose).
+</Callout>
+</div>

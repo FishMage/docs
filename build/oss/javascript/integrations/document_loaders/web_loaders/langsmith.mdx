@@ -1,9 +1,10 @@
 ---
-title: LangSmithLoader
+title: "LangSmithLoader integration"
+description: "Integrate with the LangSmithLoader document loader using LangChain JavaScript."
 ---
 
 
-This notebook provides a quick overview for getting started with the [LangSmithLoader](/oss/javascript/integrations/document_loaders/). For detailed documentation of all `LangSmithLoader` features and configurations head to the [API reference](https://api.js.langchain.com/classes/_langchain_core.document_loaders_langsmith.LangSmithLoader.html).
+This notebook provides a quick overview for getting started with `LangSmithLoader` [document loaders](/oss/javascript/integrations/document_loaders/). For detailed documentation of all `LangSmithLoader` features and configurations head to the [API reference](https://reference.langchain.com/javascript/langchain-core/document_loaders/langsmith/LangSmithLoader).
 
 ## Overview
 
@@ -11,13 +12,13 @@ This notebook provides a quick overview for getting started with the [LangSmithL
 
 | Class | Package | Local | Serializable | [PY support](https://python.langchain.com/docs/integrations/document_loaders/langsmith)|
 | :--- | :--- | :---: | :---: |  :---: |
-| [LangSmithLoader](https://api.js.langchain.com/classes/_langchain_core.document_loaders_langsmith.LangSmithLoader.html) | [@langchain/community](https://api.js.langchain.com/classes/_langchain_core.html) | ✅ | beta | ✅ |
+| [`LangSmithLoader`](https://reference.langchain.com/javascript/langchain-core/document_loaders/langsmith/LangSmithLoader) | [`@langchain/core`](https://www.npmjs.com/package/@langchain/core) | ✅ | beta | ✅ |
 
 ### Loader features
 
 | Source | Web Loader | Node Envs Only
 | :---: | :---: | :---: |
-| LangSmithLoader | ✅ | ❌ |
+| `LangSmithLoader` | ✅ | ❌ |
 
 ## Setup
 
@@ -104,7 +105,7 @@ const docs = await loader.load()
 docs[0]
 ```
 
-```output
+```javascript
 {
   pageContent: 'Conventus supellex aegrotatio termes. Vapulus abscido ubi vita coadunatio modi crapula comparo caecus. Acervus voluptate tergeo pariatur conor argumentum inventore vomito stella.',
   metadata: {
@@ -132,7 +133,7 @@ docs[0]
 console.log(docs[0].metadata)
 ```
 
-```output
+```javascript
 {
   id: 'f1a04800-6f7a-4232-9743-fb5d9029bf1f',
   created_at: '2024-08-20T17:01:38.984045+00:00',
@@ -155,7 +156,7 @@ console.log(docs[0].metadata)
 console.log(docs[0].metadata.inputs)
 ```
 
-```output
+```javascript
 {
   input: 'Conventus supellex aegrotatio termes. Vapulus abscido ubi vita coadunatio modi crapula comparo caecus. Acervus voluptate tergeo pariatur conor argumentum inventore vomito stella.'
 }
@@ -165,7 +166,7 @@ console.log(docs[0].metadata.inputs)
 console.log(docs[0].metadata.outputs)
 ```
 
-```output
+```javascript
 { output: 'Excepturi adeptio spectaculum bis volaticus accusamus.' }
 ```
 
@@ -173,7 +174,7 @@ console.log(docs[0].metadata.outputs)
 console.log(Object.keys(docs[0].metadata))
 ```
 
-```output
+```python
 [
   'id',
   'created_at',
@@ -191,13 +192,15 @@ console.log(Object.keys(docs[0].metadata))
 
 ## API reference
 
-For detailed documentation of all `LangSmithLoader` features and configurations head to the [API reference](https://api.js.langchain.com/classes/_langchain_core.document_loaders_langsmith.LangSmithLoader.html)
+For detailed documentation of all `LangSmithLoader` features and configurations head to the [API reference](https://reference.langchain.com/javascript/langchain-core/document_loaders/langsmith/LangSmithLoader)
 
 ---
 
-<Callout icon="pen-to-square" iconType="regular">
-    [Edit the source of this page on GitHub.](https://github.com/langchain-ai/docs/edit/main/src/oss/javascript/integrations/document_loaders/web_loaders/langsmith.mdx)
+<div className="source-links">
+<Callout icon="terminal-2">
+    [Connect these docs](/use-these-docs) to Claude, VSCode, and more via MCP for real-time answers.
 </Callout>
-<Tip icon="terminal" iconType="regular">
-    [Connect these docs programmatically](/use-these-docs) to Claude, VSCode, and more via MCP for    real-time answers.
-</Tip>
+<Callout icon="edit">
+    [Edit this page on GitHub](https://github.com/langchain-ai/docs/edit/main/src/oss/javascript/integrations/document_loaders/web_loaders/langsmith.mdx) or [file an issue](https://github.com/langchain-ai/docs/issues/new/choose).
+</Callout>
+</div>

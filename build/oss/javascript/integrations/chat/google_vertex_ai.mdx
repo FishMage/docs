@@ -1,27 +1,37 @@
 ---
-title: ChatVertexAI
+title: "ChatVertexAI integration"
+sidebarTitle: "ChatVertexAI (Legacy)"
+description: "Integrate with the ChatVertexAI chat model using LangChain JavaScript."
 ---
 
 [Google Vertex](https://cloud.google.com/vertex-ai) is a service that exposes all foundation models available in Google Cloud, like `gemini-2.5-pro`, `gemini-2.5-flash`, etc.
 It also provides some non-Google models such as [Anthropic's Claude](https://cloud.google.com/vertex-ai/generative-ai/docs/partner-models/use-claude).
 
-This will help you getting started with `ChatVertexAI` [chat models](/oss/javascript/langchain/models). For detailed documentation of all `ChatVertexAI` features and configurations head to the [API reference](https://api.js.langchain.com/classes/langchain_google_vertexai.ChatVertexAI.html).
+This will help you getting started with `ChatVertexAI` [chat models](/oss/javascript/langchain/models). For detailed documentation of all `ChatVertexAI` features and configurations head to the [API reference](https://reference.langchain.com/javascript/langchain-google-vertexai/index/ChatVertexAI).
+
+<Note>
+    **This library will be deprecated**
+
+    This library will be replaced by the [ChatGoogle](/oss/javascript/integrations/chat/google) library.
+    New implementations should use the [ChatGoogle](/oss/javascript/integrations/chat/google) library instead and
+    existing implementations should consider migrating.
+</Note>
 
 ## Overview
 
 ### Integration details
 
-| Class | Package | Local | Serializable | PY support | Downloads | Version |
-| :--- | :--- | :---: | :---: |  :---: | :---: | :---: |
-| [ChatVertexAI](https://api.js.langchain.com/classes/langchain_google_vertexai.ChatVertexAI.html) | [`@langchain/google-vertexai`](https://www.npmjs.com/package/@langchain/google-vertexai) | ❌ | ✅ | ✅ | ![NPM - Downloads](https://img.shields.io/npm/dm/@langchain/google-vertexai?style=flat-square&label=%20&) | ![NPM - Version](https://img.shields.io/npm/v/@langchain/google-vertexai?style=flat-square&label=%20&) |
+| Class | Package | Serializable | PY support | Downloads | Version |
+| :--- | :--- | :---: |  :---: | :---: | :---: |
+| [`ChatVertexAI`](https://reference.langchain.com/javascript/langchain-google-vertexai/index/ChatVertexAI) | [`@langchain/google-vertexai`](https://www.npmjs.com/package/@langchain/google-vertexai) | ✅ | ✅ | ![NPM - Downloads](https://img.shields.io/npm/dm/@langchain/google-vertexai?style=flat-square&label=%20&) | ![NPM - Version](https://img.shields.io/npm/v/@langchain/google-vertexai?style=flat-square&label=%20&) |
 
 ### Model features
 
 See the links in the table headers below for guides on how to use specific features.
 
-| [Tool calling](/oss/javascript/langchain/tools) | [Structured output](/oss/javascript/langchain/structured-output) | JSON mode | [Image input](/oss/javascript/langchain/messages#multimodal) | Audio input | Video input | [Token-level streaming](/oss/javascript/langchain/streaming/) | [Token usage](/oss/javascript/langchain/models#token-usage) | [Logprobs](/oss/javascript/langchain/models#log-probabilities) |
-| :---: | :---: | :---: | :---: |  :---: | :---: | :---: | :---: | :---: |
-| ✅ | ✅ | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| [Tool calling](/oss/javascript/langchain/tools) | [Structured output](/oss/javascript/langchain/structured-output) | [Image input](/oss/javascript/langchain/messages#multimodal) | Audio input | Video input | [Token-level streaming](/oss/javascript/langchain/streaming/) | [Token usage](/oss/javascript/langchain/models#token-usage) | [Logprobs](/oss/javascript/langchain/models#log-probabilities) |
+| :---: | :---: | :---: |  :---: | :---: | :---: | :---: | :---: |
+| ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 
 Note that while logprobs are supported, Gemini has fairly restricted usage of them.
 
@@ -31,7 +41,7 @@ LangChain.js supports two different authentication methods based on whether
 you're running in a Node.js environment or a web environment. It also supports
 the authentication method used by Vertex AI Express Mode using either package.
 
-To access `ChatVertexAI` models you'll need to setup Google VertexAI in your Google Cloud Platform (GCP) account, save the credentials file, and install the `@langchain/google-vertexai` integration package.
+To access `ChatVertexAI` models you'll need to setup Google VertexAI in your Google Cloud Platform (GCP) account, save the credentials file, and install the `@langchain/google-vertexai` integration package. On Node.js, that package uses [`@langchain/google-gauth`](https://github.com/langchain-ai/langchainjs/tree/main/libs/providers/langchain-google-gauth) for authentication (you do not need to install it separately).
 
 ### Credentials
 
@@ -41,11 +51,15 @@ Head to your [GCP account](https://console.cloud.google.com/) and generate a cre
 export GOOGLE_APPLICATION_CREDENTIALS="path/to/your/credentials.json"
 ```
 
-If running in a web environment, you should set the `GOOGLE_VERTEX_AI_WEB_CREDENTIALS` environment variable as a JSON stringified object, and install the `@langchain/google-vertexai-web` package:
+Alternatively, on your local machine you can run `gcloud auth application-default login` to use Application Default Credentials.
+
+If running in a web environment, install the `@langchain/google-vertexai-web` package (which uses [`@langchain/google-webauth`](https://github.com/langchain-ai/langchainjs/tree/main/libs/providers/langchain-google-webauth) for authentication). Set service account JSON in `GOOGLE_WEB_CREDENTIALS`:
 
 ```bash
-GOOGLE_VERTEX_AI_WEB_CREDENTIALS={"type":"service_account","project_id":"YOUR_PROJECT-12345",...}
+export GOOGLE_WEB_CREDENTIALS='{"type":"service_account","project_id":"YOUR_PROJECT-12345",...}'
 ```
+
+`GOOGLE_VERTEX_AI_WEB_CREDENTIALS` is also supported but deprecated.
 
 If you are using Vertex AI Express Mode, you can install either the `@langchain/google-vertexai` or `@langchain/google-vertexai-web` package.
 You can then go to the [Express Mode](https://console.cloud.google.com/vertex-ai/studio) API Key page and set your API Key in the `GOOGLE_API_KEY` environment variable:
@@ -54,7 +68,7 @@ You can then go to the [Express Mode](https://console.cloud.google.com/vertex-ai
 export GOOGLE_API_KEY="api_key_value"
 ```
 
-If you want to get automated tracing of your model calls you can also set your [LangSmith](https://docs.smith.langchain.com/) API key by uncommenting below:
+If you want to get automated tracing of your model calls you can also set your [LangSmith](/langsmith/observability) API key by uncommenting below:
 
 ```bash
 # export LANGSMITH_TRACING="true"
@@ -123,7 +137,7 @@ const aiMsg = await llm.invoke([
 aiMsg
 ```
 
-```output
+```text
 AIMessageChunk {
   "content": "J'adore programmer. \n",
   "additional_kwargs": {},
@@ -143,11 +157,11 @@ AIMessageChunk {
 console.log(aiMsg.content)
 ```
 
-```output
+```text
 J'adore programmer.
 ```
 
-## Tool Calling with Google Search Retrieval
+## Tool calling with Google search retrieval
 
 It is possible to call the model with a Google search tool which you can use to [ground](https://cloud.google.com/vertex-ai/generative-ai/docs/model-reference/grounding) content generation with real-world information and reduce hallucinations.
 
@@ -155,7 +169,7 @@ Grounding is currently not supported by `gemini-2.0-flash-exp`.
 
 You can choose to either ground using Google Search or by using a custom data store. Here are examples of both:
 
-### Google Search Retrieval
+### Google search retrieval
 
 Grounding example that uses Google Search:
 
@@ -182,11 +196,11 @@ const searchRetrievalResult = await searchRetrievalModel.invoke("Who won the 202
 console.log(searchRetrievalResult.content);
 ```
 
-```output
+```text
 The Boston Celtics won the 2024 NBA Finals, defeating the Dallas Mavericks 4-1 in the series to claim their 18th NBA championship. This victory marked their first title since 2008 and established them as the team with the most NBA championships, surpassing the Los Angeles Lakers' 17 titles.
 ```
 
-### Google Search Retrieval with Data Store
+### Google search retrieval with data store
 
 First, set up your data store (this is a schema of an example data store):
 
@@ -230,13 +244,13 @@ const searchRetrievalModelResult = await searchRetrievalModelWithDataset.invoke(
 console.log(searchRetrievalModelResult.content);
 ```
 
-```output
+```text
 Argentina won against Bolivia with a score of 6-0 on October 15, 2024.
 ```
 
 You should now get results that are grounded in the data from your provided data store.
 
-## Context Caching
+## Context caching
 
 Vertex AI offers context caching functionality, which helps optimize costs by storing and reusing long blocks of message content across multiple API requests. This is particularly useful when you have lengthy conversation histories or message segments that appear frequently in your interactions.
 
@@ -277,13 +291,15 @@ Note that not all models currently support context caching.
 
 ## API reference
 
-For detailed documentation of all ChatVertexAI features and configurations head to the [API reference](https://api.js.langchain.com/classes/langchain_google_vertexai.ChatVertexAI.html).
+For detailed documentation of all `ChatVertexAI` features and configurations head to the [API reference](https://reference.langchain.com/javascript/langchain-google-vertexai/index/ChatVertexAI).
 
 ---
 
-<Callout icon="pen-to-square" iconType="regular">
-    [Edit the source of this page on GitHub.](https://github.com/langchain-ai/docs/edit/main/src/oss/javascript/integrations/chat/google_vertex_ai.mdx)
+<div className="source-links">
+<Callout icon="terminal-2">
+    [Connect these docs](/use-these-docs) to Claude, VSCode, and more via MCP for real-time answers.
 </Callout>
-<Tip icon="terminal" iconType="regular">
-    [Connect these docs programmatically](/use-these-docs) to Claude, VSCode, and more via MCP for    real-time answers.
-</Tip>
+<Callout icon="edit">
+    [Edit this page on GitHub](https://github.com/langchain-ai/docs/edit/main/src/oss/javascript/integrations/chat/google_vertex_ai.mdx) or [file an issue](https://github.com/langchain-ai/docs/issues/new/choose).
+</Callout>
+</div>

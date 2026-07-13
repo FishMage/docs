@@ -1,5 +1,6 @@
 ---
-title: ModelScope
+title: "Modelscope integrations"
+description: "Integrate with Modelscope using LangChain Python."
 ---
 
 >[ModelScope](https://www.modelscope.cn/home) is a big repository of the models and datasets.
@@ -25,9 +26,9 @@ Head to [ModelScope](https://modelscope.cn/) to sign up to ModelScope and genera
 export MODELSCOPE_SDK_TOKEN=<your_sdk_token>
 ```
 
-## Chat Models
+## Chat models
 
-`ModelScopeChatEndpoint` class exposes chat models from ModelScope. See available models [here](https://www.modelscope.cn/docs/model-service/API-Inference/intro).
+`ModelScopeChatEndpoint` class exposes chat models from ModelScope. See [available models in the ModelScope API documentation](https://www.modelscope.cn/docs/model-service/API-Inference/intro).
 
 ```python
 from langchain_modelscope import ModelScopeChatEndpoint
@@ -59,9 +60,11 @@ llm.invoke("The meaning of life is")
 
 ---
 
-<Callout icon="pen-to-square" iconType="regular">
-    [Edit the source of this page on GitHub.](https://github.com/langchain-ai/docs/edit/main/src/oss/python/integrations/providers/modelscope.mdx)
+<div className="source-links">
+<Callout icon="terminal-2">
+    [Connect these docs](/use-these-docs) to Claude, VSCode, and more via MCP for real-time answers.
 </Callout>
-<Tip icon="terminal" iconType="regular">
-    [Connect these docs programmatically](/use-these-docs) to Claude, VSCode, and more via MCP for    real-time answers.
-</Tip>
+<Callout icon="edit">
+    [Edit this page on GitHub](https://github.com/langchain-ai/docs/edit/main/src/oss/python/integrations/providers/modelscope.mdx) or [file an issue](https://github.com/langchain-ai/docs/issues/new/choose).
+</Callout>
+</div>

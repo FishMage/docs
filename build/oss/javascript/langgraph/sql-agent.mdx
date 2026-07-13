@@ -5,19 +5,40 @@ sidebarTitle: Custom SQL agent
 
 import ChatModelTabsPy from '/snippets/chat-model-tabs.mdx';
 import ChatModelTabsJS from '/snippets/chat-model-tabs-js.mdx';
-
+import SqlAgentDownloadChinookPy from '/snippets/code-samples/sql-agent-download-chinook-py.mdx';
+import SqlAgentExploreDatabasePy from '/snippets/code-samples/sql-agent-explore-database-py.mdx';
+import LanggraphSqlAgentToolsPy from '/snippets/code-samples/langgraph-sql-agent-tools-py.mdx';
+import LanggraphSqlAgentDefineStepsPy from '/snippets/code-samples/langgraph-sql-agent-define-steps-py.mdx';
+import LanggraphSqlAgentAssembleAgentPy from '/snippets/code-samples/langgraph-sql-agent-assemble-agent-py.mdx';
+import LanggraphSqlAgentVisualizeGraphPy from '/snippets/code-samples/langgraph-sql-agent-visualize-graph-py.mdx';
+import LanggraphSqlAgentStreamAgentPy from '/snippets/code-samples/langgraph-sql-agent-stream-agent-py.mdx';
+import LanggraphSqlAgentHitlInterruptPy from '/snippets/code-samples/langgraph-sql-agent-hitl-interrupt-py.mdx';
+import LanggraphSqlAgentHitlAssemblePy from '/snippets/code-samples/langgraph-sql-agent-hitl-assemble-py.mdx';
+import LanggraphSqlAgentHitlStreamPy from '/snippets/code-samples/langgraph-sql-agent-hitl-stream-py.mdx';
+import LanggraphSqlAgentHitlResumePy from '/snippets/code-samples/langgraph-sql-agent-hitl-resume-py.mdx';
+import LanggraphSqlAgentDownloadChinookJs from '/snippets/code-samples/langgraph-sql-agent-download-chinook-js.mdx';
+import LanggraphSqlAgentExploreDatabaseJs from '/snippets/code-samples/langgraph-sql-agent-explore-database-js.mdx';
+import LanggraphSqlAgentToolsJs from '/snippets/code-samples/langgraph-sql-agent-tools-js.mdx';
+import LanggraphSqlAgentDefineStepsJs from '/snippets/code-samples/langgraph-sql-agent-define-steps-js.mdx';
+import LanggraphSqlAgentAssembleAgentJs from '/snippets/code-samples/langgraph-sql-agent-assemble-agent-js.mdx';
+import LanggraphSqlAgentVisualizeGraphJs from '/snippets/code-samples/langgraph-sql-agent-visualize-graph-js.mdx';
+import LanggraphSqlAgentStreamAgentJs from '/snippets/code-samples/langgraph-sql-agent-stream-agent-js.mdx';
+import LanggraphSqlAgentHitlInterruptJs from '/snippets/code-samples/langgraph-sql-agent-hitl-interrupt-js.mdx';
+import LanggraphSqlAgentHitlAssembleJs from '/snippets/code-samples/langgraph-sql-agent-hitl-assemble-js.mdx';
+import LanggraphSqlAgentHitlStreamJs from '/snippets/code-samples/langgraph-sql-agent-hitl-stream-js.mdx';
+import LanggraphSqlAgentHitlResumeJs from '/snippets/code-samples/langgraph-sql-agent-hitl-resume-js.mdx';
 
 In this tutorial we will build a custom agent that can answer questions about a SQL database using LangGraph.
 
-LangChain offers built-in [agent](/oss/javascript/langchain/agents) implementations, implemented using [LangGraph](/oss/javascript/langgraph/overview) primitives. If deeper customization is required, agents can be implemented directly in LangGraph. This guide demonstrates an example implementation of a SQL agent. You can find a tutorial building a SQL agent using higher-level LangChain abstractions [here](/oss/javascript/langchain/sql-agent).
+LangChain offers built-in [agent](/oss/javascript/langchain/agents) implementations, implemented using [LangGraph](/oss/javascript/langgraph/overview) primitives. If deeper customization is required, agents can be implemented directly in LangGraph. This guide demonstrates an example implementation of a SQL agent. For a practical introduction, see [building a SQL agent using higher-level LangChain abstractions](/oss/javascript/langchain/sql-agent).
 
 <Warning>
 Building Q&A systems of SQL databases requires executing model-generated SQL queries. There are inherent risks in doing this. Make sure that your database connection permissions are always scoped as narrowly as possible for your agent's needs. This will mitigate, though not eliminate, the risks of building a model-driven system.
 </Warning>
 
-The [prebuilt agent](/oss/javascript/langchain/sql-agent) lets us get started quickly, but we relied on the system prompt to constrain its behavior— for example, we instructed the agent to always start with the "list tables" tool, and to always run a query-checker tool before executing the query.
+The [prebuilt agent](/oss/javascript/langchain/sql-agent) lets us get started quickly, but we relied on the system prompt to constrain its behavior—for example, we instructed the agent to always start with the "list tables" tool, and to always run a query-checker tool before executing the query.
 
-We can enforce a higher degree of control in LangGraph by customizing the agent. Here, we implement a simple ReAct-agent setup, with dedicated nodes for specific tool-calls. We will use the same [state] as the pre-built agent.
+We can enforce a higher degree of control in LangGraph by customizing the agent. Here, we implement a simple ReAct-agent setup, with dedicated nodes for specific tool-calls. We will use the same [state] as the prebuilt agent.
 
 ### Concepts
 
@@ -34,19 +55,19 @@ We will cover the following concepts:
 
     <CodeGroup>
     ```bash npm
-    npm i langchain @langchain/core @langchain/classic @langchain/langgraph @langchain/openai typeorm sqlite3 zod
+    npm i langchain @langchain/core @langchain/langgraph @langchain/openai sqlite3 zod
     ```
     ```bash yarn
-    yarn add langchain @langchain/core @langchain/classic @langchain/langgraph @langchain/openai typeorm sqlite3 zod
+    yarn add langchain @langchain/core @langchain/langgraph @langchain/openai sqlite3 zod
     ```
     ```bash pnpm
-    pnpm add langchain @langchain/core @langchain/classic @langchain/langgraph @langchain/openai typeorm sqlite3 zod
+    pnpm add langchain @langchain/core @langchain/langgraph @langchain/openai sqlite3 zod
     ```
     </CodeGroup>
 
 
 ### LangSmith
-Set up [LangSmith](https://smith.langchain.com) to inspect what is happening inside your chain or agent. Then set the following environment variables:
+Set up [LangSmith](https://smith.langchain.com?utm_source=docs&utm_medium=cta&utm_campaign=langsmith-signup&utm_content=oss-langgraph-sql-agent) to inspect what is happening inside your chain or agent. Then set the following environment variables:
 
     ```shell
     export LANGSMITH_TRACING="true"
@@ -70,45 +91,11 @@ You will be creating a [SQLite database](https://www.sqlitetutorial.net/sqlite-s
 For convenience, we have hosted the database (`Chinook.db`) on a public GCS bucket.
 
 
-```typescript
-import fs from "node:fs/promises";
-import path from "node:path";
+<LanggraphSqlAgentDownloadChinookJs />
 
-const url = "https://storage.googleapis.com/benchmarks-artifacts/chinook/Chinook.db";
-const localPath = path.resolve("Chinook.db");
+We will use the `sqlite3` library to interact with the database:
 
-async function resolveDbPath() {
-  const exists = await fs.access(localPath).then(() => true).catch(() => false);
-  if (exists) {
-    console.log(`${localPath} already exists, skipping download.`);
-    return localPath;
-  }
-  const resp = await fetch(url);
-  if (!resp.ok) throw new Error(`Failed to download DB. Status code: ${resp.status}`);
-  const buf = Buffer.from(await resp.arrayBuffer());
-  await fs.writeFile(localPath, buf);
-  console.log(`File downloaded and saved as ${localPath}`);
-  return localPath;
-}
-```
-
-We will use a handy SQL database wrapper available in the `@langchain/classic/sql_db` module to interact with the database. The wrapper provides a simple interface to execute SQL queries and fetch results:
-
-```typescript
-import { SqlDatabase } from "@langchain/classic/sql_db";
-import { DataSource } from "typeorm";
-
-const dbPath = await resolveDbPath();
-const datasource = new DataSource({ type: "sqlite", database: dbPath });
-const db = await SqlDatabase.fromDataSourceParams({ appDataSource: datasource });
-const dialect = db.appDataSourceOptions.type;
-
-console.log(`Dialect: ${dialect}`);
-const tableNames = db.allTables.map(t => t.tableName);
-console.log(`Available tables: ${tableNames.join(", ")}`);
-const sampleResults = await db.run("SELECT * FROM Artist LIMIT 5;");
-console.log(`Sample output: ${sampleResults}`);
-```
+<LanggraphSqlAgentExploreDatabaseJs />
 ```
 Dialect: sqlite
 Available tables: Album, Artist, Customer, Employee, Genre, Invoice, InvoiceLine, MediaType, Playlist, PlaylistTrack, Track
@@ -118,66 +105,14 @@ Sample output: [{"ArtistId":1,"Name":"AC/DC"},{"ArtistId":2,"Name":"Accept"},{"A
 
 ## 3. Add tools for database interactions
 
+<Warning>
+The following database tools are minimal wrappers for demonstration purposes only. They are not intended to be secure or used in production. Use narrowly scoped database permissions and add application-specific validation before executing model-generated SQL.
+</Warning>
+
 
 We'll create custom tools to interact with the database:
 
-```typescript
-import { tool } from "langchain";
-import { z } from "zod";
-
-// Tool to list all tables
-const listTablesTool = tool(
-  async () => {
-    const tableNames = db.allTables.map(t => t.tableName);
-    return tableNames.join(", ");
-  },
-  {
-    name: "sql_db_list_tables",
-    description: "Input is an empty string, output is a comma-separated list of tables in the database.",
-    schema: z.object({}),
-  }
-);
-
-// Tool to get schema for specific tables
-const getSchemaTool = tool(
-  async ({ table_names }) => {
-    const tables = table_names.split(",").map(t => t.trim());
-    return await db.getTableInfo(tables);
-  },
-  {
-    name: "sql_db_schema",
-    description: "Input to this tool is a comma-separated list of tables, output is the schema and sample rows for those tables. Be sure that the tables actually exist by calling sql_db_list_tables first! Example Input: table1, table2, table3",
-    schema: z.object({
-      table_names: z.string().describe("Comma-separated list of table names"),
-    }),
-  }
-);
-
-// Tool to execute SQL query
-const queryTool = tool(
-  async ({ query }) => {
-    try {
-      const result = await db.run(query);
-      return typeof result === "string" ? result : JSON.stringify(result);
-    } catch (error) {
-      return `Error: ${error.message}`;
-    }
-  },
-  {
-    name: "sql_db_query",
-    description: "Input to this tool is a detailed and correct SQL query, output is a result from the database. If the query is not correct, an error message will be returned. If an error is returned, rewrite the query, check the query, and try again.",
-    schema: z.object({
-      query: z.string().describe("SQL query to execute"),
-    }),
-  }
-);
-
-const tools = [listTablesTool, getSchemaTool, queryTool];
-
-for (const tool of tools) {
-  console.log(`${tool.name}: ${tool.description}\n`);
-}
-```
+<LanggraphSqlAgentToolsJs />
 ```
 sql_db_list_tables: Input is an empty string, output is a comma-separated list of tables in the database.
 
@@ -199,108 +134,8 @@ We construct dedicated nodes for the following steps:
 Putting these steps in dedicated nodes lets us (1) force tool-calls when needed, and (2) customize the prompts associated with each step.
 
 
-```typescript
-import { AIMessage, ToolMessage, SystemMessage, HumanMessage } from "@langchain/core/messages";
-import { ToolNode } from "@langchain/langgraph/prebuilt";
-import { MessagesAnnotation, StateGraph, START, END } from "@langchain/langgraph";
+<LanggraphSqlAgentDefineStepsJs />
 
-// Create tool nodes for schema and query execution
-const getSchemaNode = new ToolNode([getSchemaTool]);
-const runQueryNode = new ToolNode([queryTool]);
-
-// Example: create a predetermined tool call
-async function listTables(state: typeof MessagesAnnotation.State) {
-  const toolCall = {
-    name: "sql_db_list_tables",
-    args: {},
-    id: "abc123",
-    type: "tool_call" as const,
-  };
-  const toolCallMessage = new AIMessage({
-    content: "",
-    tool_calls: [toolCall],
-  });
-
-  const toolMessage = await listTablesTool.invoke({});
-  const response = new AIMessage(`Available tables: ${toolMessage}`);
-
-  return { messages: [toolCallMessage, new ToolMessage({ content: toolMessage, tool_call_id: "abc123" }), response] };
-}
-
-// Example: force a model to create a tool call
-async function callGetSchema(state: typeof MessagesAnnotation.State) {
-  const llmWithTools = llm.bindTools([getSchemaTool], {
-    tool_choice: "any",
-  });
-  const response = await llmWithTools.invoke(state.messages);
-
-  return { messages: [response] };
-}
-
-const topK = 5;
-
-const generateQuerySystemPrompt = `
-You are an agent designed to interact with a SQL database.
-Given an input question, create a syntactically correct ${dialect}
-query to run, then look at the results of the query and return the answer. Unless
-the user specifies a specific number of examples they wish to obtain, always limit
-your query to at most ${topK} results.
-
-You can order the results by a relevant column to return the most interesting
-examples in the database. Never query for all the columns from a specific table,
-only ask for the relevant columns given the question.
-
-DO NOT make any DML statements (INSERT, UPDATE, DELETE, DROP etc.) to the database.
-`;
-
-async function generateQuery(state: typeof MessagesAnnotation.State) {
-  const systemMessage = new SystemMessage(generateQuerySystemPrompt);
-  // We do not force a tool call here, to allow the model to
-  // respond naturally when it obtains the solution.
-  const llmWithTools = llm.bindTools([queryTool]);
-  const response = await llmWithTools.invoke([systemMessage, ...state.messages]);
-
-  return { messages: [response] };
-}
-
-const checkQuerySystemPrompt = `
-You are a SQL expert with a strong attention to detail.
-Double check the ${dialect} query for common mistakes, including:
-- Using NOT IN with NULL values
-- Using UNION when UNION ALL should have been used
-- Using BETWEEN for exclusive ranges
-- Data type mismatch in predicates
-- Properly quoting identifiers
-- Using the correct number of arguments for functions
-- Casting to the correct data type
-- Using the proper columns for joins
-
-If there are any of the above mistakes, rewrite the query. If there are no mistakes,
-just reproduce the original query.
-
-You will call the appropriate tool to execute the query after running this check.
-`;
-
-async function checkQuery(state: typeof MessagesAnnotation.State) {
-  const systemMessage = new SystemMessage(checkQuerySystemPrompt);
-
-  // Generate an artificial user message to check
-  const lastMessage = state.messages[state.messages.length - 1];
-  if (!lastMessage.tool_calls || lastMessage.tool_calls.length === 0) {
-    throw new Error("No tool calls found in the last message");
-  }
-  const toolCall = lastMessage.tool_calls[0];
-  const userMessage = new HumanMessage(toolCall.args.query);
-  const llmWithTools = llm.bindTools([queryTool], {
-    tool_choice: "any",
-  });
-  const response = await llmWithTools.invoke([systemMessage, userMessage]);
-  // Preserve the original message ID
-  response.id = lastMessage.id;
-
-  return { messages: [response] };
-}
-```
 
 
 ## 5. Implement the agent
@@ -308,44 +143,12 @@ async function checkQuery(state: typeof MessagesAnnotation.State) {
 We can now assemble these steps into a workflow using the [Graph API](/oss/javascript/langgraph/graph-api). We define a [conditional edge](/oss/javascript/langgraph/graph-api#conditional-edges) at the query generation step that will route to the query checker if a query is generated, or end if there are no tool calls present, such that the LLM has delivered a response to the query.
 
 
-```typescript
-function shouldContinue(state: typeof MessagesAnnotation.State): "check_query" | typeof END {
-  const messages = state.messages;
-  const lastMessage = messages[messages.length - 1];
-  if (!lastMessage.tool_calls || lastMessage.tool_calls.length === 0) {
-    return END;
-  } else {
-    return "check_query";
-  }
-}
+<LanggraphSqlAgentAssembleAgentJs />
 
-const builder = new StateGraph(MessagesAnnotation)
-  .addNode("list_tables", listTables)
-  .addNode("call_get_schema", callGetSchema)
-  .addNode("get_schema", getSchemaNode)
-  .addNode("generate_query", generateQuery)
-  .addNode("check_query", checkQuery)
-  .addNode("run_query", runQueryNode)
-  .addEdge(START, "list_tables")
-  .addEdge("list_tables", "call_get_schema")
-  .addEdge("call_get_schema", "get_schema")
-  .addEdge("get_schema", "generate_query")
-  .addConditionalEdges("generate_query", shouldContinue)
-  .addEdge("check_query", "run_query")
-  .addEdge("run_query", "generate_query");
-
-const agent = builder.compile();
-```
 We visualize the application below:
-```typescript
-import * as fs from "node:fs/promises";
 
-const drawableGraph = await agent.getGraphAsync();
-const image = await drawableGraph.drawMermaidPng();
-const imageBuffer = new Uint8Array(await image.arrayBuffer());
+<LanggraphSqlAgentVisualizeGraphJs />
 
-await fs.writeFile("graph.png", imageBuffer);
-```
 
 <img
   src="/oss/images/sql-agent-langgraph.png"
@@ -355,21 +158,8 @@ await fs.writeFile("graph.png", imageBuffer);
 
 We can now invoke the graph:
 
-```typescript
-const question = "Which genre on average has the longest tracks?";
+<LanggraphSqlAgentStreamAgentJs />
 
-const stream = await agent.stream(
-  { messages: [{ role: "user", content: question }] },
-  { streamMode: "values" }
-);
-
-for await (const step of stream) {
-  if (step.messages && step.messages.length > 0) {
-    const lastMessage = step.messages[step.messages.length - 1];
-    console.log(lastMessage.toFormattedString());
-  }
-}
-```
 
 ```
 ================================ Human Message =================================
@@ -461,114 +251,26 @@ Here we leverage LangGraph's [human-in-the-loop](/oss/javascript/langgraph/inter
 Let's wrap the `sql_db_query` tool in a node that receives human input. We can implement this using the [interrupt](/oss/javascript/langgraph/interrupts) function. Below, we allow for input to approve the tool call, edit its arguments, or provide user feedback.
 
 
-```typescript
-import { RunnableConfig } from "@langchain/core/runnables";
-import { tool } from "langchain";
-import { interrupt } from "@langchain/langgraph";
+<LanggraphSqlAgentHitlInterruptJs />
 
-const queryToolWithInterrupt = tool(
-  async (input, config: RunnableConfig) => {
-    const request = {
-      action: queryTool.name,
-      args: input,
-      description: "Please review the tool call",
-    };
-    const response = interrupt([request]); // [!code highlight]
-    // approve the tool call
-    if (response.type === "accept") {
-      const toolResponse = await queryTool.invoke(input, config);
-      return toolResponse;
-    }
-    // update tool call args
-    else if (response.type === "edit") {
-      const editedInput = response.args.args;
-      const toolResponse = await queryTool.invoke(editedInput, config);
-      return toolResponse;
-    }
-    // respond to the LLM with user feedback
-    else if (response.type === "response") {
-      const userFeedback = response.args;
-      return userFeedback;
-    } else {
-      throw new Error(`Unsupported interrupt response type: ${response.type}`);
-    }
-  },
-  {
-    name: queryTool.name,
-    description: queryTool.description,
-    schema: queryTool.schema,
-  }
-);
-```
 
 
 <Note>
-The above implementation follows the [tool interrupt example](/oss/javascript/langgraph/interrupts#configuring-interrupts) in the broader [human-in-the-loop](/oss/javascript/langgraph/interrupts) guide. Refer to that guide for details and alternatives.
+The above implementation follows the [tool interrupt example](/oss/javascript/langgraph/interrupts#interrupts-in-tools) in the broader [human-in-the-loop](/oss/javascript/langgraph/interrupts) guide. Refer to that guide for details and alternatives.
 </Note>
 
 Let's now re-assemble our graph. We will replace the programmatic check with human review. Note that we now include a [checkpointer](/oss/javascript/langgraph/persistence); this is required to pause and resume the run.
 
 
-```typescript
-import { MemorySaver } from "@langchain/langgraph";
+<LanggraphSqlAgentHitlAssembleJs />
 
-function shouldContinueWithHuman(state: typeof MessagesAnnotation.State): "run_query" | typeof END {
-  const messages = state.messages;
-  const lastMessage = messages[messages.length - 1];
-  if (!lastMessage.tool_calls || lastMessage.tool_calls.length === 0) {
-    return END;
-  } else {
-    return "run_query";
-  }
-}
-
-const runQueryNodeWithInterrupt = new ToolNode([queryToolWithInterrupt]);
-
-const builderWithHuman = new StateGraph(MessagesAnnotation)
-  .addNode("list_tables", listTables)
-  .addNode("call_get_schema", callGetSchema)
-  .addNode("get_schema", getSchemaNode)
-  .addNode("generate_query", generateQuery)
-  .addNode("run_query", runQueryNodeWithInterrupt)
-  .addEdge(START, "list_tables")
-  .addEdge("list_tables", "call_get_schema")
-  .addEdge("call_get_schema", "get_schema")
-  .addEdge("get_schema", "generate_query")
-  .addConditionalEdges("generate_query", shouldContinueWithHuman)
-  .addEdge("run_query", "generate_query");
-
-const checkpointer = new MemorySaver(); // [!code highlight]
-const agentWithHuman = builderWithHuman.compile({ checkpointer }); // [!code highlight]
-```
 
 
 We can invoke the graph as before. This time, execution is interrupted:
 
 
-```typescript
-const config = { configurable: { thread_id: "1" } };
+<LanggraphSqlAgentHitlStreamJs />
 
-const question = "Which genre on average has the longest tracks?";
-
-const stream = await agentWithHuman.stream(
-  { messages: [{ role: "user", content: question }] },
-  { ...config, streamMode: "values" }
-);
-
-for await (const step of stream) {
-  if (step.messages && step.messages.length > 0) {
-    const lastMessage = step.messages[step.messages.length - 1];
-    console.log(lastMessage.toFormattedString());
-  }
-}
-
-// Check for interrupts
-const state = await agentWithHuman.getState(config);
-if (state.next.length > 0) {
-  console.log("\nINTERRUPTED:");
-  console.log(JSON.stringify(state.tasks[0].interrupts[0], null, 2));
-}
-```
 
 
 ```
@@ -586,22 +288,8 @@ INTERRUPTED:
 We can accept or edit the tool call using [Command](/oss/javascript/langgraph/use-graph-api#combine-control-flow-and-state-updates-with-command):
 
 
-```typescript
-import { Command } from "@langchain/langgraph";
+<LanggraphSqlAgentHitlResumeJs />
 
-const resumeStream = await agentWithHuman.stream(
-  new Command({ resume: { type: "accept" } }),
-  // new Command({ resume: { type: "edit", args: { query: "..." } } }),
-  { ...config, streamMode: "values" }
-);
-
-for await (const step of resumeStream) {
-  if (step.messages && step.messages.length > 0) {
-    const lastMessage = step.messages[step.messages.length - 1];
-    console.log(lastMessage.toFormattedString());
-  }
-}
-```
 
 
 ```
@@ -627,9 +315,11 @@ Check out the [Evaluate a graph](/langsmith/evaluate-graph) guide for evaluating
 
 ---
 
-<Callout icon="pen-to-square" iconType="regular">
-    [Edit the source of this page on GitHub.](https://github.com/langchain-ai/docs/edit/main/src/oss/langgraph/sql-agent.mdx)
+<div className="source-links">
+<Callout icon="terminal-2">
+    [Connect these docs](/use-these-docs) to Claude, VSCode, and more via MCP for real-time answers.
 </Callout>
-<Tip icon="terminal" iconType="regular">
-    [Connect these docs programmatically](/use-these-docs) to Claude, VSCode, and more via MCP for    real-time answers.
-</Tip>
+<Callout icon="edit">
+    [Edit this page on GitHub](https://github.com/langchain-ai/docs/edit/main/src/oss/langgraph/sql-agent.mdx) or [file an issue](https://github.com/langchain-ai/docs/issues/new/choose).
+</Callout>
+</div>

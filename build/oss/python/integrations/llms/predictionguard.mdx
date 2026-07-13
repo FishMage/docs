@@ -1,6 +1,9 @@
 ---
-title: PredictionGuard
+title: "Predictionguard integration"
+description: "Integrate with the Predictionguard LLM using LangChain Python."
 ---
+
+import LangchainCommunityUnmaintained from '/snippets/oss/langchain-community-unmaintained.mdx';
 
 >[Prediction Guard](https://predictionguard.com) is a secure, scalable GenAI platform that safeguards sensitive data, prevents common AI malfunctions, and runs on affordable hardware.
 
@@ -12,7 +15,7 @@ This integration utilizes the Prediction Guard API, which includes various safeg
 
 ## Setup
 
-To access Prediction Guard models, contact us [here](https://predictionguard.com/get-started) to get a Prediction Guard API key and get started.
+To access Prediction Guard models, [contact Prediction Guard](https://predictionguard.com/get-started) to get an API key and get started.
 
 ### Credentials
 
@@ -48,11 +51,11 @@ llm = PredictionGuard(model="Hermes-3-Llama-3.1-8B")
 llm.invoke("Tell me a short funny joke.")
 ```
 
-```output
+```text
 ' I need a laugh.\nA man walks into a library and asks the librarian, "Do you have any books on paranoia?"\nThe librarian whispers, "They\'re right behind you."'
 ```
 
-## Process Input
+## Process input
 
 With Prediction Guard, you can guard your model inputs for PII or prompt injections using one of our input checks. See the [Prediction Guard docs](https://docs.predictionguard.com/docs/process-llm-input/) for more information.
 
@@ -69,11 +72,11 @@ except ValueError as e:
     print(e)
 ```
 
-```output
+```text
 Could not make prediction. pii detected
 ```
 
-### Prompt Injection
+### Prompt injection
 
 ```python
 llm = PredictionGuard(
@@ -89,11 +92,11 @@ except ValueError as e:
     print(e)
 ```
 
-```output
+```text
 Could not make prediction. prompt injection detected
 ```
 
-## Output Validation
+## Output validation
 
 With Prediction Guard, you can check validate the model outputs using factuality to guard against hallucinations and incorrect info, and toxicity to guard against toxic responses (e.g. profanity, hate speech). See the [Prediction Guard docs](https://docs.predictionguard.com/docs/validating-llm-output) for more information.
 
@@ -109,7 +112,7 @@ except ValueError as e:
     print(e)
 ```
 
-```output
+```text
 Could not make prediction. failed toxicity check
 ```
 
@@ -126,7 +129,7 @@ except ValueError as e:
     print(e)
 ```
 
-```output
+```text
 Could not make prediction. failed factuality check
 ```
 
@@ -148,20 +151,23 @@ question = "What NFL team won the Super Bowl in the year Justin Beiber was born?
 llm_chain.invoke({"question": question})
 ```
 
-```output
+```text
 " Justin Bieber was born on March 1, 1994. Super Bowl XXVIII was held on January 30, 1994. Since the Super Bowl happened before the year of Justin Bieber's birth, it means that no NFL team won the Super Bowl in the year Justin Bieber was born. The question is invalid. However, Super Bowl XXVIII was won by the Dallas Cowboys. So, if the question was asking for the winner of Super Bowl XXVIII, the answer would be the Dallas Cowboys. \n\nExplanation: The question seems to be asking for the winner of the Super"
 ```
 
 ---
 
 ## API reference
-[python.langchain.com/api_reference/community/llms/langchain_community.llms.predictionguard.PredictionGuard.html](https://python.langchain.com/api_reference/community/llms/langchain_community.llms.predictionguard.PredictionGuard.html)
+
+[API reference](https://reference.langchain.com/python/langchain-community/llms/predictionguard/PredictionGuard)
 
 ---
 
-<Callout icon="pen-to-square" iconType="regular">
-    [Edit the source of this page on GitHub.](https://github.com/langchain-ai/docs/edit/main/src/oss/python/integrations/llms/predictionguard.mdx)
+<div className="source-links">
+<Callout icon="terminal-2">
+    [Connect these docs](/use-these-docs) to Claude, VSCode, and more via MCP for real-time answers.
 </Callout>
-<Tip icon="terminal" iconType="regular">
-    [Connect these docs programmatically](/use-these-docs) to Claude, VSCode, and more via MCP for    real-time answers.
-</Tip>
+<Callout icon="edit">
+    [Edit this page on GitHub](https://github.com/langchain-ai/docs/edit/main/src/oss/python/integrations/llms/predictionguard.mdx) or [file an issue](https://github.com/langchain-ai/docs/issues/new/choose).
+</Callout>
+</div>

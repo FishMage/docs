@@ -1,17 +1,16 @@
 ---
-title: You.com Search
+title: "You.com search integration"
+description: "Integrate with the You.com search tool using LangChain Python."
 ---
 
-The [you.com API](https://api.you.com) is a suite of tools designed to help developers ground the output of LLMs in the most recent, most accurate, most relevant information that may not have been included in their training dataset.
+The [You.com API](https://api.you.com) is a suite of tools designed to help developers ground the output of LLMs in the most recent, most accurate, most relevant information that may not have been included in their training dataset.
 
 ## Setup
 
-The tool lives in the `langchain-community` package.
-
-You also need to set your you.com API key.
+Install the `langchain-youdotcom` package and set your You.com API key. Get your API key at [you.com/platform](https://you.com/platform).
 
 ```python
-pip install -qU langchain-community
+pip install -qU langchain-youdotcom
 ```
 
 ```python
@@ -29,41 +28,36 @@ os.environ["OPENAI_API_KEY"] = ""
 # dotenv.load_dotenv()
 ```
 
-It's also helpful (but not needed) to set up [LangSmith](https://smith.langchain.com/) for best-in-class observability
+It's also helpful (but not needed) to set up [LangSmith](https://smith.langchain.com/?utm_source=docs&utm_medium=cta&utm_campaign=langsmith-signup&utm_content=oss-python-integrations-tools-you) for best-in-class observability.
 
 ```python
 os.environ["LANGSMITH_TRACING"] = "true"
 # os.environ["LANGSMITH_API_KEY"] = getpass.getpass()
 ```
 
-## Tool Usage
+## Tool usage
+
+The `langchain-youdotcom` package provides two tools: `YouSearchTool` for web search and `YouContentsTool` for fetching and extracting clean content from web pages.
 
 ```python
-from langchain_community.tools.you import YouSearchTool
-from langchain_community.utilities.you import YouSearchAPIWrapper
+from langchain_youdotcom import YouSearchTool
 
-api_wrapper = YouSearchAPIWrapper(num_web_results=1)
-tool = YouSearchTool(api_wrapper=api_wrapper)
+tool = YouSearchTool()
 
 tool
 ```
 
-```output
-YouSearchTool(api_wrapper=YouSearchAPIWrapper(ydc_api_key='054da371-e73b-47c1-a6d9-3b0cddf0fa3e<__>1Obt7EETU8N2v5f4MxaH0Zhx', num_web_results=1, safesearch=None, country=None, k=None, n_snippets_per_hit=None, endpoint_type='search', n_hits=None))
-```
-
 ```python
-# .invoke wraps utility.results
+# Invoke the search tool directly
 response = tool.invoke("What is the weather in NY")
 
-# .invoke should have a Document for each `snippet`
 print(len(response))
 
 for item in response:
     print(item)
 ```
 
-```output
+```python
 7
 page_content='10 Day Weather-Manhattan, NY\nToday43°/39°1%\nToday\nSun 31 | Day\nGenerally cloudy. High 43F. Winds W at 10 to 15 mph.\n- Humidity54%\n- UV Index0 of 11\n- Sunrise7:19 am\n- Sunset4:38 pm\nSun 31 | Night\nCloudy. Low 39F. Winds light and variable.\n- Humidity70%\n- UV Index0 of 11\n- Moonrise9:13 pmWaning Gibbous\n- Moonset10:28 am\nMon 0145°/33°7%\nMon 01\nMon 01 | Day\nConsiderable cloudiness. High around 45F. Winds light and variable.\n- Humidity71%\n- UV Index1 of 11\n- Sunrise7:19 am\n- Sunset4:39 pm\nMon 01 | Night\nA few clouds. Low 33F. Winds NNW at 5 to 10 mph.\n- Humidity64%\n- UV Index0 of 11\n- Moonrise10:14 pmWaning Gibbous\n- Moonset10:49 am\nTue 0246°/35°4%\nTue 02\nTue 02 | Day\nMainly sunny. High 46F. Winds NW at 5 to 10 mph.\n- Humidity52%\n- UV Index2 of 11\n- Sunrise7:19 am\n- Sunset4:40 pm\nTue 02 | Night\nA few clouds overnight. Low around 35F. Winds W at 5 to 10 mph.\n- Humidity64%\n- UV Index0 of 11\n- Moonrise11:13 pmWaning Gibbous\n- Moonset11:08 am\nWed 0346°/38°4%\nWed 03\nWed 03 | Day' metadata={'url': 'https://weather.com/weather/tenday/l/New+York+NY+USNY0996:1:US', 'thumbnail_url': None, 'title': '10-Day Weather Forecast for Manhattan, NY - The Weather Channel ...', 'description': 'Some sun in the morning with increasing clouds during the afternoon. High around 45F. Winds SSE at 5 to 10 mph. ... Cloudy with showers. Low near 40F. Winds SSE at 5 to 10 mph. Chance of rain 60%. ... A steady rain in the morning. Showers continuing in the afternoon.'}
 page_content='Radar\nLatest News\nOur Changing World\nYour Privacy\nTo personalize your product experience, we collect data from your device. We also may use or disclose to specific data vendors your precise geolocation data to provide the Services. To learn more please refer to our Privacy Policy.\nChoose how my information is shared' metadata={'url': 'https://weather.com/weather/tenday/l/New+York+NY+USNY0996:1:US', 'thumbnail_url': None, 'title': '10-Day Weather Forecast for Manhattan, NY - The Weather Channel ...', 'description': 'Some sun in the morning with increasing clouds during the afternoon. High around 45F. Winds SSE at 5 to 10 mph. ... Cloudy with showers. Low near 40F. Winds SSE at 5 to 10 mph. Chance of rain 60%. ... A steady rain in the morning. Showers continuing in the afternoon.'}
@@ -76,23 +70,24 @@ page_content='- Humidity70%\n- UV Index1 of 11\n- Sunrise7:18 am\n- Sunset4:34 p
 
 ## Chaining
 
-We show here how to use it as part of an [agent](/oss/python/langchain/agents). We use the OpenAI Functions Agent, so we will need to setup and install the required dependencies for that. We will also use [LangSmith Hub](https://smith.langchain.com/hub) to pull the prompt from, so we will need to install that.
+Use `YouSearchTool` as part of an [agent](/oss/python/langchain/agents).
 
 ```python
 # you need a model to use in the chain
-!pip install -qU langchain langchain-openai langchainhub langchain-community
+!pip install -qU langchain langchain-openai langchainhub langchain-youdotcom
 ```
 
 ```python
-from langchain_classic import hub
+from langchain import hub
 from langchain.agents import AgentExecutor, create_openai_functions_agent
 from langchain_openai import ChatOpenAI
+from langchain_youdotcom import YouSearchTool
 
 instructions = """You are an assistant."""
 base_prompt = hub.pull("langchain-ai/openai-functions-template")
 prompt = base_prompt.partial(instructions=instructions)
 llm = ChatOpenAI(temperature=0)
-you_tool = YouSearchTool(api_wrapper=YouSearchAPIWrapper(num_web_results=1))
+you_tool = YouSearchTool()
 tools = [you_tool]
 agent = create_openai_functions_agent(llm, tools, prompt)
 agent_executor = AgentExecutor(
@@ -106,7 +101,7 @@ agent_executor = AgentExecutor(
 agent_executor.invoke({"input": "What is the weather in NY today?"})
 ```
 
-```output
+```python
 > Entering new AgentExecutor chain...
 
 Invoking: `you_search` with `{'query': 'weather in NY today'}`
@@ -128,16 +123,18 @@ For more details, you can visit [The Weather Channel](https://weather.com/weathe
 > Finished chain.
 ```
 
-```output
+```text
 {'input': 'What is the weather in NY today?',
  'output': 'The weather in New York City today is as follows:\n- Feels Like: 43°F\n- High/Low: --/39°F\n- Wind: 3 mph\n- Humidity: 63%\n- Dew Point: 31°F\n- Pressure: 30.44 in\n- UV Index: 0 of 11\n- Visibility: 10 mi\n- Moon Phase: Waxing Gibbous\n\nFor more details, you can visit [The Weather Channel](https://weather.com/weather/today/l/96f2f84af9a5f5d452eb0574d4e4d8a840c71b05e22264ebdc0056433a642c84).'}
 ```
 
 ---
 
-<Callout icon="pen-to-square" iconType="regular">
-    [Edit the source of this page on GitHub.](https://github.com/langchain-ai/docs/edit/main/src/oss/python/integrations/tools/you.mdx)
+<div className="source-links">
+<Callout icon="terminal-2">
+    [Connect these docs](/use-these-docs) to Claude, VSCode, and more via MCP for real-time answers.
 </Callout>
-<Tip icon="terminal" iconType="regular">
-    [Connect these docs programmatically](/use-these-docs) to Claude, VSCode, and more via MCP for    real-time answers.
-</Tip>
+<Callout icon="edit">
+    [Edit this page on GitHub](https://github.com/langchain-ai/docs/edit/main/src/oss/python/integrations/tools/you.mdx) or [file an issue](https://github.com/langchain-ai/docs/issues/new/choose).
+</Callout>
+</div>

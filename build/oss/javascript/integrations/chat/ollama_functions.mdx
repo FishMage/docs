@@ -1,9 +1,12 @@
 ---
-title: Ollama Functions
+title: "Ollama functions integration"
+description: "Integrate with the Ollama functions chat model using LangChain JavaScript."
 ---
 
+import LangchainCommunityUnmaintainedJs from '/snippets/oss/langchain-community-unmaintained-js.mdx';
+
 <Warning>
-**The LangChain Ollama integration package has official support for tool calling. [Click here to view the documentation](/oss/javascript/integrations/chat/ollama#tools).**
+**The LangChain Ollama integration package has official support for tool calling. [View the Ollama tool calling documentation](/oss/javascript/integrations/chat/ollama#tools).**
 
 
 </Warning>
@@ -26,7 +29,9 @@ Follow [these instructions](https://github.com/jmorganca/ollama) to set up and r
 
 ## Initialize model
 
-You can initialize this wrapper the same way you'd initialize a standard `ChatOllama` instance:
+You can initialize this wrapper the same way you'd initialize a standard `ChatOllama` instance. `OllamaFunctions` is only available from `@langchain/community` (not `@langchain/ollama`):
+
+<LangchainCommunityUnmaintainedJs />
 
 ```typescript
 import { OllamaFunctions } from "@langchain/community/experimental/chat_models/ollama_functions";
@@ -172,7 +177,7 @@ console.log(JSON.stringify(response, null, 2));
 ```
 
 <Tip>
-You can see a simple LangSmith trace of this [here](https://smith.langchain.com/public/74692bfc-0224-4221-b187-ddbf20d7ecc0/r)
+You can [view a simple LangSmith trace of this example](https://smith.langchain.com/public/74692bfc-0224-4221-b187-ddbf20d7ecc0/r)
 </Tip>
 
 ## Customization
@@ -252,9 +257,11 @@ console.log(response);
 
 ---
 
-<Callout icon="pen-to-square" iconType="regular">
-    [Edit the source of this page on GitHub.](https://github.com/langchain-ai/docs/edit/main/src/oss/javascript/integrations/chat/ollama_functions.mdx)
+<div className="source-links">
+<Callout icon="terminal-2">
+    [Connect these docs](/use-these-docs) to Claude, VSCode, and more via MCP for real-time answers.
 </Callout>
-<Tip icon="terminal" iconType="regular">
-    [Connect these docs programmatically](/use-these-docs) to Claude, VSCode, and more via MCP for    real-time answers.
-</Tip>
+<Callout icon="edit">
+    [Edit this page on GitHub](https://github.com/langchain-ai/docs/edit/main/src/oss/javascript/integrations/chat/ollama_functions.mdx) or [file an issue](https://github.com/langchain-ai/docs/issues/new/choose).
+</Callout>
+</div>

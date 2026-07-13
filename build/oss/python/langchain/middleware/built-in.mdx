@@ -1,9 +1,11 @@
 ---
-title: Built-in middleware
+title: Prebuilt middleware
 description: Prebuilt middleware for common agent use cases
 ---
 
-LangChain provides prebuilt middleware for common use cases. Each middleware is production-ready and configurable for your specific needs.
+import RubricConfigurePy from '/snippets/code-samples/rubric-configure-py.mdx';
+
+LangChain and [Deep Agents](/oss/python/deepagents/overview) provide prebuilt middleware for common use cases. Each middleware is production-ready and configurable for your specific needs.
 
 ## Provider-agnostic middleware
 
@@ -20,10 +22,15 @@ The following middleware work with any LLM provider:
 | [To-do list](#to-do-list) | Equip agents with task planning and tracking capabilities. |
 | [LLM tool selector](#llm-tool-selector) | Use an LLM to select relevant tools before calling main model. |
 | [Tool retry](#tool-retry) | Automatically retry failed tool calls with exponential backoff. |
+| [Model retry](#model-retry) | Automatically retry failed model calls with exponential backoff. |
 | [LLM tool emulator](#llm-tool-emulator) | Emulate tool execution using an LLM for testing purposes. |
 | [Context editing](#context-editing) | Manage conversation context by trimming or clearing tool uses. |
+| [Provider tool search](#provider-tool-search) | Defer tools behind providers' server-side tool search, surfacing them on demand. |
 | [Shell tool](#shell-tool) | Expose a persistent shell session to agents for command execution. |
 | [File search](#file-search) | Provide Glob and Grep search tools over filesystem files. |
+| [Filesystem](#filesystem-middleware) | Provide agents with a filesystem for storing context and long-term memories. |
+| [Subagent](#subagent) | Add the ability to spawn subagents. |
+| [Rubric grading (Beta)](#rubric-grading) | Apply LLM-as-a-judge grading so agents self-evaluate and iterate until a rubric is satisfied. |
 
 
 
@@ -36,20 +43,24 @@ Automatically summarize conversation history when approaching token limits, pres
 - Multi-turn dialogues with extensive history.
 - Applications where preserving full conversation context matters.
 
-**API reference:** [`SummarizationMiddleware`](https://reference.langchain.com/python/langchain/middleware/#langchain.agents.middleware.SummarizationMiddleware)
+<Note>
+    Summarization is text-oriented context compression. It does not resize, downsample, or otherwise compress image/audio/video payloads. Recent messages retained by `keep` still include their original multimodal blocks, while older multimodal messages that are summarized are represented only by the generated text summary. For image-heavy applications, store media in a filesystem or object store and pass URLs or file references through message history.
+</Note>
+
+**API reference:** [`SummarizationMiddleware`](https://reference.langchain.com/python/langchain/agents/middleware/summarization/SummarizationMiddleware)
 
 ```python
 from langchain.agents import create_agent
 from langchain.agents.middleware import SummarizationMiddleware
 
 agent = create_agent(
-    model="gpt-4o",
-    tools=[weather_tool, calculator_tool],
+    model="gpt-5.5",
+    tools=[your_weather_tool, your_calculator_tool],
     middleware=[
         SummarizationMiddleware(
-            model="gpt-4o-mini",
-            trigger={"tokens": 4000},
-            keep={"messages": 20},
+            model="gpt-5.4-mini",
+            trigger=("tokens", 4000),
+            keep=("messages", 20),
         ),
     ],
 )
@@ -60,30 +71,52 @@ agent = create_agent(
 
 <Accordion title="Configuration options">
 
+<Tip>
+    The `fraction` conditions for `trigger` and `keep` (shown below) rely on a chat model's [profile data](/oss/python/langchain/models#model-profiles) if using `langchain>=1.1`. If data are not available, use another condition or specify manually:
+
+    ```python
+    from langchain.chat_models import init_chat_model
+
+    custom_profile = {
+        "max_input_tokens": 100_000,
+        # ...
+    }
+    model = init_chat_model("gpt-5.5", profile=custom_profile)
+    ```
+</Tip>
+
 <ParamField body="model" type="string | BaseChatModel" required>
-    Model for generating summaries. Can be a model identifier string (e.g., `'openai:gpt-4o-mini'`) or a `BaseChatModel` instance. See [`init_chat_model`](https://reference.langchain.com/python/langchain/models/#langchain.chat_models.init_chat_model(model)) for more information.
+    Model for generating summaries. Can be a model identifier string (e.g., `'openai:gpt-5.4-mini'`) or a `BaseChatModel` instance. See [`init_chat_model`](https://reference.langchain.com/python/langchain/chat_models/base/init_chat_model) for more information.
 </ParamField>
 
-<ParamField body="trigger" type="dict | list[dict]">
-    Conditions for triggering summarization. Can be:
+<ParamField body="trigger" type="ContextSize | TriggerClause | list[ContextSize | TriggerClause] | None">
+    Condition(s) for triggering summarization. Can be:
 
-    - A single condition dict (all properties must be met - AND logic)
-    - A list of condition dicts (any condition must be met - OR logic)
+    - A single [`ContextSize`](https://reference.langchain.com/python/langchain/agents/middleware/summarization/ContextSize) tuple (the specified threshold must be met)
+    - A single [`TriggerClause`](https://reference.langchain.com/python/langchain/agents/middleware/summarization/TriggerClause) dict (all specified thresholds must be met - AND logic)
+    - A list mixing either form (any item must be met - OR logic)
 
-    Each condition can include:
+    Supported thresholds are:
+
     - `fraction` (float): Fraction of model's context size (0-1)
     - `tokens` (int): Absolute token count
     - `messages` (int): Message count
 
-    At least one property must be specified per condition. If not provided, summarization will not trigger automatically.
+    A [`ContextSize`](https://reference.langchain.com/python/langchain/agents/middleware/summarization/ContextSize) tuple expresses exactly one threshold. A [`TriggerClause`](https://reference.langchain.com/python/langchain/agents/middleware/summarization/TriggerClause) dict can include one or more thresholds, e.g. `{"tokens": 4000, "messages": 10}`, and all thresholds in the dict must be met (AND).
+
+    Each [`TriggerClause`](https://reference.langchain.com/python/langchain/agents/middleware/summarization/TriggerClause) dict must specify at least one threshold. If `trigger` is not provided, summarization will not trigger automatically.
+
+    See the API reference for [`ContextSize`](https://reference.langchain.com/python/langchain/agents/middleware/summarization/ContextSize) and [`TriggerClause`](https://reference.langchain.com/python/langchain/agents/middleware/summarization/TriggerClause) for more information.
 </ParamField>
 
-<ParamField body="keep" type="dict" default="{messages: 20}">
+<ParamField body="keep" type="ContextSize" default="('messages', 20)">
     How much context to preserve after summarization. Specify exactly one of:
 
     - `fraction` (float): Fraction of model's context size to keep (0-1)
     - `tokens` (int): Absolute token count to keep
     - `messages` (int): Number of recent messages to keep
+
+    See the API reference for [`ContextSize`](https://reference.langchain.com/python/langchain/agents/middleware/summarization/ContextSize) for more information.
 </ParamField>
 
 <ParamField body="token_counter" type="function">
@@ -98,16 +131,16 @@ agent = create_agent(
     Maximum number of tokens to include when generating the summary. Messages will be trimmed to fit this limit before summarization.
 </ParamField>
 
-<ParamField body="summary_prefix" type="string">
-    Prefix to add to the summary message. If not provided, a default prefix is used.
+<ParamField body="summary_prefix" type="string" deprecated>
+    **Deprecated:** Use `summary_prompt` to provide the full prompt instead.
 </ParamField>
 
 <ParamField body="max_tokens_before_summary" type="number" deprecated>
-    **Deprecated:** Use `trigger: {"tokens": value}` instead. Token threshold for triggering summarization.
+    **Deprecated:** Use `trigger: ("tokens", value)` instead. Token threshold for triggering summarization.
 </ParamField>
 
 <ParamField body="messages_to_keep" type="number" deprecated>
-    **Deprecated:** Use `keep: {"messages": value}` instead. Recent messages to preserve.
+    **Deprecated:** Use `keep: ("messages", value)` instead. Recent messages to preserve.
 </ParamField>
 
 
@@ -120,11 +153,12 @@ agent = create_agent(
 The summarization middleware monitors message token counts and automatically summarizes older messages when thresholds are reached.
 
 **Trigger conditions** control when summarization runs:
-- Single condition object (all properties must be met - AND logic)
-- Array of conditions (any condition must be met - OR logic)
-- Each condition can use `fraction` (of model's context size), `tokens` (absolute count), or `messages` (message count)
+- A single threshold triggers when that threshold is met
+- A trigger clause with multiple thresholds triggers only when all thresholds are met (AND logic)
+- A list of trigger conditions triggers when any item is met (OR logic)
+- Each threshold can use `fraction` (of model's context size), `tokens` (absolute count), or `messages` (message count)
 
-**Keep conditions** control how much context to preserve (specify exactly one):
+**Keep condition** control how much context to preserve (specify exactly one):
 - `fraction` - Fraction of model's context size to keep
 - `tokens` - Absolute token count to keep
 - `messages` - Number of recent messages to keep
@@ -134,44 +168,74 @@ from langchain.agents import create_agent
 from langchain.agents.middleware import SummarizationMiddleware
 
 
-# Single condition: trigger if tokens >= 4000 AND messages >= 10
+# Single condition: trigger if tokens >= 4000
 agent = create_agent(
-    model="gpt-4o",
-    tools=[weather_tool, calculator_tool],
+    model="gpt-5.5",
+    tools=[your_weather_tool, your_calculator_tool],
     middleware=[
         SummarizationMiddleware(
-            model="gpt-4o-mini",
-            trigger={"tokens": 4000, "messages": 10},
-            keep={"messages": 20},
+            model="gpt-5.4-mini",
+            trigger=("tokens", 4000),
+            keep=("messages", 20),
         ),
     ],
 )
 
-# Multiple conditions
+# Multiple conditions: trigger if number of tokens >= 3000 OR messages >= 6
 agent2 = create_agent(
-    model="gpt-4o",
-    tools=[weather_tool, calculator_tool],
+    model="gpt-5.5",
+    tools=[your_weather_tool, your_calculator_tool],
     middleware=[
         SummarizationMiddleware(
-            model="gpt-4o-mini",
+            model="gpt-5.4-mini",
+            trigger=[
+                ("tokens", 3000),
+                ("messages", 6),
+            ],
+            keep=("messages", 20),
+        ),
+    ],
+)
+
+# AND logic: trigger only when tokens >= 4000 AND messages >= 10
+agent3 = create_agent(
+    model="gpt-5.5",
+    tools=[your_weather_tool, your_calculator_tool],
+    middleware=[
+        SummarizationMiddleware(
+            model="gpt-5.4-mini",
+            trigger={"tokens": 4000, "messages": 10},
+            keep=("messages", 20),
+        ),
+    ],
+)
+
+# Combine AND and OR: trigger if (tokens >= 5000 AND messages >= 3)
+# OR (tokens >= 3000 AND messages >= 6)
+agent4 = create_agent(
+    model="gpt-5.5",
+    tools=[your_weather_tool, your_calculator_tool],
+    middleware=[
+        SummarizationMiddleware(
+            model="gpt-5.4-mini",
             trigger=[
                 {"tokens": 5000, "messages": 3},
                 {"tokens": 3000, "messages": 6},
             ],
-            keep={"messages": 20},
+            keep=("messages", 20),
         ),
     ],
 )
 
 # Using fractional limits
-agent3 = create_agent(
-    model="gpt-4o",
-    tools=[weather_tool, calculator_tool],
+agent5 = create_agent(
+    model="gpt-5.5",
+    tools=[your_weather_tool, your_calculator_tool],
     middleware=[
         SummarizationMiddleware(
-            model="gpt-4o-mini",
-            trigger={"fraction": 0.8},
-            keep={"fraction": 0.3},
+            model="gpt-5.4-mini",
+            trigger=("fraction", 0.8),
+            keep=("fraction", 0.3),
         ),
     ],
 )
@@ -182,7 +246,6 @@ agent3 = create_agent(
 
 </Accordion>
 
-
 ### Human-in-the-loop
 
 Pause agent execution for human approval, editing, or rejection of tool calls before they execute. [Human-in-the-loop](/oss/python/langchain/human-in-the-loop) is useful for the following:
@@ -191,11 +254,11 @@ Pause agent execution for human approval, editing, or rejection of tool calls be
 - Compliance workflows where human oversight is mandatory.
 - Long-running conversations where human feedback guides the agent.
 
-**API reference:** [`HumanInTheLoopMiddleware`](https://reference.langchain.com/python/langchain/middleware/#langchain.agents.middleware.HumanInTheLoopMiddleware)
+**API reference:** [`HumanInTheLoopMiddleware`](https://reference.langchain.com/python/langchain/agents/middleware/human_in_the_loop/HumanInTheLoopMiddleware)
 
 
 <Warning>
-    Human-in-the-loop middleware requires a [checkpointer](/oss/python/langgraph/persistence#checkpoints) to maintain state across interruptions.
+    Human-in-the-loop middleware requires a [checkpointer](/oss/python/langgraph/checkpointers#checkpoints) to maintain state across interruptions.
 </Warning>
 
 ```python
@@ -203,17 +266,26 @@ from langchain.agents import create_agent
 from langchain.agents.middleware import HumanInTheLoopMiddleware
 from langgraph.checkpoint.memory import InMemorySaver
 
+
+def your_read_email_tool(email_id: str) -> str:
+    """Mock function to read an email by its ID."""
+    return f"Email content for ID: {email_id}"
+
+def your_send_email_tool(recipient: str, subject: str, body: str) -> str:
+    """Mock function to send an email."""
+    return f"Email sent to {recipient} with subject '{subject}'"
+
 agent = create_agent(
-    model="gpt-4o",
-    tools=[read_email_tool, send_email_tool],
+    model="gpt-5.5",
+    tools=[your_read_email_tool, your_send_email_tool],
     checkpointer=InMemorySaver(),
     middleware=[
         HumanInTheLoopMiddleware(
             interrupt_on={
-                "send_email_tool": {
+                "your_send_email_tool": {
                     "allowed_decisions": ["approve", "edit", "reject"],
                 },
-                "read_email_tool": False,
+                "your_read_email_tool": False,
             }
         ),
     ],
@@ -227,6 +299,13 @@ agent = create_agent(
     For complete examples, configuration options, and integration patterns, see the [Human-in-the-loop documentation](/oss/python/langchain/human-in-the-loop).
 </Tip>
 
+<Callout icon="player-play" iconType="solid">
+    Watch this [video guide](https://www.youtube.com/watch?v=SpfT6-YAVPk) demonstrating Human-in-the-loop middleware behavior.
+</Callout>
+
+
+
+
 ### Model call limit
 
 Limit the number of model calls to prevent infinite loops or excessive costs. Model call limit is useful for the following:
@@ -235,15 +314,17 @@ Limit the number of model calls to prevent infinite loops or excessive costs. Mo
 - Enforcing cost controls on production deployments.
 - Testing agent behavior within specific call budgets.
 
-**API reference:** [`ModelCallLimitMiddleware`](https://reference.langchain.com/python/langchain/middleware/#langchain.agents.middleware.ModelCallLimitMiddleware)
+**API reference:** [`ModelCallLimitMiddleware`](https://reference.langchain.com/python/langchain/agents/middleware/model_call_limit/ModelCallLimitMiddleware)
 
 ```python
 from langchain.agents import create_agent
 from langchain.agents.middleware import ModelCallLimitMiddleware
+from langgraph.checkpoint.memory import InMemorySaver
 
 agent = create_agent(
-    model="gpt-4o",
-    tools=[...],
+    model="gpt-5.5",
+    checkpointer=InMemorySaver(),  # Required for thread limiting
+    tools=[],
     middleware=[
         ModelCallLimitMiddleware(
             thread_limit=10,
@@ -253,6 +334,13 @@ agent = create_agent(
     ],
 )
 ```
+
+
+
+
+<Callout icon="player-play" iconType="solid">
+    Watch this [video guide](https://www.youtube.com/watch?v=nJEER0uaNkE) demonstrating Model Call Limit middleware behavior.
+</Callout>
 
 
 
@@ -286,14 +374,14 @@ Control agent execution by limiting the number of tool calls, either globally ac
 - Enforcing rate limits on specific tool usage.
 - Protecting against runaway agent loops.
 
-**API reference:** [`ToolCallLimitMiddleware`](https://reference.langchain.com/python/langchain/middleware/#langchain.agents.middleware.ToolCallLimitMiddleware)
+**API reference:** [`ToolCallLimitMiddleware`](https://reference.langchain.com/python/langchain/agents/middleware/tool_call_limit/ToolCallLimitMiddleware)
 
 ```python
 from langchain.agents import create_agent
 from langchain.agents.middleware import ToolCallLimitMiddleware
 
 agent = create_agent(
-    model="gpt-4o",
+    model="gpt-5.5",
     tools=[search_tool, database_tool],
     middleware=[
         # Global limit
@@ -307,6 +395,13 @@ agent = create_agent(
     ],
 )
 ```
+
+
+
+
+<Callout icon="player-play" iconType="solid">
+    Watch this [video guide](https://www.youtube.com/watch?v=6gYlaJJ8t0w) demonstrating Tool Call Limit middleware behavior.
+</Callout>
 
 
 
@@ -362,7 +457,7 @@ database_limiter = ToolCallLimitMiddleware(tool_name="query_database", thread_li
 strict_limiter = ToolCallLimitMiddleware(tool_name="scrape_webpage", run_limit=2, exit_behavior="error")
 
 agent = create_agent(
-    model="gpt-4o",
+    model="gpt-5.5",
     tools=[search_tool, database_tool, scraper_tool],
     middleware=[global_limiter, search_limiter, database_limiter, strict_limiter],
 )
@@ -382,18 +477,18 @@ Automatically fallback to alternative models when the primary model fails. Model
 - Cost optimization by falling back to cheaper models.
 - Provider redundancy across OpenAI, Anthropic, etc.
 
-**API reference:** [`ModelFallbackMiddleware`](https://reference.langchain.com/python/langchain/middleware/#langchain.agents.middleware.ModelFallbackMiddleware)
+**API reference:** [`ModelFallbackMiddleware`](https://reference.langchain.com/python/langchain/agents/middleware/model_fallback/ModelFallbackMiddleware)
 
 ```python
 from langchain.agents import create_agent
 from langchain.agents.middleware import ModelFallbackMiddleware
 
 agent = create_agent(
-    model="gpt-4o",
-    tools=[...],
+    model="gpt-5.5",
+    tools=[],
     middleware=[
         ModelFallbackMiddleware(
-            "gpt-4o-mini",
+            "gpt-5.4-mini",
             "claude-3-5-sonnet-20241022",
         ),
     ],
@@ -403,10 +498,15 @@ agent = create_agent(
 
 
 
+<Callout icon="player-play" iconType="solid">
+    Watch this [video guide](https://www.youtube.com/watch?v=8rCRO0DUeIM) demonstrating Model Fallback middleware behavior.
+</Callout>
+
+
 <Accordion title="Configuration options">
 
 <ParamField body="first_model" type="string | BaseChatModel" required>
-    First fallback model to try when the primary model fails. Can be a model identifier string (e.g., `'openai:gpt-4o-mini'`) or a `BaseChatModel` instance.
+    First fallback model to try when the primary model fails. Can be a model identifier string (e.g., `'openai:gpt-5.4-mini'`) or a `BaseChatModel` instance.
 </ParamField>
 
 <ParamField body="*additional_models" type="string | BaseChatModel">
@@ -418,7 +518,6 @@ agent = create_agent(
 
 </Accordion>
 
-
 ### PII detection
 
 Detect and handle Personally Identifiable Information (PII) in conversations using configurable strategies. PII detection is useful for the following:
@@ -427,15 +526,19 @@ Detect and handle Personally Identifiable Information (PII) in conversations usi
 - Customer service agents that need to sanitize logs.
 - Any application handling sensitive user data.
 
-**API reference:** [`PIIMiddleware`](https://reference.langchain.com/python/langchain/middleware/#langchain.agents.middleware.PIIMiddleware)
+<Note>
+With `apply_to_output=True`, `PIIMiddleware` also redacts streamed wire output—text deltas, tool-call args, tool outputs, and state snapshots—via a registered stream transformer. Requires `langchain>=1.3.2`. See [Register transformers on middleware](/oss/python/langchain/event-streaming#register-transformers-on-middleware).
+</Note>
+
+**API reference:** [`PIIMiddleware`](https://reference.langchain.com/python/langchain/agents/middleware/pii/PIIMiddleware)
 
 ```python
 from langchain.agents import create_agent
 from langchain.agents.middleware import PIIMiddleware
 
 agent = create_agent(
-    model="gpt-4o",
-    tools=[...],
+    model="gpt-5.5",
+    tools=[],
     middleware=[
         PIIMiddleware("email", strategy="redact", apply_to_input=True),
         PIIMiddleware("credit_card", strategy="mask", apply_to_input=True),
@@ -464,8 +567,8 @@ import re
 
 # Method 1: Regex pattern string
 agent1 = create_agent(
-    model="gpt-4o",
-    tools=[...],
+    model="gpt-5.5",
+    tools=[],
     middleware=[
         PIIMiddleware(
             "api_key",
@@ -477,8 +580,8 @@ agent1 = create_agent(
 
 # Method 2: Compiled regex pattern
 agent2 = create_agent(
-    model="gpt-4o",
-    tools=[...],
+    model="gpt-5.5",
+    tools=[],
     middleware=[
         PIIMiddleware(
             "phone_number",
@@ -510,8 +613,8 @@ def detect_ssn(content: str) -> list[dict[str, str | int]]:
     return matches
 
 agent3 = create_agent(
-    model="gpt-4o",
-    tools=[...],
+    model="gpt-5.5",
+    tools=[],
     middleware=[
         PIIMiddleware(
             "ssn",
@@ -541,12 +644,12 @@ def detector(content: str) -> list[dict[str, str | int]]:
 
 
 <Tip>
-For custom detectors:
+    For custom detectors:
 
-- Use regex strings for simple patterns
-- Use RegExp objects when you need flags (e.g., case-insensitive matching)
-- Use custom functions when you need validation logic beyond pattern matching
-- Custom functions give you full control over detection logic and can implement complex validation rules
+    - Use regex strings for simple patterns
+    - Use RegExp objects when you need flags (e.g., case-insensitive matching)
+    - Use custom functions when you need validation logic beyond pattern matching
+    - Custom functions give you full control over detection logic and can implement complex validation rules
 </Tip>
 
 <Accordion title="Configuration options">
@@ -559,7 +662,7 @@ For custom detectors:
     How to handle detected PII. Options:
 
     - `'block'` - Raise exception when detected
-    - `'redact'` - Replace with `[REDACTED_TYPE]`
+    - `'redact'` - Replace with `[REDACTED_{PII_TYPE}]`
     - `'mask'` - Partially mask (e.g., `****-****-****-1234`)
     - `'hash'` - Replace with deterministic hash
 </ParamField>
@@ -573,7 +676,7 @@ For custom detectors:
 </ParamField>
 
 <ParamField body="apply_to_output" type="boolean" default="False">
-    Check AI messages after model call
+    Check AI messages after model call. With `langchain>=1.3.2`, also redacts streamed wire output (text deltas, tool-call args, tool outputs, state snapshots) via a registered stream transformer. See [event streaming](/oss/python/langchain/event-streaming#register-transformers-on-middleware).
 </ParamField>
 
 <ParamField body="apply_to_tool_results" type="boolean" default="False">
@@ -596,18 +699,25 @@ Equip agents with task planning and tracking capabilities for complex multi-step
     This middleware automatically provides agents with a `write_todos` tool and system prompts to guide effective task planning.
 </Note>
 
-**API reference:** [`TodoListMiddleware`](https://reference.langchain.com/python/langchain/middleware/#langchain.agents.middleware.TodoListMiddleware)
+**API reference:** [`TodoListMiddleware`](https://reference.langchain.com/python/langchain/agents/middleware/todo/TodoListMiddleware)
 
 ```python
 from langchain.agents import create_agent
 from langchain.agents.middleware import TodoListMiddleware
 
 agent = create_agent(
-    model="gpt-4o",
+    model="gpt-5.5",
     tools=[read_file, write_file, run_tests],
     middleware=[TodoListMiddleware()],
 )
 ```
+
+
+
+
+<Callout icon="player-play" iconType="solid">
+    Watch this [video guide](https://www.youtube.com/watch?v=yTWocbVKQxw) demonstrating To-do List middleware behavior.
+</Callout>
 
 
 
@@ -627,7 +737,6 @@ agent = create_agent(
 
 </Accordion>
 
-
 ### LLM tool selector
 
 Use an LLM to intelligently select relevant tools before calling the main model. LLM tool selectors are useful for the following:
@@ -638,18 +747,18 @@ Use an LLM to intelligently select relevant tools before calling the main model.
 
 This middleware uses structured output to ask an LLM which tools are most relevant for the current query. The structured output schema defines the available tool names and descriptions. Model providers often add this structured output information to the system prompt behind the scenes.
 
-**API reference:** [`LLMToolSelectorMiddleware`](https://reference.langchain.com/python/langchain/middleware/#langchain.agents.middleware.LLMToolSelectorMiddleware)
+**API reference:** [`LLMToolSelectorMiddleware`](https://reference.langchain.com/python/langchain/agents/middleware/tool_selection/LLMToolSelectorMiddleware)
 
 ```python
 from langchain.agents import create_agent
 from langchain.agents.middleware import LLMToolSelectorMiddleware
 
 agent = create_agent(
-    model="gpt-4o",
+    model="gpt-5.5",
     tools=[tool1, tool2, tool3, tool4, tool5, ...],
     middleware=[
         LLMToolSelectorMiddleware(
-            model="gpt-4o-mini",
+            model="gpt-5.4-mini",
             max_tools=3,
             always_include=["search"],
         ),
@@ -663,7 +772,7 @@ agent = create_agent(
 <Accordion title="Configuration options">
 
 <ParamField body="model" type="string | BaseChatModel">
-    Model for tool selection. Can be a model identifier string (e.g., `'openai:gpt-4o-mini'`) or a `BaseChatModel` instance. See [`init_chat_model`](https://reference.langchain.com/python/langchain/models/#langchain.chat_models.init_chat_model(model)) for more information.
+    Model for tool selection. Can be a model identifier string (e.g., `'openai:gpt-5.4-mini'`) or a `BaseChatModel` instance. See [`init_chat_model`](https://reference.langchain.com/python/langchain/chat_models/base/init_chat_model) for more information.
 
     Defaults to the agent's main model.
 </ParamField>
@@ -694,14 +803,14 @@ Automatically retry failed tool calls with configurable exponential backoff. Too
 - Improving reliability of network-dependent tools.
 - Building resilient agents that gracefully handle temporary errors.
 
-**API reference:** [`ToolRetryMiddleware`](https://reference.langchain.com/python/langchain/middleware/#langchain.agents.middleware.ToolRetryMiddleware)
+**API reference:** [`ToolRetryMiddleware`](https://reference.langchain.com/python/langchain/agents/middleware/tool_retry/ToolRetryMiddleware)
 
 ```python
 from langchain.agents import create_agent
 from langchain.agents.middleware import ToolRetryMiddleware
 
 agent = create_agent(
-    model="gpt-4o",
+    model="gpt-5.5",
     tools=[search_tool, database_tool],
     middleware=[
         ToolRetryMiddleware(
@@ -782,7 +891,7 @@ from langchain.agents.middleware import ToolRetryMiddleware
 
 
 agent = create_agent(
-    model="gpt-4o",
+    model="gpt-5.5",
     tools=[search_tool, database_tool, api_tool],
     middleware=[
         ToolRetryMiddleware(
@@ -793,7 +902,7 @@ agent = create_agent(
             jitter=True,
             tools=["api_tool"],
             retry_on=(ConnectionError, TimeoutError),
-            on_failure="return_message",
+            on_failure="continue",
         ),
     ],
 )
@@ -804,6 +913,154 @@ agent = create_agent(
 
 </Accordion>
 
+### Model retry
+
+Automatically retry failed model calls with configurable exponential backoff. Model retry is useful for the following:
+
+- Handling transient failures in model API calls.
+- Improving reliability of network-dependent model requests.
+- Building resilient agents that gracefully handle temporary model errors.
+
+**API reference:** [`ModelRetryMiddleware`](https://reference.langchain.com/python/langchain/agents/middleware/model_retry/ModelRetryMiddleware)
+
+```python
+from langchain.agents import create_agent
+from langchain.agents.middleware import ModelRetryMiddleware
+
+agent = create_agent(
+    model="gpt-5.5",
+    tools=[search_tool, database_tool],
+    middleware=[
+        ModelRetryMiddleware(
+            max_retries=3,
+            backoff_factor=2.0,
+            initial_delay=1.0,
+        ),
+    ],
+)
+```
+
+
+
+
+<Accordion title="Configuration options">
+
+<ParamField body="max_retries" type="number" default="2">
+    Maximum number of retry attempts after the initial call (3 total attempts with default)
+</ParamField>
+
+<ParamField body="retry_on" type="tuple[type[Exception], ...] | callable" default="(Exception,)">
+    Either a tuple of exception types to retry on, or a callable that takes an exception and returns `True` if it should be retried.
+</ParamField>
+
+<ParamField body="on_failure" type="string | callable" default="continue">
+    Behavior when all retries are exhausted. Options:
+    - `'continue'` (default) - Return an `AIMessage` with error details, allowing the agent to potentially handle the failure gracefully
+    - `'error'` - Re-raise the exception (stops agent execution)
+    - Custom callable - Function that takes the exception and returns a string for the `AIMessage` content
+</ParamField>
+
+<ParamField body="backoff_factor" type="number" default="2.0">
+    Multiplier for exponential backoff. Each retry waits `initial_delay * (backoff_factor ** retry_number)` seconds. Set to `0.0` for constant delay.
+</ParamField>
+
+<ParamField body="initial_delay" type="number" default="1.0">
+    Initial delay in seconds before first retry
+</ParamField>
+
+<ParamField body="max_delay" type="number" default="60.0">
+    Maximum delay in seconds between retries (caps exponential backoff growth)
+</ParamField>
+
+<ParamField body="jitter" type="boolean" default="true">
+    Whether to add random jitter (`±25%`) to delay to avoid thundering herd
+</ParamField>
+
+
+
+
+</Accordion>
+
+<Accordion title="Full example">
+
+The middleware automatically retries failed model calls with exponential backoff.
+
+```python
+from langchain.agents import create_agent
+from langchain.agents.middleware import ModelRetryMiddleware
+
+
+# Basic usage with default settings (2 retries, exponential backoff)
+agent = create_agent(
+    model="gpt-5.5",
+    tools=[search_tool],
+    middleware=[ModelRetryMiddleware()],
+)
+
+# Custom exception filtering
+class TimeoutError(Exception):
+    """Custom exception for timeout errors."""
+    pass
+
+class ConnectionError(Exception):
+    """Custom exception for connection errors."""
+    pass
+
+# Retry specific exceptions only
+retry = ModelRetryMiddleware(
+    max_retries=4,
+    retry_on=(TimeoutError, ConnectionError),
+    backoff_factor=1.5,
+)
+
+
+def should_retry(error: Exception) -> bool:
+    # Only retry on rate limit errors
+    if isinstance(error, TimeoutError):
+        return True
+    # Or check for specific HTTP status codes
+    if hasattr(error, "status_code"):
+        return error.status_code in (429, 503)
+    return False
+
+retry_with_filter = ModelRetryMiddleware(
+    max_retries=3,
+    retry_on=should_retry,
+)
+
+# Return error message instead of raising
+retry_continue = ModelRetryMiddleware(
+    max_retries=4,
+    on_failure="continue",  # Return AIMessage with error instead of raising
+)
+
+# Custom error message formatting
+def format_error(error: Exception) -> str:
+    return f"Model call failed: {error}. Please try again later."
+
+retry_with_formatter = ModelRetryMiddleware(
+    max_retries=4,
+    on_failure=format_error,
+)
+
+# Constant backoff (no exponential growth)
+constant_backoff = ModelRetryMiddleware(
+    max_retries=5,
+    backoff_factor=0.0,  # No exponential growth
+    initial_delay=2.0,  # Always wait 2 seconds
+)
+
+# Raise exception on failure
+strict_retry = ModelRetryMiddleware(
+    max_retries=2,
+    on_failure="error",  # Re-raise exception instead of returning message
+)
+```
+
+
+
+
+</Accordion>
 
 ### LLM tool emulator
 
@@ -813,14 +1070,14 @@ Emulate tool execution using an LLM for testing purposes, replacing actual tool 
 - Developing agents when external tools are unavailable or expensive.
 - Prototyping agent workflows before implementing actual tools.
 
-**API reference:** [`LLMToolEmulator`](https://reference.langchain.com/python/langchain/middleware/#langchain.agents.middleware.LLMToolEmulator)
+**API reference:** [`LLMToolEmulator`](https://reference.langchain.com/python/langchain/agents/middleware/tool_emulator/LLMToolEmulator)
 
 ```python
 from langchain.agents import create_agent
 from langchain.agents.middleware import LLMToolEmulator
 
 agent = create_agent(
-    model="gpt-4o",
+    model="gpt-5.5",
     tools=[get_weather, search_database, send_email],
     middleware=[
         LLMToolEmulator(),  # Emulate all tools
@@ -838,7 +1095,7 @@ agent = create_agent(
 </ParamField>
 
 <ParamField body="model" type="string | BaseChatModel">
-    Model to use for generating emulated tool responses. Can be a model identifier string (e.g., `'anthropic:claude-sonnet-4-5-20250929'`) or a `BaseChatModel` instance. Defaults to the agent's model if not specified. See [`init_chat_model`](https://reference.langchain.com/python/langchain/models/#langchain.chat_models.init_chat_model(model)) for more information.
+    Model to use for generating emulated tool responses. Can be a model identifier string (e.g., `'google_genai:gemini-3.5-flash'`) or a `BaseChatModel` instance. Defaults to the agent's model if not specified. See [`init_chat_model`](https://reference.langchain.com/python/langchain/chat_models/base/init_chat_model) for more information.
 </ParamField>
 
 
@@ -853,7 +1110,7 @@ The middleware uses an LLM to generate plausible responses for tool calls instea
 ```python
 from langchain.agents import create_agent
 from langchain.agents.middleware import LLMToolEmulator
-from langchain_core.tools import tool
+from langchain.tools import tool
 
 
 @tool
@@ -869,23 +1126,23 @@ def send_email(to: str, subject: str, body: str) -> str:
 
 # Emulate all tools (default behavior)
 agent = create_agent(
-    model="gpt-4o",
+    model="gpt-5.5",
     tools=[get_weather, send_email],
     middleware=[LLMToolEmulator()],
 )
 
 # Emulate specific tools only
 agent2 = create_agent(
-    model="gpt-4o",
+    model="gpt-5.5",
     tools=[get_weather, send_email],
     middleware=[LLMToolEmulator(tools=["get_weather"])],
 )
 
 # Use custom model for emulation
 agent4 = create_agent(
-    model="gpt-4o",
+    model="gpt-5.5",
     tools=[get_weather, send_email],
-    middleware=[LLMToolEmulator(model="anthropic:claude-sonnet-4-5-20250929")],
+    middleware=[LLMToolEmulator(model="claude-sonnet-4-6")],
 )
 ```
 
@@ -902,15 +1159,15 @@ Manage conversation context by clearing older tool call outputs when token limit
 - Reducing token costs by removing older tool outputs that are no longer relevant
 - Maintaining only the most recent N tool results in context
 
-**API reference:** [`ContextEditingMiddleware`](https://reference.langchain.com/python/langchain/middleware/#langchain.agents.middleware.ContextEditingMiddleware), [`ClearToolUsesEdit`](https://reference.langchain.com/python/langchain/middleware/#langchain.agents.middleware.ClearToolUsesEdit)
+**API reference:** [`ContextEditingMiddleware`](https://reference.langchain.com/python/langchain/agents/middleware/context_editing/ContextEditingMiddleware), [`ClearToolUsesEdit`](https://reference.langchain.com/python/langchain/agents/middleware/context_editing/ClearToolUsesEdit)
 
 ```python
 from langchain.agents import create_agent
 from langchain.agents.middleware import ContextEditingMiddleware, ClearToolUsesEdit
 
 agent = create_agent(
-    model="gpt-4o",
-    tools=[...],
+    model="gpt-5.5",
+    tools=[],
     middleware=[
         ContextEditingMiddleware(
             edits=[
@@ -930,14 +1187,14 @@ agent = create_agent(
 <Accordion title="Configuration options">
 
 <ParamField body="edits" type="list[ContextEdit]" default="[ClearToolUsesEdit()]">
-    List of [`ContextEdit`](https://reference.langchain.com/python/langchain/middleware/#langchain.agents.middleware.ContextEdit) strategies to apply
+    List of [`ContextEdit`](https://reference.langchain.com/python/langchain/agents/middleware/context_editing/ContextEdit) strategies to apply
 </ParamField>
 
 <ParamField body="token_count_method" type="string" default="approximate">
     Token counting method. Options: `'approximate'` or `'model'`
 </ParamField>
 
-**[`ClearToolUsesEdit`](https://reference.langchain.com/python/langchain/middleware/#langchain.agents.middleware.ClearToolUsesEdit) options:**
+**[`ClearToolUsesEdit`](https://reference.langchain.com/python/langchain/agents/middleware/context_editing/ClearToolUsesEdit) options:**
 
 <ParamField body="trigger" type="number" default="100000">
     Token count that triggers the edit. When the conversation exceeds this token count, older tool outputs will be cleared.
@@ -984,8 +1241,8 @@ from langchain.agents.middleware import ContextEditingMiddleware, ClearToolUsesE
 
 
 agent = create_agent(
-    model="gpt-4o",
-    tools=[search_tool, calculator_tool, database_tool],
+    model="gpt-5.5",
+    tools=[search_tool, your_calculator_tool, database_tool],
     middleware=[
         ContextEditingMiddleware(
             edits=[
@@ -1007,6 +1264,69 @@ agent = create_agent(
 
 </Accordion>
 
+### Provider tool search
+
+Defer selected tools behind model providers' server-side tool search, so the model discovers them on demand instead of receiving every tool schema up front. Provider tool search is useful for:
+
+- Reducing context bloat when using many tools.
+- Improving tool selection accuracy by surfacing only relevant tools.
+
+<Note>
+    Requires a model with server-side tool search support: Anthropic (Claude Sonnet 4+/Opus 4+/Haiku 4.5+) or OpenAI (gpt-5.5+). Other providers raise a `ValueError`.
+</Note>
+
+**API reference:** [`ProviderToolSearchMiddleware`](https://reference.langchain.com/python/langchain/agents/middleware/provider_tool_search/ProviderToolSearchMiddleware)
+
+```python
+from langchain.agents import create_agent
+from langchain.agents.middleware import ProviderToolSearchMiddleware
+
+agent = create_agent(
+    model="anthropic:claude-opus-4-8",
+    tools=[get_weather, lookup_order],
+    middleware=[
+        ProviderToolSearchMiddleware(searchable_tools=["lookup_order"]),
+    ],
+)
+```
+
+<Accordion title="Configuration options">
+
+<ParamField body="searchable_tools" type="list[str | BaseTool]">
+    Tools to defer behind the provider's tool search, given by name or instance. Deferred tools are withheld from the model until its search surfaces them. Tools constructed with `extras={"defer_loading": True}` are deferred regardless of this option; if `searchable_tools` is omitted, only those pre-marked tools are deferred.
+</ParamField>
+
+</Accordion>
+
+<Accordion title="Full example">
+
+The middleware opts-in all tools included in `searchable_tools` for deferral and search. A tool can also opt into deferral at construction time by setting `extras={"defer_loading": True}`.
+
+```python
+from langchain.agents import create_agent
+from langchain.agents.middleware import ProviderToolSearchMiddleware
+from langchain.tools import tool
+
+
+# Marked `defer_loading` at construction, so it's deferred on its own —
+# no need to list it in `searchable_tools`.
+@tool(extras={"defer_loading": True})
+def send_email(to: str) -> str:
+    """Send an email."""
+    return "sent"
+
+
+agent = create_agent(
+    model="anthropic:claude-opus-4-8",
+    tools=[send_email],
+    middleware=[ProviderToolSearchMiddleware()],
+)
+```
+
+</Accordion>
+
+
+
 
 ### Shell tool
 
@@ -1025,7 +1345,7 @@ Expose a persistent shell session to agents for command execution. Shell tool mi
     **Limitation**: Persistent shell sessions do not currently work with interrupts (human-in-the-loop). We anticipate adding support for this in the future.
 </Note>
 
-**API reference:** @[`ShellToolMiddleware`]
+**API reference:** [`ShellToolMiddleware`](https://reference.langchain.com/python/langchain/agents/middleware/shell_tool/ShellToolMiddleware)
 
 ```python
 from langchain.agents import create_agent
@@ -1035,7 +1355,7 @@ from langchain.agents.middleware import (
 )
 
 agent = create_agent(
-    model="gpt-4o",
+    model="gpt-5.5",
     tools=[search_tool],
     middleware=[
         ShellToolMiddleware(
@@ -1069,7 +1389,10 @@ agent = create_agent(
 </ParamField>
 
 <ParamField body="redaction_rules" type="tuple[RedactionRule, ...] | list[RedactionRule] | None">
-    Optional redaction rules to sanitize command output before returning it to the model
+    Optional redaction rules to sanitize command output before returning it to the model.
+    <Warning>
+    Redaction rules are applied post execution and do not prevent exfiltration of secrets or sensitive data when using `HostExecutionPolicy`.
+    </Warning>
 </ParamField>
 
 <ParamField body="tool_description" type="str | None">
@@ -1107,7 +1430,7 @@ from langchain.agents.middleware import (
 
 # Basic shell tool with host execution
 agent = create_agent(
-    model="gpt-4o",
+    model="gpt-5.5",
     tools=[search_tool],
     middleware=[
         ShellToolMiddleware(
@@ -1119,7 +1442,7 @@ agent = create_agent(
 
 # Docker isolation with startup commands
 agent_docker = create_agent(
-    model="gpt-4o",
+    model="gpt-5.5",
     tools=[],
     middleware=[
         ShellToolMiddleware(
@@ -1133,9 +1456,9 @@ agent_docker = create_agent(
     ],
 )
 
-# With output redaction
+# With output redaction (applied post execution)
 agent_redacted = create_agent(
-    model="gpt-4o",
+    model="gpt-5.5",
     tools=[],
     middleware=[
         ShellToolMiddleware(
@@ -1150,24 +1473,23 @@ agent_redacted = create_agent(
 
 </Accordion>
 
-
 ### File search
 
-Provide Glob and Grep search tools over filesystem files. File search middleware is useful for the following:
+Provide Glob and Grep search tools over a filesystem. File search middleware is useful for the following:
 
 - Code exploration and analysis
 - Finding files by name patterns
 - Searching code content with regex
 - Large codebases where file discovery is needed
 
-**API reference:** @[`FilesystemFileSearchMiddleware`]
+**API reference:** [`FilesystemFileSearchMiddleware`](https://reference.langchain.com/python/langchain/agents/middleware/file_search/FilesystemFileSearchMiddleware)
 
 ```python
 from langchain.agents import create_agent
 from langchain.agents.middleware import FilesystemFileSearchMiddleware
 
 agent = create_agent(
-    model="gpt-4o",
+    model="gpt-5.5",
     tools=[],
     middleware=[
         FilesystemFileSearchMiddleware(
@@ -1177,7 +1499,6 @@ agent = create_agent(
     ],
 )
 ```
-
 
 <Accordion title="Configuration options">
 
@@ -1211,11 +1532,11 @@ The middleware adds two search tools to agents:
 ```python
 from langchain.agents import create_agent
 from langchain.agents.middleware import FilesystemFileSearchMiddleware
-from langchain_core.messages import HumanMessage
+from langchain.messages import HumanMessage
 
 
 agent = create_agent(
-    model="gpt-4o",
+    model="gpt-5.5",
     tools=[],
     middleware=[
         FilesystemFileSearchMiddleware(
@@ -1235,653 +1556,206 @@ result = agent.invoke({
 # 1. glob_search(pattern="**/*.py") to find Python files
 # 2. grep_search(pattern="async def", include="*.py") to find async functions
 ```
-
-
 </Accordion>
+
+
+
+### Filesystem middleware
+
+Context engineering is a main challenge in building effective agents. This is particularly difficult when using tools that return variable-length results (for example, `web_search` and RAG), as long tool results can quickly fill your context window.
+
+`FilesystemMiddleware` from [Deep Agents](/oss/python/deepagents/overview) provides four tools for interacting with both short-term and long-term memory:
+
+- `ls`: List the files in the filesystem
+- `read_file`: Read an entire file or a certain number of lines from a file
+- `write_file`: Write a new file to the filesystem
+- `edit_file`: Edit an existing file in the filesystem
+
+```python
+from langchain.agents import create_agent
+from deepagents.middleware.filesystem import FilesystemMiddleware
+
+# FilesystemMiddleware is included by default in create_deep_agent
+# You can customize it if building a custom agent
+agent = create_agent(
+    model="claude-sonnet-4-6",
+    middleware=[
+        FilesystemMiddleware(
+            backend=None,  # Optional: custom backend (defaults to StateBackend)
+            system_prompt="Write to the filesystem when...",  # Optional custom addition to the system prompt
+            custom_tool_descriptions={
+                "ls": "Use the ls tool when...",
+                "read_file": "Use the read_file tool to..."
+            },  # Optional: Custom descriptions for filesystem tools
+            tools=["read_file", "ls", "glob", "grep"],  # Optional: Allowlist restricting which filesystem tools are exposed
+        ),
+    ],
+)
+```
+
+
+
+
+#### Short-term vs. long-term filesystem
+
+By default, these tools write to a local "filesystem" in your graph state. To enable persistent storage across threads, configure a `CompositeBackend` that routes specific paths (like `/memories/`) to a `StoreBackend`.
+
+```python
+from langchain.agents import create_agent
+from deepagents.middleware import FilesystemMiddleware
+from deepagents.backends import CompositeBackend, StateBackend, StoreBackend
+from langgraph.store.memory import InMemoryStore
+
+store = InMemoryStore()
+
+agent = create_agent(
+    model="claude-sonnet-4-6",
+    store=store,
+    middleware=[
+        FilesystemMiddleware(
+            backend=CompositeBackend(
+                default=StateBackend(),
+                routes={"/memories/": StoreBackend()}
+            ),
+            custom_tool_descriptions={
+                "ls": "Use the ls tool when...",
+                "read_file": "Use the read_file tool to..."
+            }  # Optional: Custom descriptions for filesystem tools
+        ),
+    ],
+)
+```
+
+
+
+
+When you configure a `CompositeBackend` with a `StoreBackend` for `/memories/`, any files prefixed with **/memories/** are saved to persistent storage and survive across different threads. Files without this prefix remain in ephemeral state storage.
+
+### Subagent
+
+Handing off tasks to subagents isolates context, keeping the main (supervisor) agent's context window clean while still going deep on a task.
+
+The subagents middleware from [Deep Agents](/oss/python/deepagents/overview) allows you to supply subagents through a `task` tool.
+
+```python
+from langchain.tools import tool
+from langchain.agents import create_agent
+from deepagents.middleware.subagents import SubAgentMiddleware
+
+
+@tool
+def get_weather(city: str) -> str:
+    """Get the weather in a city."""
+    return f"The weather in {city} is sunny."
+
+agent = create_agent(
+    model="claude-sonnet-4-6",
+    middleware=[
+        SubAgentMiddleware(
+            default_model="claude-sonnet-4-6",
+            default_tools=[],
+            subagents=[
+                {
+                    "name": "weather",
+                    "description": "This subagent can get weather in cities.",
+                    "system_prompt": "Use the get_weather tool to get the weather in a city.",
+                    "tools": [get_weather],
+                    "model": "gpt-5.5",
+                    "middleware": [],
+                }
+            ],
+        )
+    ],
+)
+```
+
+
+
+
+A subagent is defined with a **name**, **description**, **system prompt**, and **tools**. You can also provide a subagent with a custom **model**, or with additional **middleware**. This can be particularly useful when you want to give the subagent an additional state key to share with the main agent.
+
+For more complex use cases, you can also provide your own prebuilt LangGraph graph as a subagent.
+
+```python
+from langchain.agents import create_agent
+from deepagents.middleware.subagents import SubAgentMiddleware
+from deepagents import CompiledSubAgent
+from langgraph.graph import StateGraph
+
+# Create a custom LangGraph graph
+def create_weather_graph():
+    workflow = StateGraph(...)
+    # Build your custom graph
+    return workflow.compile()
+
+weather_graph = create_weather_graph()
+
+# Wrap it in a CompiledSubAgent
+weather_subagent = CompiledSubAgent(
+    name="weather",
+    description="This subagent can get weather in cities.",
+    runnable=weather_graph
+)
+
+agent = create_agent(
+    model="claude-sonnet-4-6",
+    middleware=[
+        SubAgentMiddleware(
+            default_model="claude-sonnet-4-6",
+            default_tools=[],
+            subagents=[weather_subagent],
+        )
+    ],
+)
+```
+
+
+
+
+In addition to any user-defined subagents, the main agent has access to a `general-purpose` subagent at all times. This subagent has the same instructions as the main agent and all the tools it has access to. The primary purpose of the `general-purpose` subagent is context isolation—the main agent can delegate a complex task to this subagent and get a concise answer back without bloat from intermediate tool calls.
+
+### Rubric grading
+
+<Note>
+`RubricMiddleware` requires `deepagents>=0.6.5`. It is in [**beta**](/oss/python/versioning); the API may change in the future.
+</Note>
+
+Some tasks have a clear definition of "done" that an agent cannot reliably hit on the first try. `RubricMiddleware` lets you declare _what done looks like_ as a rubric and have the agent self-evaluate and iterate until the rubric is satisfied or a maximum iteration cap is hit.
+
+**API reference:** [`RubricMiddleware`](https://reference.langchain.com/python/deepagents/middleware/rubric/RubricMiddleware)
+
+<RubricConfigurePy />
+
+For full configuration options, streaming events, and a complete code generation example, see [Grading rubrics](/oss/python/deepagents/rubric).
+
 
 ## Provider-specific middleware
 
-These middleware are optimized for specific LLM providers.
+These middleware are optimized for specific LLM providers. See each provider's documentation for full details and examples.
 
-### Anthropic
+<Columns cols={2}>
 
-Middleware specifically designed for Anthropic's Claude models.
+    <Card title="Anthropic" href="/oss/python/integrations/middleware/anthropic" icon="/images/providers/anthropic-icon.svg" arrow>
+        Prompt caching, bash tool, text editor, memory, and file search middleware for Claude models.
+    </Card>
+    <Card title="AWS" href="/oss/python/integrations/middleware/aws" icon="brand-aws" arrow>
+        Prompt caching middleware for Amazon Bedrock models.
+    </Card>
+    <Card title="OpenAI" href="/oss/python/integrations/middleware/openai" icon="brand-openai" arrow>
+        Content moderation middleware for OpenAI models.
+    </Card>
 
-| Middleware | Description |
-|------------|-------------|
-| [Prompt caching](#prompt-caching) | Reduce costs by caching repetitive prompt prefixes |
-| [Bash tool](#bash-tool) | Execute Claude's native bash tool with local command execution |
-| [Text editor](#text-editor) | Provide Claude's text editor tool for file editing |
-| [Memory](#memory) | Provide Claude's memory tool for persistent agent memory |
-| [File search](#file-search-1) | Search tools for state-based file systems |
 
 
-
-
-
-#### Prompt caching
-
-Reduce costs and latency by caching static or repetitive prompt content (like system prompts, tool definitions, and conversation history) on Anthropic's servers. This middleware implements a **conversational caching strategy** that places cache breakpoints after the most recent message, allowing the entire conversation history (including the latest user message) to be cached and reused in subsequent API calls. Prompt caching is useful for the following:
-
-- Applications with long, static system prompts that don't change between requests
-- Agents with many tool definitions that remain constant across invocations
-- Conversations where early message history is reused across multiple turns
-- High-volume deployments where reducing API costs and latency is critical
-
-<Info>
-    Learn more about [Anthropic prompt caching](https://docs.claude.com/en/docs/build-with-claude/prompt-caching#cache-limitations) strategies and limitations.
-</Info>
-
-**API reference:** [`AnthropicPromptCachingMiddleware`](https://reference.langchain.com/python/integrations/langchain_anthropic/middleware/#langchain_anthropic.middleware.AnthropicPromptCachingMiddleware)
-
-```python
-from langchain_anthropic import ChatAnthropic
-from langchain_anthropic.middleware import AnthropicPromptCachingMiddleware
-from langchain.agents import create_agent
-
-agent = create_agent(
-    model=ChatAnthropic(model="claude-sonnet-4-5-20250929"),
-    system_prompt="<Your long system prompt here>",
-    middleware=[AnthropicPromptCachingMiddleware(ttl="5m")],
-)
-```
-
-
-
-
-<Accordion title="Configuration options">
-
-<ParamField body="type" type="string" default="ephemeral">
-    Cache type. Only `'ephemeral'` is currently supported.
-</ParamField>
-
-<ParamField body="ttl" type="string" default="5m">
-    Time to live for cached content. Valid values: `'5m'` or `'1h'`
-</ParamField>
-
-<ParamField body="min_messages_to_cache" type="number" default="0">
-    Minimum number of messages before caching starts
-</ParamField>
-
-<ParamField body="unsupported_model_behavior" type="string" default="warn">
-    Behavior when using non-Anthropic models. Options: `'ignore'`, `'warn'`, or `'raise'`
-</ParamField>
-
-
-
-
-</Accordion>
-
-<Accordion title="Full example">
-
-The middleware caches content up to and including the latest message in each request. On subsequent requests within the TTL window (5 minutes or 1 hour), previously seen content is retrieved from cache rather than reprocessed, significantly reducing costs and latency.
-
-**How it works:**
-1. First request: System prompt, tools, and the user message "Hi, my name is Bob" are sent to the API and cached
-2. Second request: The cached content (system prompt, tools, and first message) is retrieved from cache. Only the new message "What's my name?" needs to be processed, plus the model's response from the first request
-3. This pattern continues for each turn, with each request reusing the cached conversation history
-
-```python
-from langchain_anthropic import ChatAnthropic
-from langchain_anthropic.middleware import AnthropicPromptCachingMiddleware
-from langchain.agents import create_agent
-from langchain_core.messages import HumanMessage
-
-
-LONG_PROMPT = """
-Please be a helpful assistant.
-
-<Lots more context ...>
-"""
-
-agent = create_agent(
-    model=ChatAnthropic(model="claude-sonnet-4-5-20250929"),
-    system_prompt=LONG_PROMPT,
-    middleware=[AnthropicPromptCachingMiddleware(ttl="5m")],
-)
-
-# First invocation: Creates cache with system prompt, tools, and "Hi, my name is Bob"
-agent.invoke({"messages": [HumanMessage("Hi, my name is Bob")]})
-
-# Second invocation: Reuses cached system prompt, tools, and previous messages
-# Only processes the new message "What's my name?" and the previous AI response
-agent.invoke({"messages": [HumanMessage("What's my name?")]})
-```
-
-
-
-
-</Accordion>
-
-#### Bash tool
-
-Execute Claude's native `bash_20250124` tool with local command execution. The bash tool middleware is useful for the following:
-
-- Using Claude's built-in bash tool with local execution
-- Leveraging Claude's optimized bash tool interface
-- Agents that need persistent shell sessions with Anthropic models
-
-<Info>
-    This middleware wraps `ShellToolMiddleware` and exposes it as Claude's native bash tool.
-</Info>
-
-**API reference:** @[`ClaudeBashToolMiddleware`]
-
-```python
-from langchain_anthropic import ChatAnthropic
-from langchain_anthropic.middleware import ClaudeBashToolMiddleware
-from langchain.agents import create_agent
-
-agent = create_agent(
-    model=ChatAnthropic(model="claude-sonnet-4-5-20250929"),
-    tools=[],
-    middleware=[
-        ClaudeBashToolMiddleware(
-            workspace_root="/workspace",
-        ),
-    ],
-)
-```
-
-<Accordion title="Configuration options">
-
-`ClaudeBashToolMiddleware` accepts all parameters from @[`ShellToolMiddleware`], including:
-
-<ParamField body="workspace_root" type="str | Path | None">
-    Base directory for the shell session
-</ParamField>
-
-<ParamField body="startup_commands" type="tuple[str, ...] | list[str] | str | None">
-    Commands to run when the session starts
-</ParamField>
-
-<ParamField body="execution_policy" type="BaseExecutionPolicy | None">
-    Execution policy (`HostExecutionPolicy`, `DockerExecutionPolicy`, or `CodexSandboxExecutionPolicy`)
-</ParamField>
-
-<ParamField body="redaction_rules" type="tuple[RedactionRule, ...] | list[RedactionRule] | None">
-    Rules for sanitizing command output
-</ParamField>
-
-See [Shell tool](#shell-tool) for full configuration details.
-
-</Accordion>
-
-<Accordion title="Full example">
-
-```python
-from langchain_anthropic import ChatAnthropic
-from langchain_anthropic.middleware import ClaudeBashToolMiddleware
-from langchain.agents import create_agent
-from langchain.agents.middleware import DockerExecutionPolicy
-
-
-agent = create_agent(
-    model=ChatAnthropic(model="claude-sonnet-4-5-20250929"),
-    tools=[],
-    middleware=[
-        ClaudeBashToolMiddleware(
-            workspace_root="/workspace",
-            startup_commands=["pip install requests"],
-            execution_policy=DockerExecutionPolicy(
-                image="python:3.11-slim",
-            ),
-        ),
-    ],
-)
-
-# Claude can now use its native bash tool
-result = agent.invoke({
-    "messages": [{"role": "user", "content": "List files in the workspace"}]
-})
-```
-
-</Accordion>
-
-
-#### Text editor
-
-Provide Claude's text editor tool (`text_editor_20250728`) for file creation and editing. The text editor middleware is useful for the following:
-
-- File-based agent workflows
-- Code editing and refactoring tasks
-- Multi-file project work
-- Agents that need persistent file storage
-
-<Note>
-    Available in two variants: **State-based** (files in LangGraph state) and **Filesystem-based** (files on disk).
-</Note>
-
-**API reference:** @[`StateClaudeTextEditorMiddleware`], @[`FilesystemClaudeTextEditorMiddleware`]
-
-```python
-from langchain_anthropic import ChatAnthropic
-from langchain_anthropic.middleware import StateClaudeTextEditorMiddleware
-from langchain.agents import create_agent
-
-# State-based (files in LangGraph state)
-agent = create_agent(
-    model=ChatAnthropic(model="claude-sonnet-4-5-20250929"),
-    tools=[],
-    middleware=[
-        StateClaudeTextEditorMiddleware(),
-    ],
-)
-```
-
-<Accordion title="Configuration options">
-
-**@[`StateClaudeTextEditorMiddleware`] (state-based)**
-
-<ParamField body="allowed_path_prefixes" type="Sequence[str] | None">
-    Optional list of allowed path prefixes. If specified, only paths starting with these prefixes are allowed.
-</ParamField>
-
-**@[`FilesystemClaudeTextEditorMiddleware`] (filesystem-based)**
-
-<ParamField body="root_path" type="str" required>
-    Root directory for file operations
-</ParamField>
-
-<ParamField body="allowed_prefixes" type="list[str] | None">
-    Optional list of allowed virtual path prefixes (default: `["/"]`)
-</ParamField>
-
-<ParamField body="max_file_size_mb" type="int" default="10">
-    Maximum file size in MB
-</ParamField>
-
-</Accordion>
-
-<Accordion title="Full example">
-
-Claude's text editor tool supports the following commands:
-- `view` - View file contents or list directory
-- `create` - Create a new file
-- `str_replace` - Replace string in file
-- `insert` - Insert text at line number
-- `delete` - Delete a file
-- `rename` - Rename/move a file
-
-```python
-from langchain_anthropic import ChatAnthropic
-from langchain_anthropic.middleware import (
-    StateClaudeTextEditorMiddleware,
-    FilesystemClaudeTextEditorMiddleware,
-)
-from langchain.agents import create_agent
-
-
-# State-based: Files persist in LangGraph state
-agent_state = create_agent(
-    model=ChatAnthropic(model="claude-sonnet-4-5-20250929"),
-    tools=[],
-    middleware=[
-        StateClaudeTextEditorMiddleware(
-            allowed_path_prefixes=["/project"],
-        ),
-    ],
-)
-
-# Filesystem-based: Files persist on disk
-agent_fs = create_agent(
-    model=ChatAnthropic(model="claude-sonnet-4-5-20250929"),
-    tools=[],
-    middleware=[
-        FilesystemClaudeTextEditorMiddleware(
-            root_path="/workspace",
-            allowed_prefixes=["/src"],
-            max_file_size_mb=10,
-        ),
-    ],
-)
-```
-
-</Accordion>
-
-
-#### Memory
-
-Provide Claude's memory tool (`memory_20250818`) for persistent agent memory across conversation turns. The memory middleware is useful for the following:
-
-- Long-running agent conversations
-- Maintaining context across interruptions
-- Task progress tracking
-- Persistent agent state management
-
-<Info>
-    Claude's memory tool uses a `/memories` directory and automatically injects a system prompt encouraging the agent to check and update memory.
-</Info>
-
-**API reference:** @[`StateClaudeMemoryMiddleware`], @[`FilesystemClaudeMemoryMiddleware`]
-
-```python
-from langchain_anthropic import ChatAnthropic
-from langchain_anthropic.middleware import StateClaudeMemoryMiddleware
-from langchain.agents import create_agent
-
-# State-based memory
-agent = create_agent(
-    model=ChatAnthropic(model="claude-sonnet-4-5-20250929"),
-    tools=[],
-    middleware=[
-        StateClaudeMemoryMiddleware(),
-    ],
-)
-```
-
-<Accordion title="Configuration options">
-
-**@[`StateClaudeMemoryMiddleware`] (state-based)**
-
-<ParamField body="allowed_path_prefixes" type="Sequence[str] | None">
-    Optional list of allowed path prefixes. Defaults to `["/memories"]`.
-</ParamField>
-
-<ParamField body="system_prompt" type="str">
-    System prompt to inject. Defaults to Anthropic's recommended memory prompt that encourages the agent to check and update memory.
-</ParamField>
-
-**@[`FilesystemClaudeMemoryMiddleware`] (filesystem-based)**
-
-<ParamField body="root_path" type="str" required>
-    Root directory for file operations
-</ParamField>
-
-<ParamField body="allowed_prefixes" type="list[str] | None">
-    Optional list of allowed virtual path prefixes. Defaults to `["/memories"]`.
-</ParamField>
-
-<ParamField body="max_file_size_mb" type="int" default="10">
-    Maximum file size in MB
-</ParamField>
-
-<ParamField body="system_prompt" type="str">
-    System prompt to inject
-</ParamField>
-
-</Accordion>
-
-<Accordion title="Full example">
-
-```python
-from langchain_anthropic import ChatAnthropic
-from langchain_anthropic.middleware import (
-    StateClaudeMemoryMiddleware,
-    FilesystemClaudeMemoryMiddleware,
-)
-from langchain.agents import create_agent
-
-
-# State-based: Memory persists in LangGraph state
-agent_state = create_agent(
-    model=ChatAnthropic(model="claude-sonnet-4-5-20250929"),
-    tools=[],
-    middleware=[
-        StateClaudeMemoryMiddleware(),
-    ],
-)
-
-# Filesystem-based: Memory persists on disk
-agent_fs = create_agent(
-    model=ChatAnthropic(model="claude-sonnet-4-5-20250929"),
-    tools=[],
-    middleware=[
-        FilesystemClaudeMemoryMiddleware(
-            root_path="/workspace",
-        ),
-    ],
-)
-
-# The agent will automatically:
-# 1. Check /memories directory at start
-# 2. Record progress and thoughts during execution
-# 3. Update memory files as work progresses
-```
-
-</Accordion>
-
-
-#### File search
-
-Provide Glob and Grep search tools for files stored in LangGraph state. File search middleware is useful for the following:
-
-- Searching through state-based virtual file systems
-- Works with text editor and memory tools
-- Finding files by patterns
-- Content search with regex
-
-**API reference:** @[`StateFileSearchMiddleware`]
-
-```python
-from langchain_anthropic import ChatAnthropic
-from langchain_anthropic.middleware import (
-    StateClaudeTextEditorMiddleware,
-    StateFileSearchMiddleware,
-)
-from langchain.agents import create_agent
-
-agent = create_agent(
-    model=ChatAnthropic(model="claude-sonnet-4-5-20250929"),
-    tools=[],
-    middleware=[
-        StateClaudeTextEditorMiddleware(),
-        StateFileSearchMiddleware(),  # Search text editor files
-    ],
-)
-```
-
-<Accordion title="Configuration options">
-
-<ParamField body="state_key" type="str" default="text_editor_files">
-    State key containing files to search. Use `"text_editor_files"` for text editor files or `"memory_files"` for memory files.
-</ParamField>
-
-</Accordion>
-
-<Accordion title="Full example">
-
-The middleware adds Glob and Grep search tools that work with state-based files.
-
-```python
-from langchain_anthropic import ChatAnthropic
-from langchain_anthropic.middleware import (
-    StateClaudeTextEditorMiddleware,
-    StateClaudeMemoryMiddleware,
-    StateFileSearchMiddleware,
-)
-from langchain.agents import create_agent
-
-
-# Search text editor files
-agent = create_agent(
-    model=ChatAnthropic(model="claude-sonnet-4-5-20250929"),
-    tools=[],
-    middleware=[
-        StateClaudeTextEditorMiddleware(),
-        StateFileSearchMiddleware(state_key="text_editor_files"),
-    ],
-)
-
-# Search memory files
-agent_memory = create_agent(
-    model=ChatAnthropic(model="claude-sonnet-4-5-20250929"),
-    tools=[],
-    middleware=[
-        StateClaudeMemoryMiddleware(),
-        StateFileSearchMiddleware(state_key="memory_files"),
-    ],
-)
-```
-
-</Accordion>
-
-
-
-### OpenAI
-
-Middleware specifically designed for OpenAI models.
-
-| Middleware | Description |
-|------------|-------------|
-| [Content moderation](#content-moderation) | Moderate agent traffic using OpenAI's moderation endpoint |
-
-#### Content moderation
-
-Moderate agent traffic (user input, model output, and tool results) using OpenAI's moderation endpoint to detect and handle unsafe content. Content moderation is useful for the following:
-
-- Applications requiring content safety and compliance
-- Filtering harmful, hateful, or inappropriate content
-- Customer-facing agents that need safety guardrails
-- Meeting platform moderation requirements
-
-<Info>
-    Learn more about [OpenAI's moderation models](https://platform.openai.com/docs/guides/moderation) and categories.
-</Info>
-
-**API reference:** @[`OpenAIModerationMiddleware`]
-
-```python
-from langchain_openai import ChatOpenAI
-from langchain_openai.middleware import OpenAIModerationMiddleware
-from langchain.agents import create_agent
-
-agent = create_agent(
-    model=ChatOpenAI(model="gpt-4o"),
-    tools=[search_tool, database_tool],
-    middleware=[
-        OpenAIModerationMiddleware(
-            model="omni-moderation-latest",
-            check_input=True,
-            check_output=True,
-            exit_behavior="end",
-        ),
-    ],
-)
-```
-
-
-<Accordion title="Configuration options">
-
-<ParamField body="model" type="ModerationModel" default="omni-moderation-latest">
-    OpenAI moderation model to use. Options: `'omni-moderation-latest'`, `'omni-moderation-2024-09-26'`, `'text-moderation-latest'`, `'text-moderation-stable'`
-</ParamField>
-
-<ParamField body="check_input" type="bool" default="True">
-    Whether to check user input messages before the model is called
-</ParamField>
-
-<ParamField body="check_output" type="bool" default="True">
-    Whether to check model output messages after the model is called
-</ParamField>
-
-<ParamField body="check_tool_results" type="bool" default="False">
-    Whether to check tool result messages before the model is called
-</ParamField>
-
-<ParamField body="exit_behavior" type="string" default="end">
-    How to handle violations when content is flagged. Options:
-
-    - `'end'` - End agent execution immediately with a violation message
-    - `'error'` - Raise `OpenAIModerationError` exception
-    - `'replace'` - Replace the flagged content with the violation message and continue
-</ParamField>
-
-<ParamField body="violation_message" type="str | None">
-    Custom template for violation messages. Supports template variables:
-
-    - `{categories}` - Comma-separated list of flagged categories
-    - `{category_scores}` - JSON string of category scores
-    - `{original_content}` - The original flagged content
-
-    Default: `"I'm sorry, but I can't comply with that request. It was flagged for {categories}."`
-</ParamField>
-
-<ParamField body="client" type="OpenAI | None">
-    Optional pre-configured OpenAI client to reuse. If not provided, a new client will be created.
-</ParamField>
-
-<ParamField body="async_client" type="AsyncOpenAI | None">
-    Optional pre-configured AsyncOpenAI client to reuse. If not provided, a new async client will be created.
-</ParamField>
-
-
-</Accordion>
-
-<Accordion title="Full example">
-
-The middleware integrates OpenAI's moderation endpoint to check content at different stages:
-
-**Moderation stages:**
-- `check_input` - User messages before model call
-- `check_output` - AI messages after model call
-- `check_tool_results` - Tool outputs before model call
-
-**Exit behaviors:**
-- `'end'` (default) - Stop execution with violation message
-- `'error'` - Raise exception for application handling
-- `'replace'` - Replace flagged content and continue
-
-```python
-from langchain_openai import ChatOpenAI
-from langchain_openai.middleware import OpenAIModerationMiddleware
-from langchain.agents import create_agent
-
-
-# Basic moderation
-agent = create_agent(
-    model=ChatOpenAI(model="gpt-4o"),
-    tools=[search_tool, customer_data_tool],
-    middleware=[
-        OpenAIModerationMiddleware(
-            model="omni-moderation-latest",
-            check_input=True,
-            check_output=True,
-        ),
-    ],
-)
-
-# Strict moderation with custom message
-agent_strict = create_agent(
-    model=ChatOpenAI(model="gpt-4o"),
-    tools=[search_tool, customer_data_tool],
-    middleware=[
-        OpenAIModerationMiddleware(
-            model="omni-moderation-latest",
-            check_input=True,
-            check_output=True,
-            check_tool_results=True,
-            exit_behavior="error",
-            violation_message=(
-                "Content policy violation detected: {categories}. "
-                "Please rephrase your request."
-            ),
-        ),
-    ],
-)
-
-# Moderation with replacement behavior
-agent_replace = create_agent(
-    model=ChatOpenAI(model="gpt-4o"),
-    tools=[search_tool],
-    middleware=[
-        OpenAIModerationMiddleware(
-            check_input=True,
-            exit_behavior="replace",
-            violation_message="[Content removed due to safety policies]",
-        ),
-    ],
-)
-```
-
-
-</Accordion>
+</Columns>
 
 ---
 
-<Callout icon="pen-to-square" iconType="regular">
-    [Edit the source of this page on GitHub.](https://github.com/langchain-ai/docs/edit/main/src/oss/langchain/middleware/built-in.mdx)
+<div className="source-links">
+<Callout icon="terminal-2">
+    [Connect these docs](/use-these-docs) to Claude, VSCode, and more via MCP for real-time answers.
 </Callout>
-<Tip icon="terminal" iconType="regular">
-    [Connect these docs programmatically](/use-these-docs) to Claude, VSCode, and more via MCP for    real-time answers.
-</Tip>
+<Callout icon="edit">
+    [Edit this page on GitHub](https://github.com/langchain-ai/docs/edit/main/src/oss/langchain/middleware/built-in.mdx) or [file an issue](https://github.com/langchain-ai/docs/issues/new/choose).
+</Callout>
+</div>

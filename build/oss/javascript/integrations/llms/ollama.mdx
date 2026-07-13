@@ -1,23 +1,21 @@
 ---
-title: Ollama
+title: "Ollama integration"
+description: "Integrate with the Ollama LLM using LangChain JavaScript."
 ---
-
 
 <Warning>
 **You are currently on a page documenting the use of Ollama models as text completion models. Many popular models available on Ollama are [chat completion models](/oss/javascript/langchain/models).**
 
-
 You may be looking for [this page instead](/oss/javascript/integrations/chat/ollama/).
 </Warning>
 
-
-This will help you get started with Ollama text completion models (LLMs) using LangChain. For detailed documentation on `Ollama` features and configuration options, please refer to the [API reference](https://api.js.langchain.com/classes/langchain_ollama.Ollama.html).
+This will help you get started with Ollama text completion models (LLMs) using LangChain. For detailed documentation on `Ollama` features and configuration options, please refer to the [API reference](https://reference.langchain.com/javascript/langchain-ollama/Ollama).
 
 ## Overview
 
 ### Integration details
 
-[Ollama](https://ollama.ai/) allows you to run open-source large language models, such as Llama 3, locally.
+[Ollama](https://ollama.ai/) allows you to run open-source Large Language Models (LLMs), such as Llama 3, locally.
 
 Ollama bundles model weights, configuration, and data into a single package, defined by a Modelfile. It optimizes setup and configuration details, including GPU usage.
 
@@ -26,15 +24,15 @@ For a complete list of supported models and model variants, see the [Ollama mode
 
 | Class | Package | Local | Serializable | [PY support](https://python.langchain.com/docs/integrations/llms/ollama/) | Downloads | Version |
 | :--- | :--- | :---: | :---: |  :---: | :---: | :---: |
-| [`Ollama`](https://api.js.langchain.com/classes/langchain_ollama.Ollama.html) | [`@langchain/ollama`](https://npmjs.com/@langchain/ollama) | ✅ | ❌ | ✅ | ![NPM - Downloads](https://img.shields.io/npm/dm/@langchain/ollama?style=flat-square&label=%20&) | ![NPM - Version](https://img.shields.io/npm/v/@langchain/ollama?style=flat-square&label=%20&) |
+| [`Ollama`](https://reference.langchain.com/javascript/langchain-ollama/Ollama) | [`@langchain/ollama`](https://npmjs.com/@langchain/ollama) | ✅ | ❌ | ✅ | ![NPM - Downloads](https://img.shields.io/npm/dm/@langchain/ollama?style=flat-square&label=%20&) | ![NPM - Version](https://img.shields.io/npm/v/@langchain/ollama?style=flat-square&label=%20&) |
 
 ## Setup
 
-To access Ollama embedding models you'll need to follow [these instructions](https://github.com/jmorganca/ollama) to install Ollama, and install the `@langchain/ollama` integration package.
+To access Ollama LLM models, follow [these instructions](https://github.com/ollama/ollama) to install Ollama, then install the `@langchain/ollama` integration package.
 
 ### Credentials
 
-If you want to get automated tracing of your model calls you can also set your [LangSmith](https://docs.smith.langchain.com/) API key by uncommenting below:
+If you want to get automated tracing of your model calls you can also set your [LangSmith](/langsmith/observability) API key by uncommenting below:
 
 ```bash
 # export LANGSMITH_TRACING="true"
@@ -81,7 +79,7 @@ const completion = await llm.invoke(inputText)
 completion
 ```
 
-```output
+```text
 I think you meant to say "Olivia" instead of "Ollama". Olivia is not a well-known AI company, but there are several other AI companies with similar names. Here are a few examples:
 
 * Oliva AI: A startup that uses artificial intelligence to help businesses optimize their operations and improve customer experiences.
@@ -112,7 +110,7 @@ const res = await model.invoke("What's in this image?");
 console.log(res);
 ```
 
-```output
+```text
  The image shows a hot dog placed inside what appears to be a bun that has been specially prepared to resemble a hot dog bun. This is an example of a creative or novelty food item, where the bread used for the bun looks similar to a cooked hot dog itself, playing on the name "hot dog." The image also shows the typical garnishes like ketchup and mustard on the side.
 ```
 
@@ -124,13 +122,15 @@ console.log(res);
 
 ## API reference
 
-For detailed documentation of all `Ollama` features and configurations head to the [API reference](https://api.js.langchain.com/classes/langchain_ollama.Ollama.html)
+For detailed documentation of all `Ollama` features and configurations head to the [API reference](https://reference.langchain.com/javascript/langchain-ollama/Ollama)
 
 ---
 
-<Callout icon="pen-to-square" iconType="regular">
-    [Edit the source of this page on GitHub.](https://github.com/langchain-ai/docs/edit/main/src/oss/javascript/integrations/llms/ollama.mdx)
+<div className="source-links">
+<Callout icon="terminal-2">
+    [Connect these docs](/use-these-docs) to Claude, VSCode, and more via MCP for real-time answers.
 </Callout>
-<Tip icon="terminal" iconType="regular">
-    [Connect these docs programmatically](/use-these-docs) to Claude, VSCode, and more via MCP for    real-time answers.
-</Tip>
+<Callout icon="edit">
+    [Edit this page on GitHub](https://github.com/langchain-ai/docs/edit/main/src/oss/javascript/integrations/llms/ollama.mdx) or [file an issue](https://github.com/langchain-ai/docs/issues/new/choose).
+</Callout>
+</div>

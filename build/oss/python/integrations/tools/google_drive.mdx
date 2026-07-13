@@ -1,5 +1,6 @@
 ---
-title: Google Drive
+title: "Google drive integration"
+description: "Integrate with the Google drive tool using LangChain Python."
 ---
 
 This notebook walks through connecting a LangChain to the `Google Drive API`.
@@ -11,7 +12,7 @@ This notebook walks through connecting a LangChain to the `Google Drive API`.
 1. [Authorize credentials for desktop app](https://developers.google.com/drive/api/quickstart/python#authorize_credentials_for_a_desktop_application)
 1. `pip install -U google-api-python-client google-auth-httplib2 google-auth-oauthlib`
 
-## Instructions for retrieving your Google Docs data
+## Instructions for retrieving your Google docs data
 
 By default, the `GoogleDriveTools` and `GoogleDriveWrapper` expects the `credentials.json` file to be `~/.credentials/credentials.json`, but this is configurable by setting the `GOOGLE_ACCOUNT_FILE` environment variable to your `custom/path/to/credentials.json`.
 The location of `token.json` use the same directory (or use the parameter `token_path`). Note that `token.json` will be created automatically the first time you use the tool.
@@ -21,7 +22,7 @@ The location of `token.json` use the same directory (or use the parameter `token
 By default, If you use a `folder_id`, all the files inside this folder can be retrieved to `Document`, if the name match the query.
 
 ```python
-pip install -qU  google-api-python-client google-auth-httplib2 google-auth-oauthlib langchain-community
+pip install -qU  google-api-python-client google-auth-httplib2 google-auth-oauthlib
 ```
 
 You can obtain your folder and document id from the URL:
@@ -56,7 +57,7 @@ By default, all files with these mime-type can be converted to `Document`.
 
 It's possible to update or customize this. See the documentation of `GoogleDriveAPIWrapper`.
 
-But, the corresponding packages must installed.
+The corresponding packages must be installed.
 
 ```python
 pip install -qU  unstructured langchain-googledrive
@@ -94,7 +95,7 @@ tool.run("machine learning")
 tool.description
 ```
 
-```output
+```text
 "A wrapper around Google Drive Search. Useful for when you need to find a document in google drive. The input should be formatted as a list of entities separated with a space. As an example, a list of keywords is 'hello word'."
 ```
 
@@ -106,7 +107,7 @@ In order to create an agent that uses the Google Jobs tool install LangGraph
 pip install -qU langgraph langchain-openai
 ```
 
-and use the [`create_agent`](https://reference.langchain.com/python/langchain/agents/#langchain.agents.create_agent) functionality to initialize a ReAct agent. You will also need to set up your OPEN_API_KEY (visit [platform.openai.com](https://platform.openai.com)) in order to access OpenAI's chat models.
+and use the [`create_agent`](https://reference.langchain.com/python/langchain/agents/factory/create_agent) functionality to initialize a ReAct agent. You will also need to set up your OPEN_API_KEY (visit [platform.openai.com](https://platform.openai.com)) in order to access OpenAI's chat models.
 
 ```python
 import os
@@ -118,22 +119,24 @@ from langchain.agents import create_agent
 os.environ["OPENAI_API_KEY"] = "your-openai-api-key"
 
 
-model = init_chat_model("gpt-4o-mini", model_provider="openai", temperature=0)
+model = init_chat_model("gpt-5.4-mini", model_provider="openai", temperature=0)
 agent = create_agent(model, tools=[tool])
 
-events = agent.stream(
+stream = agent.stream_events(
     {"messages": [("user", "Search in google drive, who is 'Yann LeCun' ?")]},
-    stream_mode="values",
+    version="v3",
 )
-for event in events:
-    event["messages"][-1].pretty_print()
+for snapshot in stream.values:
+    snapshot["messages"][-1].pretty_print()
 ```
 
 ---
 
-<Callout icon="pen-to-square" iconType="regular">
-    [Edit the source of this page on GitHub.](https://github.com/langchain-ai/docs/edit/main/src/oss/python/integrations/tools/google_drive.mdx)
+<div className="source-links">
+<Callout icon="terminal-2">
+    [Connect these docs](/use-these-docs) to Claude, VSCode, and more via MCP for real-time answers.
 </Callout>
-<Tip icon="terminal" iconType="regular">
-    [Connect these docs programmatically](/use-these-docs) to Claude, VSCode, and more via MCP for    real-time answers.
-</Tip>
+<Callout icon="edit">
+    [Edit this page on GitHub](https://github.com/langchain-ai/docs/edit/main/src/oss/python/integrations/tools/google_drive.mdx) or [file an issue](https://github.com/langchain-ai/docs/issues/new/choose).
+</Callout>
+</div>

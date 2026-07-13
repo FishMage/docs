@@ -1,5 +1,6 @@
 ---
-title: Compass DeFi Toolkit
+title: "Compass defi toolkit integration"
+description: "Integrate with the Compass defi toolkit using LangChain Python."
 ---
 
 Interact with various DeFi protocols. Non-custodial.Tools return *unsigned transactions*. The toolkit is built on top of a Universal DeFi API ([Compass API](https://api.compasslabs.ai/)) allowing agents to perform financial operations like:
@@ -16,7 +17,7 @@ Interact with various DeFi protocols. Non-custodial.Tools return *unsigned trans
 
 | Class                    | Package             | Serializable | JS support |                                         Version                                         |
 |:-------------------------|:--------------------| :---: | :---: |:----------------------------------------------------------------------------------------------:|
-| LangchainCompassToolkit  | `langchain-compass` | ❌ | ❌ | ![PyPI - Version](https://img.shields.io/pypi/v/langchain-compass?style=flat-square&label=%20) |
+| `LangchainCompassToolkit`  | `langchain-compass` | ❌ | ❌ | ![PyPI - Version](https://img.shields.io/pypi/v/langchain-compass?style=flat-square&label=%20) |
 
 ### Tool features
 
@@ -44,7 +45,7 @@ This toolkit lives in the `langchain-compass` package:
 pip install -qU langchain-compass
 ```
 
-#### Environment Setup
+#### Environment setup
 
 To run these examples, ensure LangChain has access to an LLM service. For instance, if you're using GPT-4o, create a `.env` file containing:
 
@@ -96,7 +97,7 @@ tool = next(tool for tool in tools if tool.name == tool_name)
 tool.invoke({"ens_name": "vitalik.eth", "chain": "ethereum:mainnet"})
 ```
 
-```output
+```text
 EnsNameInfoResponse(wallet_address='0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045', registrant='0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045')
 ```
 
@@ -110,7 +111,7 @@ from langchain_openai import ChatOpenAI
 
 load_dotenv()
 
-llm = ChatOpenAI(model="gpt-4o")
+llm = ChatOpenAI(model="gpt-5.5")
 ```
 
 Initialize the agent with the tools:
@@ -128,12 +129,12 @@ Example usage:
 ```python
 example_query = "please set an allowance on Uniswap of 10 WETH for vitalic.eth."  # spelt wrong intentionally
 
-events = agent_executor.stream(
+stream = agent_executor.stream_events(
     {"messages": [("user", example_query)]},
-    stream_mode="values",
+    version="v3",
 )
-for event in events:
-    event["messages"][-1].pretty_print()
+for snapshot in stream.values:
+    snapshot["messages"][-1].pretty_print()
 ```
 
 Expected output:
@@ -177,9 +178,11 @@ Name: generic_allowance_set
 
 ---
 
-<Callout icon="pen-to-square" iconType="regular">
-    [Edit the source of this page on GitHub.](https://github.com/langchain-ai/docs/edit/main/src/oss/python/integrations/tools/compass.mdx)
+<div className="source-links">
+<Callout icon="terminal-2">
+    [Connect these docs](/use-these-docs) to Claude, VSCode, and more via MCP for real-time answers.
 </Callout>
-<Tip icon="terminal" iconType="regular">
-    [Connect these docs programmatically](/use-these-docs) to Claude, VSCode, and more via MCP for    real-time answers.
-</Tip>
+<Callout icon="edit">
+    [Edit this page on GitHub](https://github.com/langchain-ai/docs/edit/main/src/oss/python/integrations/tools/compass.mdx) or [file an issue](https://github.com/langchain-ai/docs/issues/new/choose).
+</Callout>
+</div>

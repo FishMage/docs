@@ -22,7 +22,7 @@ import {
 } from "langchain";
 
 const agent = createAgent({
-  model: "gpt-4o",
+  model: "gpt-5.5",
   tools: [...],
   middleware: [summarizationMiddleware, humanInTheLoopMiddleware],
 });
@@ -49,6 +49,39 @@ Middleware exposes hooks before and after each of those steps:
     className="rounded-lg mx-auto"
 />
 
+## Use middleware inside a LangGraph workflow
+
+Middleware is not a separate runtime: hooks run inside the compiled [LangGraph](/oss/javascript/langgraph/overview) that [`create_agent`](https://reference.langchain.com/javascript/langchain/index/createAgent) returns. You can drop the whole agent (middleware and all) into a larger [StateGraph](https://reference.langchain.com/javascript/langchain-langgraph/index/StateGraph) as a node or subgraph, and every middleware hook continues to run.
+
+Reach for this pattern when the surrounding topology is more than a standard "loop until done": classifying input before routing to one of several agents, fanning out work in parallel, or stitching agent calls together with deterministic steps.
+
+`HumanInTheLoopMiddleware` matches against each tool's `.name`. In Python, `@tool`-decorated functions take their name from the function (so the key below is `"send_email"`); in TypeScript, the key matches the `name` you pass to `tool({...}, { name })`.
+
+
+
+```typescript
+import { AgentState, createAgent, humanInTheLoopMiddleware } from "langchain";
+import { StateGraph, START } from "@langchain/langgraph";
+
+// Assumes readEmail, sendEmail, classifyNode, and route are defined elsewhere.
+// readEmail / sendEmail are registered with name: "read_email" / "send_email".
+const emailAgent = createAgent({
+  model: "claude-sonnet-4-6",
+  tools: [readEmail, sendEmail],
+  middleware: [humanInTheLoopMiddleware({ interruptOn: { send_email: true } })],
+});
+
+const graph = new StateGraph(AgentState)
+  .addNode("classify", classifyNode)
+  .addNode("emailAgent", emailAgent)
+  .addEdge(START, "classify")
+  .addConditionalEdges("classify", route)
+  .compile();
+```
+
+
+The HITL interrupt, summarization, PII redaction, retries, and any custom hooks all travel with the agent node. See [Use subgraphs](/oss/javascript/langgraph/use-subgraphs) for the full set of composition patterns, including subgraph checkpointer scoping (per-invocation versus per-thread).
+
 ## Additional resources
 
 <CardGroup cols={2}>
@@ -61,16 +94,21 @@ Middleware exposes hooks before and after each of those steps:
     <Card title="Middleware API reference" icon="book" href="https://reference.langchain.com/python/langchain/middleware/">
         Complete API reference for middleware.
     </Card>
-    <Card title="Testing agents" icon="scale-unbalanced" href="/oss/javascript/langchain/test">
+    <Card title="Middleware integrations" icon="plug" href="/oss/javascript/integrations/middleware/">
+        Provider-specific middleware for Anthropic, AWS, OpenAI, and more.
+    </Card>
+    <Card title="Testing agents" icon="scale" href="/oss/javascript/langchain/test/">
         Test your agents with LangSmith.
     </Card>
 </CardGroup>
 
 ---
 
-<Callout icon="pen-to-square" iconType="regular">
-    [Edit the source of this page on GitHub.](https://github.com/langchain-ai/docs/edit/main/src/oss/langchain/middleware/overview.mdx)
+<div className="source-links">
+<Callout icon="terminal-2">
+    [Connect these docs](/use-these-docs) to Claude, VSCode, and more via MCP for real-time answers.
 </Callout>
-<Tip icon="terminal" iconType="regular">
-    [Connect these docs programmatically](/use-these-docs) to Claude, VSCode, and more via MCP for    real-time answers.
-</Tip>
+<Callout icon="edit">
+    [Edit this page on GitHub](https://github.com/langchain-ai/docs/edit/main/src/oss/langchain/middleware/overview.mdx) or [file an issue](https://github.com/langchain-ai/docs/issues/new/choose).
+</Callout>
+</div>

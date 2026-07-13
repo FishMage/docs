@@ -1,40 +1,45 @@
 ---
-title: ChatXAI
+title: "ChatXAI integration"
+description: "Integrate with the ChatXAI chat model using LangChain JavaScript."
 ---
 
-[xAI](https://x.ai/) is an artificial intelligence company that develops large language models (LLMs). Their flagship model, Grok, is trained on real-time X (formerly Twitter) data and aims to provide witty, personality-rich responses while maintaining high capability on technical tasks.
+<Warning>
+This page documents Grok models from [xAI](https://docs.x.ai/docs/overview). Do not confuse xAI with [Groq](https://console.groq.com/docs/overview), a separate inference provider. See the [Groq integration](/oss/javascript/integrations/chat/groq).
+</Warning>
 
-This guide will help you getting started with `ChatXAI` [chat models](/oss/javascript/langchain/models). For detailed documentation of all `ChatXAI` features and configurations head to the [API reference](https://api.js.langchain.com/classes/_langchain_xai.ChatXAI.html).
+[xAI](https://x.ai/) develops Grok chat models. See the [xAI model documentation](https://docs.x.ai/docs/models) for available model IDs.
+
+This guide will help you getting started with `ChatXAI` [chat models](/oss/javascript/langchain/models). For detailed documentation of all `ChatXAI` features and configurations head to the [API reference](https://reference.langchain.com/javascript/langchain-xai/ChatXAI).
 
 ## Overview
 
 ### Integration details
 
-| Class | Package | Local | Serializable | PY support | Downloads | Version |
-| :--- | :--- | :---: | :---: |  :---: | :---: | :---: |
-| [ChatXAI](https://api.js.langchain.com/classes/_langchain_xai.ChatXAI.html) | [`@langchain/xai`](https://www.npmjs.com/package/@langchain/xai) | ❌ | ✅ | ❌ | ![NPM - Downloads](https://img.shields.io/npm/dm/@langchain/xai?style=flat-square&label=%20&) | ![NPM - Version](https://img.shields.io/npm/v/@langchain/xai?style=flat-square&label=%20&) |
+| Class | Package | Serializable | [PY support](https://python.langchain.com/docs/integrations/chat/xai/) | Downloads | Version |
+| :--- | :--- | :---: |  :---: | :---: | :---: |
+| [`ChatXAI`](https://reference.langchain.com/javascript/langchain-xai/ChatXAI) | [`@langchain/xai`](https://www.npmjs.com/package/@langchain/xai) | ✅ | ✅ | ![NPM - Downloads](https://img.shields.io/npm/dm/@langchain/xai?style=flat-square&label=%20&) | ![NPM - Version](https://img.shields.io/npm/v/@langchain/xai?style=flat-square&label=%20&) |
 
 ### Model features
 
 See the links in the table headers below for guides on how to use specific features.
 
-| [Tool calling](/oss/javascript/langchain/tools) | [Structured output](/oss/javascript/langchain/structured-output) | JSON mode | [Image input](/oss/javascript/langchain/messages#multimodal) | Audio input | Video input | [Token-level streaming](/oss/javascript/langchain/streaming/) | [Token usage](/oss/javascript/langchain/models#token-usage) | [Logprobs](/oss/javascript/langchain/models#log-probabilities) |
-| :---: | :---: | :---: | :---: |  :---: | :---: | :---: | :---: | :---: |
-| ✅ | ✅ | ✅ | ❌ | ❌ | ❌ | ✅ | ✅ | ✅ |
+| [Tool calling](/oss/javascript/langchain/tools) | [Structured output](/oss/javascript/langchain/structured-output) | [Image input](/oss/javascript/langchain/messages#multimodal) | Audio input | Video input | [Token-level streaming](/oss/javascript/langchain/streaming/) | [Token usage](/oss/javascript/langchain/models#token-usage) | [Logprobs](/oss/javascript/langchain/models#log-probabilities) |
+| :---: | :---: | :---: |  :---: | :---: | :---: | :---: | :---: |
+| ✅ | ✅ | ❌ | ❌ | ❌ | ✅ | ✅ | ✅ |
 
 ## Setup
 
-To access `ChatXAI` models you'll need to create an xAI account, [get an API key](https://console.x.ai/), and install the `@langchain/xai` integration package.
+To access `ChatXAI` models, create an xAI account, [get an API key](https://console.x.ai/), and install the `@langchain/xai` integration package.
 
 ### Credentials
 
-Head to [the xAI website](https://x.ai) to sign up to xAI and generate an API key. Once you've done this set the `XAI_API_KEY` environment variable:
+Head to [the xAI website](https://x.ai) to sign up and generate an API key. Set the `XAI_API_KEY` environment variable:
 
 ```bash
 export XAI_API_KEY="your-api-key"
 ```
 
-If you want to get automated tracing of your model calls you can also set your [LangSmith](https://docs.smith.langchain.com/) API key by uncommenting below:
+If you want to get automated tracing of your model calls you can also set your [LangSmith](/langsmith/observability) API key by uncommenting below:
 
 ```bash
 # export LANGSMITH_TRACING="true"
@@ -62,10 +67,10 @@ pnpm add @langchain/xai @langchain/core
 Now we can instantiate our model object and generate chat completions:
 
 ```typescript
-import { ChatXAI } from "@langchain/xai"
+import { ChatXAI } from "@langchain/xai";
 
 const llm = new ChatXAI({
-    model: "grok-beta", // default
+    model: "grok-3-fast",
     temperature: 0,
     maxTokens: undefined,
     maxRetries: 2,
@@ -86,7 +91,7 @@ const aiMsg = await llm.invoke([
 console.log(aiMsg)
 ```
 
-```output
+```text
 AIMessage {
   "id": "71d7e3d8-30dd-472c-8038-b6b283dcee63",
   "content": "J'adore programmer.",
@@ -121,7 +126,7 @@ AIMessage {
 console.log(aiMsg.content)
 ```
 
-```output
+```text
 J'adore programmer.
 ```
 
@@ -129,13 +134,15 @@ J'adore programmer.
 
 ## API reference
 
-For detailed documentation of all ChatXAI features and configurations head to the [API reference](https://api.js.langchain.com/classes/_langchain_xai.ChatXAI.html).
+For detailed documentation of all `ChatXAI` features and configurations head to the [API reference](https://reference.langchain.com/javascript/langchain-xai/ChatXAI).
 
 ---
 
-<Callout icon="pen-to-square" iconType="regular">
-    [Edit the source of this page on GitHub.](https://github.com/langchain-ai/docs/edit/main/src/oss/javascript/integrations/chat/xai.mdx)
+<div className="source-links">
+<Callout icon="terminal-2">
+    [Connect these docs](/use-these-docs) to Claude, VSCode, and more via MCP for real-time answers.
 </Callout>
-<Tip icon="terminal" iconType="regular">
-    [Connect these docs programmatically](/use-these-docs) to Claude, VSCode, and more via MCP for    real-time answers.
-</Tip>
+<Callout icon="edit">
+    [Edit this page on GitHub](https://github.com/langchain-ai/docs/edit/main/src/oss/javascript/integrations/chat/xai.mdx) or [file an issue](https://github.com/langchain-ai/docs/issues/new/choose).
+</Callout>
+</div>

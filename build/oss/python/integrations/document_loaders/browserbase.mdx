@@ -1,6 +1,9 @@
 ---
-title: Browserbase
+title: "Browserbase integration"
+description: "Integrate with the Browserbase document loader using LangChain Python."
 ---
+
+import LangchainCommunityUnmaintained from '/snippets/oss/langchain-community-unmaintained.mdx';
 
 [Browserbase](https://browserbase.com) is a developer platform to reliably run, manage, and monitor headless browsers.
 
@@ -11,38 +14,29 @@ Power your AI data retrievals with:
 - [Session Debugger](https://docs.browserbase.com/features/sessions) to inspect your Browser Session with networks timeline and logs
 - [Live Debug](https://docs.browserbase.com/guides/session-debug-connection/browser-remote-control) to quickly debug your automation
 
-## Installation and Setup
+## Installation and setup
 
 - Get an API key and Project ID from [browserbase.com](https://browserbase.com) and set it in environment variables (`BROWSERBASE_API_KEY`, `BROWSERBASE_PROJECT_ID`).
-- Install the [Browserbase SDK](http://github.com/browserbase/python-sdk):
+- Install the [Browserbase SDK](https://github.com/browserbase/python-sdk):
 
-```python
+```bash
 pip install browserbase
 ```
 
-## Loading documents
+## Load documents
 
-You can load webpages into LangChain using `BrowserbaseLoader`. Optionally, you can set `text_content` parameter to convert the pages to text-only representation.
+Load webpages into LangChain with `BrowserbaseLoader`. The loader reads
+`BROWSERBASE_API_KEY` and `BROWSERBASE_PROJECT_ID` from the environment
+when the arguments are omitted. Set `text_content=True` to return text-only
+content instead of full HTML.
+
+<LangchainCommunityUnmaintained />
 
 ```python
-import os
-
 from langchain_community.document_loaders import BrowserbaseLoader
 
-load_dotenv()
-
-BROWSERBASE_API_KEY = os.getenv("BROWSERBASE_API_KEY")
-BROWSERBASE_PROJECT_ID = os.getenv("BROWSERBASE_PROJECT_ID")
-```
-
-```python
 loader = BrowserbaseLoader(
-    api_key=BROWSERBASE_API_KEY,
-    project_id=BROWSERBASE_PROJECT_ID,
-    urls=[
-        "https://example.com",
-    ],
-    # Text mode
+    urls=["https://example.com"],
     text_content=False,
 )
 
@@ -50,7 +44,7 @@ docs = loader.load()
 print(docs[0].page_content[:61])
 ```
 
-### Loader Options
+### Loader options
 
 - `urls` Required. A list of URLs to fetch.
 - `text_content` Retrieve only text content. Default is `False`.
@@ -61,9 +55,11 @@ print(docs[0].page_content[:61])
 
 ---
 
-<Callout icon="pen-to-square" iconType="regular">
-    [Edit the source of this page on GitHub.](https://github.com/langchain-ai/docs/edit/main/src/oss/python/integrations/document_loaders/browserbase.mdx)
+<div className="source-links">
+<Callout icon="terminal-2">
+    [Connect these docs](/use-these-docs) to Claude, VSCode, and more via MCP for real-time answers.
 </Callout>
-<Tip icon="terminal" iconType="regular">
-    [Connect these docs programmatically](/use-these-docs) to Claude, VSCode, and more via MCP for    real-time answers.
-</Tip>
+<Callout icon="edit">
+    [Edit this page on GitHub](https://github.com/langchain-ai/docs/edit/main/src/oss/python/integrations/document_loaders/browserbase.mdx) or [file an issue](https://github.com/langchain-ai/docs/issues/new/choose).
+</Callout>
+</div>

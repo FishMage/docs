@@ -67,7 +67,7 @@ If you're using OpenAI Codex CLI, run this command in your terminal to add the s
 codex mcp add langchain-docs --url https://docs.langchain.com/mcp
 ```
 
-### Connect with Cursor or VS Code
+### Connect with Cursor
 
 Add the following to your MCP settings configuration file:
 
@@ -81,6 +81,34 @@ Add the following to your MCP settings configuration file:
 }
 ```
 
+### Connect with VS Code
+
+Add the following to your MCP settings configuration file:
+
+```json
+{
+  "servers": {
+    "docs-langchain": {
+      "url": "https://docs.langchain.com/mcp"
+    }
+  }
+}
+```
+
+### Connect with Antigravity
+
+Add the following to your MCP settings configuration file:
+
+```json
+{
+  "mcpServers": {
+    "docs-langchain": {
+      "serverUrl": "https://docs.langchain.com/mcp"
+    }
+  }
+}
+```
+
 ## Learn more
 
 For more information about using Mintlify's MCP servers, see the [official Mintlify documentation](https://www.mintlify.com/docs/ai/model-context-protocol).
@@ -89,9 +117,11 @@ Have questions or feedback? Let us know in our [community forum](https://forum.l
 
 ---
 
-<Callout icon="pen-to-square" iconType="regular">
-    [Edit the source of this page on GitHub.](https://github.com/langchain-ai/docs/edit/main/src/use-these-docs.mdx)
+<div className="source-links">
+<Callout icon="terminal-2">
+    [Connect these docs](/use-these-docs) to Claude, VSCode, and more via MCP for real-time answers.
 </Callout>
-<Tip icon="terminal" iconType="regular">
-    [Connect these docs programmatically](/use-these-docs) to Claude, VSCode, and more via MCP for    real-time answers.
-</Tip>
+<Callout icon="edit">
+    [Edit this page on GitHub](https://github.com/langchain-ai/docs/edit/main/src/use-these-docs.mdx) or [file an issue](https://github.com/langchain-ai/docs/issues/new/choose).
+</Callout>
+</div>

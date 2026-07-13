@@ -27,7 +27,7 @@ If a hard shutdown occurs due to a server crash or an infrastructure failure, an
 
 ## Postgres resilience
 
-For deployment modalities where we manage the Postgres database, we have periodic backups and continuously replicated standby replicas for automatic failover. This Postgres configuration is available in the [Cloud deployment option](/langsmith/cloud) for [`Production` deployment types](/langsmith/control-plane#deployment-types) only.
+For deployment modalities where we manage the Postgres database, we have periodic backups and continuously replicated standby replicas for automatic failover. This Postgres configuration is available in the [Cloud deployment option](/langsmith/cloud) for [`Production` deployment types](/langsmith/cloud-platform-features#deployment-types) only.
 
 All communication with Postgres implements retries for retry-able errors. If Postgres is momentarily unavailable, such as during a database restart, most/all traffic should continue to succeed. Prolonged failure of Postgres will render the Agent Server unavailable.
 
@@ -39,9 +39,11 @@ All communication with Redis implements retries for retry-able errors. If Redis 
 
 ---
 
-<Callout icon="pen-to-square" iconType="regular">
-    [Edit the source of this page on GitHub.](https://github.com/langchain-ai/docs/edit/main/src/langsmith/scalability-and-resilience.mdx)
+<div className="source-links">
+<Callout icon="terminal-2">
+    [Connect these docs](/use-these-docs) to Claude, VSCode, and more via MCP for real-time answers.
 </Callout>
-<Tip icon="terminal" iconType="regular">
-    [Connect these docs programmatically](/use-these-docs) to Claude, VSCode, and more via MCP for    real-time answers.
-</Tip>
+<Callout icon="edit">
+    [Edit this page on GitHub](https://github.com/langchain-ai/docs/edit/main/src/langsmith/scalability-and-resilience.mdx) or [file an issue](https://github.com/langchain-ai/docs/issues/new/choose).
+</Callout>
+</div>

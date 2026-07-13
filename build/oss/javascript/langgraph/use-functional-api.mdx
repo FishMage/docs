@@ -3,9 +3,10 @@ title: Use the functional API
 sidebarTitle: Use the Functional API
 ---
 
+import LanggraphFunctionalApiStreamCustomDataPy from '/snippets/code-samples/langgraph-functional-api-stream-custom-data-py.mdx';
+import LanggraphFunctionalApiStreamCustomDataJs from '/snippets/code-samples/langgraph-functional-api-stream-custom-data-js.mdx';
 
-
-The [**Functional API**](/oss/javascript/langgraph/functional-api) allows you to add LangGraph's key features — [persistence](/oss/javascript/langgraph/persistence), [memory](/oss/javascript/langgraph/add-memory), [human-in-the-loop](/oss/javascript/langgraph/interrupts), and [streaming](/oss/javascript/langgraph/streaming) — to your applications with minimal changes to your existing code.
+The [**Functional API**](/oss/javascript/langgraph/functional-api) allows you to add LangGraph's key features ([persistence](/oss/javascript/langgraph/persistence), [memory](/oss/javascript/langgraph/add-memory), [human-in-the-loop](/oss/javascript/langgraph/interrupts), and [streaming](/oss/javascript/langgraph/streaming)) to your applications with minimal changes to your existing code.
 
 <Tip>
 For conceptual information on the functional API, see [Functional API](/oss/javascript/langgraph/functional-api).
@@ -37,7 +38,7 @@ await myWorkflow.invoke({ value: 1, anotherValue: 2 });
 
 
   ```typescript
-  import { v4 as uuidv4 } from "uuid";
+  import { v7 as uuid7 } from "uuid";
   import { entrypoint, task, MemorySaver } from "@langchain/langgraph";
 
   // Task that checks if a number is even
@@ -63,7 +64,7 @@ await myWorkflow.invoke({ value: 1, anotherValue: 2 });
   );
 
   // Run the workflow with a unique thread ID
-  const config = { configurable: { thread_id: uuidv4() } };
+  const config = { configurable: { thread_id: uuid7() } };
   const result = await workflow.invoke({ number: 7 }, config);
   console.log(result);
   ```
@@ -78,7 +79,7 @@ await myWorkflow.invoke({ value: 1, anotherValue: 2 });
 
 
   ```typescript
-  import { v4 as uuidv4 } from "uuid";
+  import { v7 as uuid7 } from "uuid";
   import { ChatOpenAI } from "@langchain/openai";
   import { entrypoint, task, MemorySaver } from "@langchain/langgraph";
 
@@ -106,7 +107,7 @@ await myWorkflow.invoke({ value: 1, anotherValue: 2 });
   );
 
   // Execute the workflow
-  const config = { configurable: { thread_id: uuidv4() } };
+  const config = { configurable: { thread_id: uuid7() } };
   const result = await workflow.invoke("the history of flight", config);
   console.log(result);
   ```
@@ -139,7 +140,7 @@ const graph = entrypoint(
 
 
   ```typescript
-  import { v4 as uuidv4 } from "uuid";
+  import { v7 as uuid7 } from "uuid";
   import { ChatOpenAI } from "@langchain/openai";
   import { entrypoint, task, MemorySaver } from "@langchain/langgraph";
 
@@ -168,7 +169,7 @@ const graph = entrypoint(
   );
 
   // Run the workflow
-  const config = { configurable: { thread_id: uuidv4() } };
+  const config = { configurable: { thread_id: uuid7() } };
   const result = await workflow.invoke(["quantum computing", "climate change", "history of aviation"], config);
   console.log(result);
   ```
@@ -211,13 +212,12 @@ const someWorkflow = entrypoint(
 
 
   ```typescript
-  import { v4 as uuidv4 } from "uuid";
-  import { entrypoint, MemorySaver } from "@langchain/langgraph";
-  import { StateGraph } from "@langchain/langgraph";
+  import { v7 as uuid7 } from "uuid";
+  import { entrypoint, MemorySaver, StateGraph, StateSchema } from "@langchain/langgraph";
   import * as z from "zod";
 
   // Define the shared state type
-  const State = z.object({
+  const State = new StateSchema({
     foo: z.number(),
   });
 
@@ -241,7 +241,7 @@ const someWorkflow = entrypoint(
   );
 
   // Execute the workflow
-  const config = { configurable: { thread_id: uuidv4() } };
+  const config = { configurable: { thread_id: uuid7() } };
   console.log(await workflow.invoke(5, config)); // Output: { bar: 10 }
   ```
 
@@ -276,7 +276,7 @@ const myWorkflow = entrypoint(
 
 
   ```typescript
-  import { v4 as uuidv4 } from "uuid";
+  import { v7 as uuid7 } from "uuid";
   import { entrypoint, MemorySaver } from "@langchain/langgraph";
 
   // Initialize a checkpointer
@@ -300,7 +300,7 @@ const myWorkflow = entrypoint(
   );
 
   // Execute the main workflow
-  const config = { configurable: { thread_id: uuidv4() } };
+  const config = { configurable: { thread_id: uuid7() } };
   console.log(await main.invoke({ x: 6, y: 7 }, config)); // Output: { product: 42 }
   ```
 
@@ -311,55 +311,16 @@ const myWorkflow = entrypoint(
 The **Functional API** uses the same streaming mechanism as the **Graph API**. Please
 read the [**streaming guide**](/oss/javascript/langgraph/streaming) section for more details.
 
-Example of using the streaming API to stream both updates and custom data.
+Example of using the streaming API to stream value chunks from a workflow run.
 
 
 
-```typescript
-import {
-  entrypoint,
-  MemorySaver,
-  LangGraphRunnableConfig,
-} from "@langchain/langgraph";
-
-const checkpointer = new MemorySaver();
-
-const main = entrypoint(
-  { checkpointer, name: "main" },
-  async (
-    inputs: { x: number },
-    config: LangGraphRunnableConfig
-  ): Promise<number> => {
-    config.writer?.("Started processing");   // [!code highlight]
-    const result = inputs.x * 2;
-    config.writer?.(`Result is ${result}`);   // [!code highlight]
-    return result;
-  }
-);
-
-const config = { configurable: { thread_id: "abc" } };
-
-  // [!code highlight]
-for await (const [mode, chunk] of await main.stream(
-  { x: 5 },
-  { streamMode: ["custom", "updates"], ...config }   // [!code highlight]
-)) {
-  console.log(`${mode}: ${JSON.stringify(chunk)}`);
-}
-```
+<LanggraphFunctionalApiStreamCustomDataJs />
 
 1. Emit custom data before computation begins.
 2. Emit another custom message after computing the result.
-3. Use `.stream()` to process streamed output.
-4. Specify which streaming modes to use.
-
-```
-updates: {"addOne": 2}
-updates: {"addTwo": 3}
-custom: "hello"
-custom: "world"
-updates: {"main": 5}
-```
+3. Use `streamEvents()` to process streamed output.
+4. Iterate `stream.values` to receive value snapshots.
 
 
 ## Retry policy
@@ -420,7 +381,9 @@ await main.invoke({ any_input: "foobar" }, config);
 ```
 
 
-## Caching Tasks
+
+
+## Caching tasks
 
 
 
@@ -452,16 +415,10 @@ const main = entrypoint(
   }
 );
 
-for await (const chunk of await main.stream(
-  { x: 5 },
-  { streamMode: "updates" }
-)) {
-  console.log(chunk);
+const stream = await main.streamEvents({ x: 5 }, { version: "v3" });
+for await (const snapshot of stream.values) {
+  console.log(snapshot);
 }
-
-//> { slowAdd: 10 }
-//> { slowAdd: 10, '__metadata__': { cached: true } }
-//> { main: { result1: 10, result2: 10 } }
 ```
 
 1. `ttl` is specified in seconds. The cache will be invalidated after this time.
@@ -549,7 +506,7 @@ await main.invoke(null, config);
 
 ## Human-in-the-loop
 
-The functional API supports [human-in-the-loop](/oss/javascript/langgraph/interrupts) workflows using the [`interrupt`](https://langchain-ai.github.io/langgraphjs/reference/functions/langgraph.interrupt-2.html) function and the `Command` primitive.
+The functional API supports [human-in-the-loop](/oss/javascript/langgraph/interrupts) workflows using the [`interrupt`](https://reference.langchain.com/javascript/langchain-langgraph/index/interrupt) function and the `Command` primitive.
 
 ### Basic human-in-the-loop workflow
 
@@ -604,7 +561,7 @@ const graph = entrypoint(
 ```
 
 
-[interrupt()](/oss/javascript/langgraph/interrupts#pause-using-interrupt) is called inside a task, enabling a human to review and edit the output of the previous task. The results of prior tasks-- in this case `step_1`-- are persisted, so that they are not run again following the [`interrupt`](https://langchain-ai.github.io/langgraphjs/reference/functions/langgraph.interrupt-2.html).
+[interrupt()](/oss/javascript/langgraph/interrupts#pause-using-interrupt) is called inside a task, enabling a human to review and edit the output of the previous task. The results of prior tasks-- in this case `step_1`-- are persisted, so that they are not run again following the [`interrupt`](https://reference.langchain.com/javascript/langchain-langgraph/index/interrupt).
 
 Let's send in a query string:
 
@@ -613,25 +570,30 @@ Let's send in a query string:
 ```typescript
 const config = { configurable: { thread_id: "1" } };
 
-for await (const event of await graph.stream("foo", config)) {
-  console.log(event);
-  console.log("\n");
+const stream = await graph.streamEvents("foo", config, { version: "v3" });
+for await (const message of stream.messages) {
+  for await (const token of message.text) {
+    process.stdout.write(token);
+  }
 }
 ```
 
 
-Note that we've paused with an [`interrupt`](https://langchain-ai.github.io/langgraphjs/reference/functions/langgraph.interrupt-2.html) after `step_1`. The interrupt provides instructions to resume the run. To resume, we issue a [`Command`](/oss/javascript/langgraph/interrupts#resuming-interrupts) containing the data expected by the `human_feedback` task.
+Note that we've paused with an [`interrupt`](https://reference.langchain.com/javascript/langchain-langgraph/index/interrupt) after `step_1`. The interrupt provides instructions to resume the run. To resume, we issue a [`Command`](/oss/javascript/langgraph/interrupts#resuming-interrupts) containing the data expected by the `human_feedback` task.
 
 
 
 ```typescript
 // Continue execution
-for await (const event of await graph.stream(
+const stream = await graph.streamEvents(
   new Command({ resume: "baz" }),
-  config
-)) {
-  console.log(event);
-  console.log("\n");
+  config,
+  { version: "v3" }
+);
+for await (const message of stream.messages) {
+  for await (const token of message.text) {
+    process.stdout.write(token);
+  }
 }
 ```
 
@@ -642,7 +604,7 @@ After resuming, the run proceeds through the remaining step and terminates as ex
 
 To review tool calls before execution, we add a `review_tool_call` function that calls [`interrupt`](/oss/javascript/langgraph/interrupts#pause-using-interrupt). When this function is called, execution will be paused until we issue a command to resume it.
 
-Given a tool call, our function will [`interrupt`](https://langchain-ai.github.io/langgraphjs/reference/functions/langgraph.interrupt-2.html) for human review. At that point we can either:
+Given a tool call, our function will [`interrupt`](https://reference.langchain.com/javascript/langchain-langgraph/index/interrupt) for human review. At that point we can either:
 
 * Accept the tool call
 * Revise the tool call and continue
@@ -682,7 +644,7 @@ function reviewToolCall(toolCall: ToolCall): ToolCall | ToolMessage {
 ```
 
 
-We can now update our [entrypoint](/oss/javascript/langgraph/functional-api#entrypoint) to review the generated tool calls. If a tool call is accepted or revised, we execute in the same way as before. Otherwise, we just append the @[`ToolMessage`] supplied by the human. The results of prior tasks — in this case the initial model call — are persisted, so that they are not run again following the [`interrupt`](https://langchain-ai.github.io/langgraphjs/reference/functions/langgraph.interrupt-2.html).
+We can now update our [entrypoint](/oss/javascript/langgraph/functional-api#entrypoint) to review the generated tool calls. If a tool call is accepted or revised, we execute in the same way as before. Otherwise, we just append the [`ToolMessage`](https://reference.langchain.com/javascript/langchain-core/messages/ToolMessage) supplied by the human. The results of prior tasks—in this case the initial model call—are persisted, so that they are not run again following the [`interrupt`](https://reference.langchain.com/javascript/langchain-langgraph/index/interrupt).
 
 
 
@@ -882,7 +844,7 @@ console.log(await accumulate.invoke(3, config)); // 3
 
 ### Chatbot example
 
-An example of a simple chatbot using the functional API and the @[`InMemorySaver`] checkpointer.
+An example of a simple chatbot using the functional API and the [`InMemorySaver`](https://reference.langchain.com/javascript/classes/_langchain_langgraph-checkpoint.MemorySaver.html) checkpointer.
 
 The bot is able to remember the previous conversation and continue from where it left off.
 
@@ -898,7 +860,7 @@ import {
 } from "@langchain/langgraph";
 import { ChatAnthropic } from "@langchain/anthropic";
 
-const model = new ChatAnthropic({ model: "claude-sonnet-4-5-20250929" });
+const model = new ChatAnthropic({ model: "claude-sonnet-4-6" });
 
 const callModel = task(
   "callModel",
@@ -932,19 +894,15 @@ const workflow = entrypoint(
 const config = { configurable: { thread_id: "1" } };
 const inputMessage = { role: "user", content: "hi! I'm bob" };
 
-for await (const chunk of await workflow.stream([inputMessage], {
-  ...config,
-  streamMode: "values",
-})) {
-  console.log(chunk.content);
+const stream1 = await workflow.streamEvents([inputMessage], { ...config, version: "v3" });
+for await (const snapshot of stream1.values) {
+  console.log(snapshot);
 }
 
 const inputMessage2 = { role: "user", content: "what's my name?" };
-for await (const chunk of await workflow.stream([inputMessage2], {
-  ...config,
-  streamMode: "values",
-})) {
-  console.log(chunk.content);
+const stream2 = await workflow.streamEvents([inputMessage2], { ...config, version: "v3" });
+for await (const snapshot of stream2.values) {
+  console.log(snapshot);
 }
 ```
 
@@ -959,13 +917,15 @@ for await (const chunk of await workflow.stream([inputMessage2], {
 
 ## Integrate with other libraries
 
-* [Add LangGraph's features to other frameworks using the functional API](/langsmith/autogen-integration): Add LangGraph features like persistence, memory and streaming to other agent frameworks that do not provide them out of the box.
+* [Add LangGraph's features to other frameworks using the functional API](/langsmith/deploy-other-frameworks): Add LangGraph features like persistence, memory and streaming to other agent frameworks that do not provide them out of the box.
 
 ---
 
-<Callout icon="pen-to-square" iconType="regular">
-    [Edit the source of this page on GitHub.](https://github.com/langchain-ai/docs/edit/main/src/oss/langgraph/use-functional-api.mdx)
+<div className="source-links">
+<Callout icon="terminal-2">
+    [Connect these docs](/use-these-docs) to Claude, VSCode, and more via MCP for real-time answers.
 </Callout>
-<Tip icon="terminal" iconType="regular">
-    [Connect these docs programmatically](/use-these-docs) to Claude, VSCode, and more via MCP for    real-time answers.
-</Tip>
+<Callout icon="edit">
+    [Edit this page on GitHub](https://github.com/langchain-ai/docs/edit/main/src/oss/langgraph/use-functional-api.mdx) or [file an issue](https://github.com/langchain-ai/docs/issues/new/choose).
+</Callout>
+</div>

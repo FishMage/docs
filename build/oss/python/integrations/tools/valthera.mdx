@@ -1,5 +1,6 @@
 ---
-title: Valthera
+title: "Valthera integration"
+description: "Integrate with the Valthera tool using LangChain Python."
 ---
 
 Enable AI agents to engage users when they're most likely to respond.
@@ -327,8 +328,9 @@ try:
 
     # Process the input and display responses
     print("Running Valthera agent workflow...")
-    for response in graph.stream(inputs, stream_mode="values"):
-        print(response)
+    stream = graph.stream_events(inputs, version="v3")
+    for snapshot in stream.values:
+        print(snapshot)
 
 except Exception as e:
     print(f"Error running Valthera workflow: {e}")
@@ -354,9 +356,11 @@ For detailed usage, refer to the inline documentation in the source code.
 
 ---
 
-<Callout icon="pen-to-square" iconType="regular">
-    [Edit the source of this page on GitHub.](https://github.com/langchain-ai/docs/edit/main/src/oss/python/integrations/tools/valthera.mdx)
+<div className="source-links">
+<Callout icon="terminal-2">
+    [Connect these docs](/use-these-docs) to Claude, VSCode, and more via MCP for real-time answers.
 </Callout>
-<Tip icon="terminal" iconType="regular">
-    [Connect these docs programmatically](/use-these-docs) to Claude, VSCode, and more via MCP for    real-time answers.
-</Tip>
+<Callout icon="edit">
+    [Edit this page on GitHub](https://github.com/langchain-ai/docs/edit/main/src/oss/python/integrations/tools/valthera.mdx) or [file an issue](https://github.com/langchain-ai/docs/issues/new/choose).
+</Callout>
+</div>

@@ -3,16 +3,19 @@ title: Functional API overview
 sidebarTitle: Functional API
 ---
 
+import LanggraphFunctionalApiInterruptStreamPy from '/snippets/code-samples/langgraph-functional-api-interrupt-stream-py.mdx';
+import LanggraphFunctionalApiInterruptResumePy from '/snippets/code-samples/langgraph-functional-api-interrupt-resume-py.mdx';
+import LanggraphFunctionalApiInterruptStreamJs from '/snippets/code-samples/langgraph-functional-api-interrupt-stream-js.mdx';
+import LanggraphFunctionalApiInterruptResumeJs from '/snippets/code-samples/langgraph-functional-api-interrupt-resume-js.mdx';
 
-
-The **Functional API** allows you to add LangGraph's key features — [persistence](/oss/python/langgraph/persistence), [memory](/oss/python/langgraph/add-memory), [human-in-the-loop](/oss/python/langgraph/interrupts), and [streaming](/oss/python/langgraph/streaming) — to your applications with minimal changes to your existing code.
+The **Functional API** allows you to add LangGraph's key features ([persistence](/oss/python/langgraph/persistence), [memory](/oss/python/langgraph/add-memory), [human-in-the-loop](/oss/python/langgraph/interrupts), and [streaming](/oss/python/langgraph/streaming)) to your applications with minimal changes to your existing code.
 
 It is designed to integrate these features into existing code that may use standard language primitives for branching and control flow, such as `if` statements, `for` loops, and function calls. Unlike many data orchestration frameworks that require restructuring code into an explicit pipeline or DAG, the Functional API allows you to incorporate these capabilities without enforcing a rigid execution model.
 
 The Functional API uses two key building blocks:
 
-* **`@entrypoint`** – Marks a function as the starting point of a workflow, encapsulating logic and managing execution flow, including handling long-running tasks and interrupts.
-* **[`@task`](https://reference.langchain.com/python/langgraph/func/#langgraph.func.task)** – Represents a discrete unit of work, such as an API call or data processing step, that can be executed asynchronously within an entrypoint. Tasks return a future-like object that can be awaited or resolved synchronously.
+* **`@entrypoint`**: Marks a function as the starting point of a workflow, encapsulating logic and managing execution flow, including handling long-running tasks and interrupts.
+* **[`@task`](https://reference.langchain.com/python/langgraph/func/task)**: Represents a discrete unit of work, such as an API call or data processing step, that can be executed asynchronously within an entrypoint. Tasks return a future-like object that can be awaited or resolved synchronously.
 
 
 
@@ -77,75 +80,11 @@ def workflow(topic: str) -> dict:
 
   When the workflow is resumed, it executes from the very start, but because the result of the `writeEssay` task was already saved, the task result will be loaded from the checkpoint instead of being recomputed.
 
-  ```python
-  import time
-  import uuid
-  from langgraph.func import entrypoint, task
-  from langgraph.types import interrupt
-  from langgraph.checkpoint.memory import InMemorySaver
-
-
-  @task
-  def write_essay(topic: str) -> str:
-      """Write an essay about the given topic."""
-      time.sleep(1)  # This is a placeholder for a long-running task.
-      return f"An essay about topic: {topic}"
-
-  @entrypoint(checkpointer=InMemorySaver())
-  def workflow(topic: str) -> dict:
-      """A simple workflow that writes an essay and asks for a review."""
-      essay = write_essay("cat").result()
-      is_approved = interrupt(
-          {
-              # Any json-serializable payload provided to interrupt as argument.
-              # It will be surfaced on the client side as an Interrupt when streaming data
-              # from the workflow.
-              "essay": essay,  # The essay we want reviewed.
-              # We can add any additional information that we need.
-              # For example, introduce a key called "action" with some instructions.
-              "action": "Please approve/reject the essay",
-          }
-      )
-      return {
-          "essay": essay,  # The essay that was generated
-          "is_approved": is_approved,  # Response from HIL
-      }
-
-
-  thread_id = str(uuid.uuid4())
-  config = {"configurable": {"thread_id": thread_id}}
-  for item in workflow.stream("cat", config):
-      print(item)
-  # > {'write_essay': 'An essay about topic: cat'}
-  # > {
-  # >     '__interrupt__': (
-  # >        Interrupt(
-  # >            value={
-  # >                'essay': 'An essay about topic: cat',
-  # >                'action': 'Please approve/reject the essay'
-  # >            },
-  # >            id='b9b2b9d788f482663ced6dc755c9e981'
-  # >        ),
-  # >    )
-  # > }
-  ```
+  <LanggraphFunctionalApiInterruptStreamPy />
 
   An essay has been written and is ready for review. Once the review is provided, we can resume the workflow:
 
-  ```python
-  from langgraph.types import Command
-
-  # Get review from a user (e.g., via a UI)
-  # In this case, we're using a bool, but this can be any json-serializable value.
-  human_review = True
-
-  for item in workflow.stream(Command(resume=human_review), config):
-      print(item)
-  ```
-
-  ```pycon
-  {'workflow': {'essay': 'An essay about topic: cat', 'is_approved': False}}
-  ```
+  <LanggraphFunctionalApiInterruptResumePy />
 
   The workflow has been completed and the review has been added to the essay.
 
@@ -155,7 +94,7 @@ def workflow(topic: str) -> dict:
 
 ## Entrypoint
 
-The [`@entrypoint`](https://reference.langchain.com/python/langgraph/func/#langgraph.func.entrypoint) decorator can be used to create a workflow from a function. It encapsulates workflow logic and manages execution flow, including handling _long-running tasks_ and [interrupts](/oss/python/langgraph/interrupts).
+The [`@entrypoint`](https://reference.langchain.com/python/langgraph/func/entrypoint) decorator can be used to create a workflow from a function. It encapsulates workflow logic and manages execution flow, including handling _long-running tasks_ and [interrupts](/oss/python/langgraph/interrupts).
 
 
 
@@ -207,7 +146,7 @@ The **inputs** and **outputs** of entrypoints must be JSON-serializable to suppo
 
 ### Injectable parameters
 
-When declaring an `entrypoint`, you can request access to additional parameters that will be injected automatically at run time. These parameters include:
+When declaring an `entrypoint`, you can request access to additional parameters that will be injected automatically at runtime. These parameters include:
 
 | Parameter    | Description                                                                                                                                                        |
 | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -226,11 +165,14 @@ Declare the parameters with the appropriate name and type annotation.
   from langgraph.func import entrypoint
   from langgraph.store.base import BaseStore
   from langgraph.store.memory import InMemoryStore
+  from langgraph.checkpoint.memory import InMemorySaver
+  from langgraph.types import StreamWriter
 
+  in_memory_checkpointer = InMemorySaver(...)
   in_memory_store = InMemoryStore(...)  # An instance of InMemoryStore for long-term memory
 
   @entrypoint(
-      checkpointer=checkpointer,  # Specify the checkpointer
+      checkpointer=in_memory_checkpointer,  # Specify the checkpointer
       store=in_memory_store  # Specify the store
   )
   def my_workflow(
@@ -278,8 +220,10 @@ Using the [`@entrypoint`](#entrypoint) yields a [`Pregel`](https://reference.lan
         }
     }
 
-    for chunk in my_workflow.stream(some_input, config):
-        print(chunk)
+    stream = my_workflow.stream_events(some_input, config, version="v3")
+    for message in stream.messages:
+        for token in message.text:
+            print(token, end="", flush=True)
     ```
     </Tab>
     <Tab title="Async Stream">
@@ -290,8 +234,10 @@ Using the [`@entrypoint`](#entrypoint) yields a [`Pregel`](https://reference.lan
         }
     }
 
-    async for chunk in my_workflow.astream(some_input, config):
-        print(chunk)
+    stream = await my_workflow.astream_events(some_input, config, version="v3")
+    async for message in stream.messages:
+        async for token in message.text:
+            print(token, end="", flush=True)
     ```
     </Tab>
 </Tabs>
@@ -301,7 +247,7 @@ Using the [`@entrypoint`](#entrypoint) yields a [`Pregel`](https://reference.lan
 
 ### Resuming
 
-Resuming an execution after an [interrupt](https://reference.langchain.com/python/langgraph/types/#langgraph.types.interrupt) can be done by passing a **resume** value to the [`Command`](https://reference.langchain.com/python/langgraph/types/#langgraph.types.Command) primitive.
+Resuming an execution after an [interrupt](https://reference.langchain.com/python/langgraph/types/interrupt) can be done by passing a **resume** value to the [`Command`](https://reference.langchain.com/python/langgraph/types/Command) primitive.
 
 <Tabs>
     <Tab title="Invoke">
@@ -340,8 +286,10 @@ Resuming an execution after an [interrupt](https://reference.langchain.com/pytho
         }
     }
 
-    for chunk in my_workflow.stream(Command(resume=some_resume_value), config):
-        print(chunk)
+    stream = my_workflow.stream_events(Command(resume=some_resume_value), config, version="v3")
+    for message in stream.messages:
+        for token in message.text:
+            print(token, end="", flush=True)
     ```
     </Tab>
     <Tab title="Async Stream">
@@ -354,8 +302,10 @@ Resuming an execution after an [interrupt](https://reference.langchain.com/pytho
         }
     }
 
-    async for chunk in my_workflow.astream(Command(resume=some_resume_value), config):
-        print(chunk)
+    stream = await my_workflow.astream_events(Command(resume=some_resume_value), config, version="v3")
+    async for message in stream.messages:
+        async for token in message.text:
+            print(token, end="", flush=True)
     ```
     </Tab>
 </Tabs>
@@ -403,8 +353,10 @@ This assumes that the underlying **error** has been resolved and execution can p
         }
     }
 
-    for chunk in my_workflow.stream(None, config):
-        print(chunk)
+    stream = my_workflow.stream_events(None, config, version="v3")
+    for message in stream.messages:
+        for token in message.text:
+            print(token, end="", flush=True)
     ```
     </Tab>
     <Tab title="Async Stream">
@@ -416,8 +368,10 @@ This assumes that the underlying **error** has been resolved and execution can p
         }
     }
 
-    async for chunk in my_workflow.astream(None, config):
-        print(chunk)
+    stream = await my_workflow.astream_events(None, config, version="v3")
+    async for message in stream.messages:
+        async for token in message.text:
+            print(token, end="", flush=True)
     ```
     </Tab>
 </Tabs>
@@ -427,7 +381,7 @@ This assumes that the underlying **error** has been resolved and execution can p
 
 ### Short-term memory
 
-When an `entrypoint` is defined with a `checkpointer`, it stores information between successive invocations on the same **thread id** in [checkpoints](/oss/python/langgraph/persistence#checkpoints).
+When an `entrypoint` is defined with a `checkpointer`, it stores information between successive invocations on the same **thread id** in [checkpoints](/oss/python/langgraph/checkpointers#checkpoints).
 
 This allows accessing the state from the previous invocation using the `previous` parameter.
 
@@ -454,7 +408,7 @@ my_workflow.invoke(2, config)  # 3 (previous was 1 from the previous invocation)
 
 #### `entrypoint.final`
 
-[`entrypoint.final`](https://reference.langchain.com/python/langgraph/func/#langgraph.func.entrypoint.final) is a special primitive that can be returned from an entrypoint and allows **decoupling** the value that is **saved in the checkpoint** from the **return value of the entrypoint**.
+[`entrypoint.final`](https://reference.langchain.com/python/langgraph/func/entrypoint/final) is a special primitive that can be returned from an entrypoint and allows **decoupling** the value that is **saved in the checkpoint** from the **return value of the entrypoint**.
 
 The first value is the return value of the entrypoint, and the second value is the value that will be saved in the checkpoint. The type annotation is `entrypoint.final[return_type, save_type]`.
 
@@ -547,7 +501,7 @@ To obtain the result of a **task**, you can either wait for it synchronously (us
 * **Checkpointing**: When you need to save the result of a long-running operation to a checkpoint, so you don't need to recompute it when resuming the workflow.
 * **Human-in-the-loop**: If you're building a workflow that requires human intervention, you MUST use **tasks** to encapsulate any randomness (e.g., API calls) to ensure that the workflow can be resumed correctly. See the [determinism](#determinism) section for more details.
 * **Parallel Execution**: For I/O-bound tasks, **tasks** enable parallel execution, allowing multiple operations to run concurrently without blocking (e.g., calling multiple APIs).
-* **Observability**: Wrapping operations in **tasks** provides a way to track the progress of the workflow and monitor the execution of individual operations using [LangSmith](https://docs.smith.langchain.com/).
+* **Observability**: Wrapping operations in **tasks** provides a way to track the progress of the workflow and monitor the execution of individual operations using [LangSmith](/langsmith/observability).
 * **Retryable Work**: When work needs to be retried to handle failures or inconsistencies, **tasks** provide a way to encapsulate and manage the retry logic.
 
 ## Serialization
@@ -568,17 +522,27 @@ Providing non-serializable inputs or outputs will result in a runtime error when
 
 ## Determinism
 
-To utilize features like **human-in-the-loop**, any randomness should be encapsulated inside of **tasks**. This guarantees that when execution is halted (e.g., for human in the loop) and then resumed, it will follow the same _sequence of steps_, even if **task** results are non-deterministic.
+When you resume a workflow run, the code does **NOT** resume from the **same line of code** where execution stopped. Execution returns to a checkpoint boundary, and the workflow **replays** forward until it reaches the pause again.
 
-LangGraph achieves this behavior by persisting **task** and [**subgraph**](/oss/python/langgraph/use-subgraphs) results as they execute. A well-designed workflow ensures that resuming execution follows the _same sequence of steps_, allowing previously computed results to be retrieved correctly without having to re-execute them. This is particularly useful for long-running **tasks** or **tasks** with non-deterministic results, as it avoids repeating previously done work and allows resuming from essentially the same.
+For the Functional API, replay starts at the beginning of the **entrypoint** while LangGraph restores completed [**task**](/oss/python/langgraph/functional-api#task) and [**subgraph**](/oss/python/langgraph/use-subgraphs) results from the checkpointer instead of recomputing them. That preserves the recorded order of steps across pauses, including for long-running or non-deterministic **task** outputs.
 
-While different runs of a workflow can produce different results, resuming a **specific** run should always follow the same sequence of recorded steps. This allows LangGraph to efficiently look up **task** and **subgraph** results that were executed prior to the graph being interrupted and avoid recomputing them.
+To use features like **human-in-the-loop**, you must place non-deterministic work (for example, random values) and side effects (for example, file writes or API calls) in [**tasks**](/oss/python/langgraph/functional-api#task).
+
+Different runs of a workflow can produce different results, but resuming a **specific** thread should replay the same persisted **task** and **subgraph** results.
+
+To ensure that your workflow is deterministic and can be consistently replayed, follow these guidelines:
+
+* **Avoid repeating work**: In an **entrypoint**, if you chain several side effects (for example, logging, file writes, or network calls), give each its own **task** so resume restores their outputs from the checkpointer instead of running them again.
+* **Encapsulate non-deterministic operations**: Keep values that can change between attempts (for example, random numbers or wall-clock reads) inside **tasks**, so replay lines up with what was checkpointed.
+* **Use idempotent operations**: For partial task failures and retries, see [Idempotency](#idempotency).
 
 ## Idempotency
 
-Idempotency ensures that running the same operation multiple times produces the same result. This helps prevent duplicate API calls and redundant processing if a step is rerun due to a failure. Always place API calls inside **tasks** functions for checkpointing, and design them to be idempotent in case of re-execution. Re-execution can occur if a **task** starts, but does not complete successfully. Then, if the workflow is resumed, the **task** will run again. Use idempotency keys or verify existing results to avoid duplication.
+Idempotency ensures that running the same operation multiple times produces the same result. This helps prevent duplicate API calls and redundant processing if a step is rerun due to a failure. Always place API calls inside **tasks** functions for checkpointing, and design them to be idempotent in case of re-execution.
+This is particularly important for operations that result in data writes.
+When a workflow resumes, LangGraph replays completed **task** results from the checkpoint. A **task** that started but did not finish may run again on that resume, so design side effects to be idempotent. Use idempotency keys or verify existing results to avoid unintended duplication.
 
-## Common Pitfalls
+## Common pitfalls
 
 ### Handling side effects
 
@@ -633,12 +597,9 @@ Operations that might give different results each time (like getting current tim
 * In a task: Get random number (5) → interrupt → resume → (returns 5 again) → ...
 * Not in a task: Get random number (5) → interrupt → resume → get new random number (7) → ...
 
-This is especially important when using **human-in-the-loop** workflows with multiple interrupts calls. LangGraph keeps a list of resume values for each task/entrypoint. When an interrupt is encountered, it's matched with the corresponding resume value. This matching is strictly **index-based**, so the order of the resume values should match the order of the interrupts.
+This is especially important when using **human-in-the-loop** workflows with multiple interrupt calls. LangGraph keeps a list of resume values for each task/entrypoint. When an interrupt is encountered, it's matched with the corresponding resume value. This matching is strictly **index-based**, so the order of the resume values should match the order of the interrupts.
 
-
-
-
-If order of execution is not maintained when resuming, one [`interrupt`](https://reference.langchain.com/python/langgraph/types/#langgraph.types.interrupt) call may be matched with the wrong `resume` value, leading to incorrect results.
+If order of execution is not maintained when resuming, one [`interrupt`](https://reference.langchain.com/python/langgraph/types/interrupt) call may be matched with the wrong `resume` value, leading to incorrect results.
 
 Please read the section on [determinism](#determinism) for more details.
 
@@ -709,11 +670,19 @@ Please read the section on [determinism](#determinism) for more details.
     </Tab>
 </Tabs>
 
+## Learn more
+
+- [How to use the Functional API](/oss/python/langgraph/use-functional-api)
+- [Graph API conceptual overview](/oss/python/langgraph/graph-api)
+- [Choosing between Graph API and Functional API](/oss/python/langgraph/choosing-apis)
+
 ---
 
-<Callout icon="pen-to-square" iconType="regular">
-    [Edit the source of this page on GitHub.](https://github.com/langchain-ai/docs/edit/main/src/oss/langgraph/functional-api.mdx)
+<div className="source-links">
+<Callout icon="terminal-2">
+    [Connect these docs](/use-these-docs) to Claude, VSCode, and more via MCP for real-time answers.
 </Callout>
-<Tip icon="terminal" iconType="regular">
-    [Connect these docs programmatically](/use-these-docs) to Claude, VSCode, and more via MCP for    real-time answers.
-</Tip>
+<Callout icon="edit">
+    [Edit this page on GitHub](https://github.com/langchain-ai/docs/edit/main/src/oss/langgraph/functional-api.mdx) or [file an issue](https://github.com/langchain-ai/docs/issues/new/choose).
+</Callout>
+</div>

@@ -53,7 +53,7 @@ First, install the required dependencies:
 There are 2 namespaces in the `langchain-tests` package:
 
 <AccordionGroup>
-    <Accordion title="Unit tests" icon="gear">
+    <Accordion title="Unit tests" icon="settings">
 
         **Location**: `src.unit_tests`
 
@@ -63,7 +63,7 @@ There are 2 namespaces in the `langchain-tests` package:
         [View API reference](https://reference.langchain.com/python/langchain_tests/unit_tests)
     </Accordion>
 
-    <Accordion title="Integration tests" icon="network-wired">
+    <Accordion title="Integration tests" icon="network">
 
         **Location**: `src.integration_tests`
 
@@ -112,47 +112,38 @@ class ChatParrotLinkStandardIntegrationTests extends ChatModelIntegrationTests<
 
 
 
-To see the complete list of configurable capabilities and their defaults, visit the [API reference](https://reference.langchain.com/javascript) for standard tests.
+To see the complete list of configurable capabilities and their defaults, see [Implementing standard tests](/oss/javascript/contributing/standard-tests-langchain#implementing-standard-tests).
 
 
-{/*
-TODO update when added to new refs
 
-<Columns cols={2}>
-    <Card title="Unit tests" href="https://v03.api.js.langchain.com/classes/_langchain_standard_tests.ChatModelUnitTests.html" icon="gear" arrow />
-    <Card title="Integration tests" href="https://v03.api.js.langchain.com/classes/_langchain_standard_tests.ChatModelIntegrationTests.html" icon="network-wired" arrow />
-</Columns>
- */}
 
-Here are some example implementations of standard tests from popular integrations:
+## Sandbox integrations
 
-<Tabs>
-    <Tab title="Unit tests">
 
-    </Tab>
-    <Tab title="Integration tests">
 
-    </Tab>
-</Tabs>
+Deep Agents sandbox integrations use `sandboxStandardTests` from `@langchain/sandbox-standard-tests`.
+Call it with a config object that includes `createSandbox`, `resolvePath`, and `closeSandbox`.
+Use the [Daytona integration tests](https://github.com/langchain-ai/deepagentsjs/blob/main/libs/providers/daytona/src/sandbox.int.test.ts) as a reference implementation.
+See [Contributing a sandbox integration](/oss/javascript/contributing/integrations-langchain) for publishing guidelines.
+
+
 
 ---
 
-## Running tests
-
-
-TODO
 
 
 ## Troubleshooting
 
 
-For a full list of the standard test suites that are available, as well as information on which tests are included and how to troubleshoot common issues, see the [Standard Tests API Reference](https://v03.api.js.langchain.com/modules/_langchain_standard_tests.html).
+For a full list of the standard test suites that are available, as well as information on which tests are included and how to troubleshoot common issues, see the [contributing README](https://github.com/langchain-ai/langchainjs/blob/main/CONTRIBUTING.md).
 
 ---
 
-<Callout icon="pen-to-square" iconType="regular">
-    [Edit the source of this page on GitHub.](https://github.com/langchain-ai/docs/edit/main/src/oss/contributing/standard-tests-langchain.mdx)
+<div className="source-links">
+<Callout icon="terminal-2">
+    [Connect these docs](/use-these-docs) to Claude, VSCode, and more via MCP for real-time answers.
 </Callout>
-<Tip icon="terminal" iconType="regular">
-    [Connect these docs programmatically](/use-these-docs) to Claude, VSCode, and more via MCP for    real-time answers.
-</Tip>
+<Callout icon="edit">
+    [Edit this page on GitHub](https://github.com/langchain-ai/docs/edit/main/src/oss/contributing/standard-tests-langchain.mdx) or [file an issue](https://github.com/langchain-ai/docs/issues/new/choose).
+</Callout>
+</div>

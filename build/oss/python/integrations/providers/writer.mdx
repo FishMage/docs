@@ -1,5 +1,6 @@
 ---
-title: WRITER
+title: "Writer integrations"
+description: "Integrate with Writer using LangChain Python."
 ---
 
 All functionality related to WRITER
@@ -10,7 +11,7 @@ All functionality related to WRITER
 >
 >The [Writer API](https://dev.writer.com/api-guides/introduction) is powered by a diverse set of Palmyra sub-models with different capabilities and price points.
 
-## Installation and Setup
+## Installation and setup
 
 Install the integration package with
 <CodeGroup>
@@ -33,18 +34,18 @@ from langchain_writer import ChatWriter
 See [details](/oss/python/integrations/chat/writer).
 
 
-## PDF Parser
+## PDF parser
 
 ```python
 from langchain_writer.pdf_parser import PDFParser
 ```
+<Warning>
+**Deprecation notice**: The parse PDF tool is deprecated and will be removed on **December 22, 2025**.
+
+**Migration path**: We plan to introduce a prebuilt PDF parsing tool for chat completions that will provide similar functionality. This tool will work similarly to other prebuilt tools. We will provide more details about this alternative when it becomes available.
+</Warning>
+
 See [details](/oss/python/integrations/document_loaders/parsers/writer_pdf_parser).
-
-## Text splitter
-
-```python
-from langchain_writer.text_splitter import WriterTextSplitter
-```
 
 ## Tools calling
 
@@ -75,9 +76,11 @@ See [details](/oss/python/integrations/tools/writer).
 
 ---
 
-<Callout icon="pen-to-square" iconType="regular">
-    [Edit the source of this page on GitHub.](https://github.com/langchain-ai/docs/edit/main/src/oss/python/integrations/providers/writer.mdx)
+<div className="source-links">
+<Callout icon="terminal-2">
+    [Connect these docs](/use-these-docs) to Claude, VSCode, and more via MCP for real-time answers.
 </Callout>
-<Tip icon="terminal" iconType="regular">
-    [Connect these docs programmatically](/use-these-docs) to Claude, VSCode, and more via MCP for    real-time answers.
-</Tip>
+<Callout icon="edit">
+    [Edit this page on GitHub](https://github.com/langchain-ai/docs/edit/main/src/oss/python/integrations/providers/writer.mdx) or [file an issue](https://github.com/langchain-ai/docs/issues/new/choose).
+</Callout>
+</div>

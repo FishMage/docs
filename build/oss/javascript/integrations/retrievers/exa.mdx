@@ -1,18 +1,19 @@
 ---
-title: ExaRetriever
+title: "ExaRetriever integration"
+description: "Integrate with the ExaRetriever retriever using LangChain JavaScript."
 ---
 
 ## Overview
 
 [Exa](https://exa.ai/) is a search engine that retrieves relevant content from the web given some input query.
 
-This guide will help you getting started with the Exa [retriever](/oss/javascript/langchain/retrieval). For detailed documentation of all `ExaRetriever` features and configurations head to the [API reference](https://api.js.langchain.com/classes/langchain_exa.ExaRetriever.html).
+This guide will help you getting started with `ExaRetriever` [retrieval](/oss/javascript/langchain/retrieval). For detailed documentation of all `ExaRetriever` features and configurations head to the [API reference](https://reference.langchain.com/javascript/langchain-exa/ExaRetriever).
 
 ### Integration details
 
 | Retriever | Source | Package |
 | :--- | :--- | :---: |
-[ExaRetriever](https://api.js.langchain.com/classes/langchain_exa.ExaRetriever.html) | Information on the web. | [`@langchain/exa`](https://www.npmjs.com/package/@langchain/exa) |
+[ExaRetriever](https://reference.langchain.com/javascript/langchain-exa/ExaRetriever) | Information on the web. | [`@langchain/exa`](https://www.npmjs.com/package/@langchain/exa) |
 
 ## Setup
 
@@ -20,11 +21,11 @@ You'll need to set your API key as an environment variable.
 
 The `Exa` class defaults to `EXASEARCH_API_KEY` when searching for your API key.
 
-```typescript
-process.env.EXASEARCH_API_KEY="<YOUR API KEY>";
+```bash
+export EXASEARCH_API_KEY="your-api-key"
 ```
 
-If you want to get automated tracing from individual queries, you can also set your [LangSmith](https://docs.smith.langchain.com/) API key by uncommenting below:
+If you want to get automated tracing from individual queries, you can also set your [LangSmith](/langsmith/observability) API key by uncommenting below:
 
 ```typescript
 // process.env.LANGSMITH_API_KEY = "<YOUR API KEY HERE>";
@@ -74,7 +75,7 @@ const query = "What did the speaker say about Justice Breyer in the 2022 State o
 await retriever.invoke(query);
 ```
 
-```output
+```javascript
 [
   Document {
     pageContent: 'President Biden’s State of the Union Address\n' +
@@ -189,13 +190,15 @@ await retriever.invoke(query);
 
 ## API reference
 
-For detailed documentation of all ExaRetriever features and configurations head to the [API reference](https://api.js.langchain.com/classes/langchain_exa.ExaRetriever.html).
+For detailed documentation of all `ExaRetriever` features and configurations head to the [API reference](https://reference.langchain.com/javascript/langchain-exa/ExaRetriever).
 
 ---
 
-<Callout icon="pen-to-square" iconType="regular">
-    [Edit the source of this page on GitHub.](https://github.com/langchain-ai/docs/edit/main/src/oss/javascript/integrations/retrievers/exa.mdx)
+<div className="source-links">
+<Callout icon="terminal-2">
+    [Connect these docs](/use-these-docs) to Claude, VSCode, and more via MCP for real-time answers.
 </Callout>
-<Tip icon="terminal" iconType="regular">
-    [Connect these docs programmatically](/use-these-docs) to Claude, VSCode, and more via MCP for    real-time answers.
-</Tip>
+<Callout icon="edit">
+    [Edit this page on GitHub](https://github.com/langchain-ai/docs/edit/main/src/oss/javascript/integrations/retrievers/exa.mdx) or [file an issue](https://github.com/langchain-ai/docs/issues/new/choose).
+</Callout>
+</div>

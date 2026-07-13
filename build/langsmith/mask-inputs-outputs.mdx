@@ -3,7 +3,22 @@ title: Prevent logging of sensitive data in traces
 sidebarTitle: Prevent logging of sensitive data in traces
 ---
 
-In some situations, you may need to prevent the inputs and outputs of your traces from being logged for privacy or security reasons. LangSmith provides a way to filter the inputs and outputs of your traces before they are sent to the LangSmith backend.
+When working with LangSmith traces, you may need to prevent sensitive information from being logged to maintain privacy and comply with security requirements. LangSmith provides multiple approaches to protect your data before it's sent to the backend:
+
+- [Completely hide inputs and outputs](#hide-inputs-and-outputs) using environment variables or [Client](https://reference.langchain.com/python/langsmith/client/Client) configuration.
+- [Hide metadata](#hide-metadata) to remove or transform run metadata.
+- [Apply rule-based masking](#rule-based-masking-of-inputs-and-outputs) with regex patterns or anonymization libraries to selectively redact sensitive information.
+- [Redact secrets from traces](/langsmith/redact-secrets) using the SDK anonymizer with ready-to-use regex patterns for API keys, tokens, and credentials.
+- [Process inputs and outputs for individual functions](#processing-inputs-and-outputs-for-a-single-function) with function-level customization.
+- [Use third-party anonymizers](#examples) like Microsoft Presidio and Amazon Comprehend for advanced PII detection.
+- [Batch process run operations](#batch-processing-for-high-throughput-masking) to apply expensive masking logic across multiple runs at once, reducing per-run overhead. LangSmith processes runs in a background thread, which does not block your application.
+- [Redact inputs and outputs per request](/langsmith/conditional-tracing#conditionally-redact-inputs-and-outputs) using `tracing_context` to mask data only for specific invocations (for example, based on tenant or feature flag) while leaving other traces untouched.
+
+<Note>
+If your compliance or privacy requirements mandate that certain operations should never be traced at all (for example, clients with zero-retention policies), consider using [conditional tracing](/langsmith/conditional-tracing) to disable tracing selectively for specific requests instead of masking data.
+</Note>
+
+## Hide inputs and outputs
 
 If you want to completely hide the inputs and outputs of your traces, you can set the following environment variables when running your application:
 
@@ -14,9 +29,9 @@ LANGSMITH_HIDE_OUTPUTS=true
 
 This works for both the LangSmith SDK (Python and TypeScript) and LangChain.
 
-You can also customize and override this behavior for a given `Client` instance. This can be done by setting the `hide_inputs` and `hide_outputs` parameters on the `Client` object (`hideInputs` and `hideOutputs` in TypeScript).
+You can also customize and override this behavior for a given [Client](https://reference.langchain.com/python/langsmith/client/Client) instance. This can be done by setting the `hide_inputs` and `hide_outputs` parameters on the [Client](https://reference.langchain.com/python/langsmith/client/Client) object (`hideInputs` and `hideOutputs` in TypeScript).
 
-For the example below, we will simply return an empty object for both `hide_inputs` and `hide_outputs`, but you can customize this to your needs.
+The following example returns an empty object for both `hide_inputs` and `hide_outputs`, but you can customize this to your needs:
 
 <CodeGroup>
 
@@ -32,7 +47,7 @@ langsmith_client = Client(
 
 # The trace produced will have its metadata present, but the inputs will be hidden
 openai_client.chat.completions.create(
-    model="gpt-4o-mini",
+    model="gpt-5.4-mini",
     messages=[
         {"role": "system", "content": "You are a helpful assistant."},
         {"role": "user", "content": "Hello!"},
@@ -42,7 +57,7 @@ openai_client.chat.completions.create(
 
 # The trace produced will not have hidden inputs and outputs
 openai_client.chat.completions.create(
-    model="gpt-4o-mini",
+    model="gpt-5.4-mini",
     messages=[
         {"role": "system", "content": "You are a helpful assistant."},
         {"role": "user", "content": "Hello!"},
@@ -65,7 +80,7 @@ const filteredOAIClient = wrapOpenAI(new OpenAI(), {
     client: langsmithClient,
 });
 await filteredOAIClient.chat.completions.create({
-    model: "gpt-4o-mini",
+    model: "gpt-5.4-mini",
     messages: [
         { role: "system", content: "You are a helpful assistant." },
         { role: "user", content: "Hello!" },
@@ -75,7 +90,7 @@ await filteredOAIClient.chat.completions.create({
 const openaiClient = wrapOpenAI(new OpenAI());
 // The trace produced will not have hidden inputs and outputs
 await openaiClient.chat.completions.create({
-    model: "gpt-4o-mini",
+    model: "gpt-5.4-mini",
     messages: [
         { role: "system", content: "You are a helpful assistant." },
         { role: "user", content: "Hello!" },
@@ -84,6 +99,83 @@ await openaiClient.chat.completions.create({
 ```
 
 </CodeGroup>
+
+## Hide metadata
+
+The `hide_metadata` parameter allows you to control whether run metadata is hidden or transformed when tracing with the LangSmith Python SDK. Metadata is passed with the `extra` parameter when creating runs (e.g., `extra={"metadata": {...}}`). `hide_metadata` is useful for removing sensitive information, complying with privacy requirements, or reducing the amount of data sent to LangSmith. You can configure metadata hiding in two ways:
+
+- Using the SDK:
+
+    ```python
+    from langsmith import Client
+
+    client = Client(hide_metadata=True)
+    ```
+
+- Using environment variables:
+
+    ```bash
+    export LANGSMITH_HIDE_METADATA=true
+    ```
+
+The `hide_metadata` parameter accepts three types of values:
+
+- `True`: Completely removes all metadata (sends an empty dictionary).
+- `False` or `None`: Preserves metadata as-is (default behavior).
+- `Callable`: A custom function that transforms the metadata dictionary.
+
+When set, this parameter affects the `metadata` field in the `extra` parameter for all runs created or updated by the [Client](https://reference.langchain.com/python/langsmith/client/Client), including runs created through the `@traceable` decorator or LangChain integrations.
+
+### Hide all metadata
+
+Set `hide_metadata=True` to remove all metadata completely from runs sent to LangSmith:
+
+```python
+from langsmith import Client
+
+# Hide all metadata completely
+client = Client(hide_metadata=True)
+
+# Now when you create runs, metadata will be empty
+client.create_run(
+    "my_run",
+    inputs={"question": "What is 2+2?"},
+    run_type="llm",
+    extra={"metadata": {"user_id": "123", "session": "abc"}}
+)
+# The metadata sent to LangSmith will be {} instead of the provided metadata
+```
+
+### Custom transformation
+
+Use a callable function to selectively filter, redact, or modify metadata before it's sent to LangSmith:
+
+```python
+# Remove sensitive keys
+def hide_sensitive_metadata(metadata: dict) -> dict:
+    return {k: v for k, v in metadata.items() if not k.startswith("_private")}
+
+client = Client(hide_metadata=hide_sensitive_metadata)
+
+# Redact specific values
+def redact_emails(metadata: dict) -> dict:
+    import re
+    result = {}
+    for k, v in metadata.items():
+        if isinstance(v, str) and "@" in v:
+            result[k] = "[REDACTED_EMAIL]"
+        else:
+            result[k] = v
+    return result
+
+client = Client(hide_metadata=redact_emails)
+
+# Add transformation marker
+def add_marker(metadata: dict) -> dict:
+    return {**metadata, "transformed": True}
+
+client = Client(hide_metadata=add_marker)
+```
 
 ## Rule-based masking of inputs and outputs
 
@@ -94,11 +186,15 @@ This feature is available in the following LangSmith SDK versions:
 * TypeScript: 0.1.33 and above
 </Info>
 
-To mask specific data in inputs and outputs, you can use the `create_anonymizer` / `createAnonymizer` function and pass the newly created anonymizer when instantiating the client. The anonymizer can be either constructed from a list of regex patterns and the replacement values or from a function that accepts and returns a string value.
+To mask specific data in inputs and outputs, you can use the `create_anonymizer` / `createAnonymizer` function and pass the newly created anonymizer when instantiating the [Client](https://reference.langchain.com/python/langsmith/client/Client). The anonymizer can be either constructed from a list of regex patterns and the replacement values or from a function that accepts and returns a string value.
+
+<Tip>
+For redacting API keys, tokens, and other credentials, see [Redact secrets from traces](/langsmith/redact-secrets) for ready-to-use regex patterns and recipes.
+</Tip>
 
 The anonymizer will be skipped for inputs if `LANGSMITH_HIDE_INPUTS = true`. Same applies for outputs if `LANGSMITH_HIDE_OUTPUTS = true`.
 
-However, if inputs or outputs are to be sent to client, the `anonymizer` method will take precedence over functions found in `hide_inputs` and `hide_outputs`. By default, the `create_anonymizer` will only look at maximum of 10 nesting levels deep, which can be configured via the `max_depth` parameter.
+However, if inputs or outputs are to be sent to [Client](https://reference.langchain.com/python/langsmith/client/Client), the `anonymizer` method will take precedence over functions found in `hide_inputs` and `hide_outputs`. By default, the `create_anonymizer` will only look at maximum of 10 nesting levels deep, which can be configured via the `max_depth` parameter.
 
 <CodeGroup>
 
@@ -153,12 +249,12 @@ const main = traceable(async (inputs: any) => {
 Please note, that using the anonymizer might incur a performance hit with complex regular expressions or large payloads, as the anonymizer serializes the payload to JSON before processing.
 
 <Note>
-Improving the performance of `anonymizer` API is on our roadmap! If you are encountering performance issues, please contact us at [support@langchain.dev](mailto:support@langchain.dev).
+Improving the performance of `anonymizer` API is on our roadmap! If you are encountering performance issues, please contact support via [support.langchain.com](https://support.langchain.com).
 </Note>
 
-![](/langsmith/images/hide-inputs-outputs.png)
+![Hide inputs outputs](/langsmith/images/hide-inputs-outputs.png)
 
-Older versions of LangSmith SDKs can use the `hide_inputs` and `hide_outputs` parameters to achieve the same effect. You can also use these parameters to process the inputs and outputs more efficiently as well.
+Older versions of LangSmith SDKs can use the `hide_inputs` and `hide_outputs` parameters to achieve the same effect. You can also use these parameters to process the inputs and outputs more efficiently.
 
 <CodeGroup>
 
@@ -257,13 +353,13 @@ await parent(inputs);
 
 </CodeGroup>
 
-## Processing Inputs & Outputs for a Single Function
+## Processing inputs and outputs for a single function
 
 <Info>
 The `process_outputs` parameter is available in LangSmith SDK version 0.1.98 and above for Python.
 </Info>
 
-In addition to client-level input and output processing, LangSmith provides function-level processing through the `process_inputs` and `process_outputs` parameters of the `@traceable` decorator.
+In addition to [Client](https://reference.langchain.com/python/langsmith/client/Client)-level input and output processing, LangSmith provides function-level processing through the `process_inputs` and `process_outputs` parameters of the `@traceable` decorator.
 
 These parameters accept functions that allow you to transform the inputs and outputs of a specific function before they are logged to LangSmith. This is useful for reducing payload size, removing sensitive information, or customizing how an object should be serialized and represented in LangSmith for a particular function.
 
@@ -309,11 +405,11 @@ async def async_function(key: str) -> int:
     return len(key)
 ```
 
-These function-level processors take precedence over client-level processors (`hide_inputs` and `hide_outputs`) when both are defined.
+These function-level processors take precedence over [Client](https://reference.langchain.com/python/langsmith/client/Client)-level processors (`hide_inputs` and `hide_outputs`) when both are defined.
 
-## Quick starts
+## Examples
 
-You can combine rule-based masking with various anonymizers to scrub sensitive information from inputs and outputs. In this how-to-guide, we'll cover working with regex, Microsoft Presidio, and Amazon Comprehend.
+You can combine rule-based masking with various anonymizers to scrub sensitive information from inputs and outputs. The following examples will cover working with regex, Microsoft Presidio, and Amazon Comprehend.
 
 ### Regex
 
@@ -383,14 +479,14 @@ def recursive_anonymize(data, depth=10):
 
 openai_client = wrap_openai(openai.Client())
 
-# Initialize the LangSmith client with the anonymization functions
+# Initialize the LangSmith @[Client] with the anonymization functions
 langsmith_client = Client(
     hide_inputs=recursive_anonymize, hide_outputs=recursive_anonymize
 )
 
 # The trace produced will have its metadata present, but the inputs and outputs will be anonymized
 response_with_anonymization = openai_client.chat.completions.create(
-    model="gpt-4o-mini",
+    model="gpt-5.4-mini",
     messages=[
         {"role": "system", "content": "You are a helpful assistant."},
         {"role": "user", "content": "My name is John Doe, my SSN is 123-45-6789, my credit card number is 4111 1111 1111 1111, my email is john.doe@example.com, and my phone number is (123) 456-7890."},
@@ -400,7 +496,7 @@ response_with_anonymization = openai_client.chat.completions.create(
 
 # The trace produced will not have anonymized inputs and outputs
 response_without_anonymization = openai_client.chat.completions.create(
-    model="gpt-4o-mini",
+    model="gpt-5.4-mini",
     messages=[
         {"role": "system", "content": "You are a helpful assistant."},
         {"role": "user", "content": "My name is John Doe, my SSN is 123-45-6789, my credit card number is 4111 1111 1111 1111, my email is john.doe@example.com, and my phone number is (123) 456-7890."},
@@ -493,14 +589,14 @@ def presidio_anonymize(data):
 
 openai_client = wrap_openai(openai.Client())
 
-# initialize the langsmith client with the anonymization functions
+# initialize the langsmith @[Client] with the anonymization functions
 langsmith_client = Client(
   hide_inputs=presidio_anonymize, hide_outputs=presidio_anonymize
 )
 
 # The trace produced will have its metadata present, but the inputs and outputs will be anonymized
 response_with_anonymization = openai_client.chat.completions.create(
-  model="gpt-4o-mini",
+  model="gpt-5.4-mini",
   messages=[
       {"role": "system", "content": "You are a helpful assistant."},
       {"role": "user", "content": "My name is Slim Shady, call me at 313-666-7440 or email me at real.slim.shady@gmail.com"},
@@ -510,7 +606,7 @@ response_with_anonymization = openai_client.chat.completions.create(
 
 # The trace produced will not have anonymized inputs and outputs
 response_without_anonymization = openai_client.chat.completions.create(
-  model="gpt-4o-mini",
+  model="gpt-5.4-mini",
   messages=[
       {"role": "system", "content": "You are a helpful assistant."},
       {"role": "user", "content": "My name is Slim Shady, call me at 313-666-7440 or email me at real.slim.shady@gmail.com"},
@@ -554,7 +650,7 @@ uv add openai
 ```
 </CodeGroup>
 
-You will need to set up credentials in AWS and authenticate using the AWS CLI. Follow the instructions [here](https://docs.aws.amazon.com/comprehend/latest/dg/setting-up.html).
+You will need to set up credentials in AWS and authenticate using the AWS CLI. Follow the [AWS Comprehend setup instructions](https://docs.aws.amazon.com/comprehend/latest/dg/setting-up.html).
 
 ```python
 import openai
@@ -635,14 +731,14 @@ def comprehend_anonymize(data):
 
 openai_client = wrap_openai(openai.Client())
 
-# initialize the langsmith client with the anonymization functions
+# initialize the langsmith @[Client] with the anonymization functions
 langsmith_client = Client(
   hide_inputs=comprehend_anonymize, hide_outputs=comprehend_anonymize
 )
 
 # The trace produced will have its metadata present, but the inputs and outputs will be anonymized
 response_with_anonymization = openai_client.chat.completions.create(
-  model="gpt-4o-mini",
+  model="gpt-5.4-mini",
   messages=[
       {"role": "system", "content": "You are a helpful assistant."},
       {"role": "user", "content": "My name is Slim Shady, call me at 313-666-7440 or email me at real.slim.shady@gmail.com"},
@@ -652,7 +748,7 @@ response_with_anonymization = openai_client.chat.completions.create(
 
 # The trace produced will not have anonymized inputs and outputs
 response_without_anonymization = openai_client.chat.completions.create(
-  model="gpt-4o-mini",
+  model="gpt-5.4-mini",
   messages=[
       {"role": "system", "content": "You are a helpful assistant."},
       {"role": "user", "content": "My name is Slim Shady, call me at 313-666-7440 or email me at real.slim.shady@gmail.com"},
@@ -664,11 +760,129 @@ The anonymized run will look like this in LangSmith: ![Anonymized run](/langsmit
 
 The non-anonymized run will look like this in LangSmith: ![Non-anonymized run](/langsmith/images/aws-comprehend-not-anonymized.png)
 
+### Batch processing for high-throughput masking
+
+<Info>
+[`process_buffered_run_ops`](https://reference.langchain.com/python/langsmith/client/Client) is available in the [Python SDK only](/langsmith/smith-python-sdk).
+</Info>
+
+The previous approaches on this page process each run individually. If your masking logic involves a rate-limited API or model inference—such as the Presidio or Amazon Comprehend examples—processing runs one at a time can create a bottleneck. [`process_buffered_run_ops`](https://reference.langchain.com/python/langsmith/client/Client) lets you intercept a batch of raw run dicts before they are serialized and sent to the API, so you can amortize the cost across multiple runs at once. LangSmith processes these runs in a background thread, which does not block your application.
+
+LangSmith holds runs in an in-memory buffer and flushes them as a batch when either:
+
+- `run_ops_buffer_size` run operations have accumulated, or
+- `run_ops_buffer_timeout_ms` milliseconds have elapsed since the last run was added (default: 5000 ms).
+
+Your function receives the batch as a list of raw run dicts and must return a list of the **same length**, in the **same order**, with **run IDs unchanged**. Breaking either constraint raises a `ValueError`.
+
+<Note>
+`run_ops_buffer_size` counts individual run *operations*, not unique runs. Each traced call typically produces two operations: a create (when the run starts) and an update (when it ends with outputs). Set your buffer size accordingly. For example, `run_ops_buffer_size=1000` will buffer approximately 500 traced calls. Because of this, the same run ID may appear twice in a single batch: once with inputs and once with outputs.
+</Note>
+
+<Warning>
+The buffer only flushes automatically when the size limit is reached or the timeout elapses. Always call `client.flush()` before your program exits to avoid dropping buffered runs.
+</Warning>
+
+Each run dict in the batch is either a create operation (with `inputs`, sent when the run starts) or an update operation (with `outputs`, sent when it ends). Here's what a typical pair looks like for a single traced call:
+
+```json
+# Create op — sent when the run starts
+{
+    "id": "018f1b2c-...",
+    "name": "my_llm_call",
+    "run_type": "llm",
+    "inputs": {"messages": [{"role": "user", "content": "My name is Jane Smith..."}]},
+    "start_time": "2024-01-01T00:00:00.000Z",
+    "trace_id": "018f1b2c-...",
+    "dotted_order": "20240101T000000000000Z018f1b2c-...",
+    "extra": {"metadata": {}, "runtime": {...}},
+    "session_name": "default",
+}
+
+# Update op — sent when the run ends (same id, adds outputs)
+{
+    "id": "018f1b2c-...",
+    "outputs": {"choices": [{"message": {"role": "assistant", "content": "Hello Jane..."}}]},
+    "end_time": "2024-01-01T00:00:01.000Z",
+    "trace_id": "018f1b2c-...",
+    "dotted_order": "20240101T000000000000Z018f1b2c-...",
+}
+```
+
+The following example uses Comprehend's [`batch_detect_entities` endpoint](https://docs.aws.amazon.com/comprehend/latest/APIReference/API_BatchDetectEntities.html), which accepts up to 25 texts per call. With the per-run approach (`hide_inputs`) you would make one API call per run. Here, all message texts across the entire buffer are gathered first, then sent to Comprehend in chunks of 25, which results in significantly fewer API calls at high throughput.
+
+```python
+import boto3
+from langsmith import Client, traceable
+
+comprehend = boto3.client("comprehend", region_name="us-east-1")
+
+def redact_entities(text: str, entities: list) -> str:
+    for entity in sorted(entities, key=lambda e: e["BeginOffset"], reverse=True):
+        placeholder = f"[{entity['Type']}]"
+        text = text[:entity["BeginOffset"]] + placeholder + text[entity["EndOffset"]:]
+    return text
+
+def comprehend_anonymize_batch(runs: list[dict]) -> list[dict]:
+    # Collect all message texts and remember where they came from.
+    # Note: the same run ID may appear twice — once as a create (with inputs)
+    # and once as an update (with outputs).
+    locations = []  # (run_idx, field, msg_idx)
+    texts = []
+    for run_idx, run in enumerate(runs):
+        for field in ("inputs", "outputs"):
+            data = run.get(field)
+            if not isinstance(data, dict):
+                continue
+            for msg_idx, message in enumerate(data.get("messages") or []):
+                content = message.get("content", "")
+                if content.strip():
+                    locations.append((run_idx, field, msg_idx))
+                    texts.append(content)
+
+    # Send all texts to Comprehend in batches of 25 (API limit).
+    # For 1000 ops (~500 runs) with 2 messages each: 40 API calls instead of 1000.
+    redacted_texts = []
+    for i in range(0, len(texts), 25):
+        chunk = texts[i : i + 25]
+        response = comprehend.batch_detect_entities(
+            TextList=chunk, LanguageCode="en"
+        )
+        for text, result in zip(chunk, response["ResultList"]):
+            redacted_texts.append(redact_entities(text, result.get("Entities", [])))
+
+    # Write redacted text back into the run dicts
+    for (run_idx, field, msg_idx), redacted in zip(locations, redacted_texts):
+        runs[run_idx][field]["messages"][msg_idx]["content"] = redacted
+
+    return runs
+
+client = Client(
+    process_buffered_run_ops=comprehend_anonymize_batch,
+    run_ops_buffer_size=1000,        # ~500 traced calls (2 ops each: create + update)
+    run_ops_buffer_timeout_ms=3000,  # or after 3 seconds, whichever comes first
+)
+
+@traceable(client=client)
+def my_llm_call(messages: list) -> dict:
+    # ... your LLM call ...
+    pass
+
+try:
+    my_llm_call([{"role": "user", "content": "My name is Jane Smith, call me at 555-867-5309"}])
+finally:
+    client.flush()  # always flush before exit
+```
+
+[`process_buffered_run_ops`](https://reference.langchain.com/python/langsmith/client/Client) and `run_ops_buffer_size` must always be set together—providing one without the other raises a `ValueError`.
+
 ---
 
-<Callout icon="pen-to-square" iconType="regular">
-    [Edit the source of this page on GitHub.](https://github.com/langchain-ai/docs/edit/main/src/langsmith/mask-inputs-outputs.mdx)
+<div className="source-links">
+<Callout icon="terminal-2">
+    [Connect these docs](/use-these-docs) to Claude, VSCode, and more via MCP for real-time answers.
 </Callout>
-<Tip icon="terminal" iconType="regular">
-    [Connect these docs programmatically](/use-these-docs) to Claude, VSCode, and more via MCP for    real-time answers.
-</Tip>
+<Callout icon="edit">
+    [Edit this page on GitHub](https://github.com/langchain-ai/docs/edit/main/src/langsmith/mask-inputs-outputs.mdx) or [file an issue](https://github.com/langchain-ai/docs/issues/new/choose).
+</Callout>
+</div>

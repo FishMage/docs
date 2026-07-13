@@ -1,5 +1,6 @@
 ---
-title: Google Cloud SQL for SQL server
+title: "Google cloud SQL for SQL server integration"
+description: "Integrate with the Google cloud SQL for SQL server document loader using LangChain Python."
 ---
 
 > [Cloud SQL](https://cloud.google.com/sql) is a fully managed relational database service that offers high performance, seamless integration, and impressive scalability. It offers [MySQL](https://cloud.google.com/sql/mysql), [PostgreSQL](https://cloud.google.com/sql/postgres), and [SQL Server](https://cloud.google.com/sql/sqlserver) database engines. Extend your database application to build AI-powered experiences leveraging Cloud SQL's LangChain integrations.
@@ -10,7 +11,7 @@ Learn more about the package on [GitHub](https://github.com/googleapis/langchain
 
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/googleapis/langchain-google-cloud-sql-mssql-python/blob/main/docs/document_loader.ipynb)
 
-## Before You Begin
+## Before you begin
 
 To run this notebook, you will need to do the following:
 
@@ -36,7 +37,7 @@ DATABASE = "test"  # @param {type:"string"}
 TABLE_NAME = "test-default"  # @param {type:"string"}
 ```
 
-### 🦜🔗 Library Installation
+### 🦜🔗 Library installation
 
 The integration lives in its own `langchain-google-cloud-sql-mssql` package, so we need to install it.
 
@@ -59,7 +60,7 @@ pip install -qU langchain-google-cloud-sql-mssql
 Authenticate to Google Cloud as the IAM user logged into this notebook in order to access your Google Cloud Project.
 
 * If you are using Colab to run this notebook, use the cell below and continue.
-* If you are using Vertex AI Workbench, check out the setup instructions [here](https://github.com/GoogleCloudPlatform/generative-ai/tree/main/setup-env).
+* If you are using Vertex AI Workbench, check out the [Vertex AI Workbench setup instructions](https://github.com/GoogleCloudPlatform/generative-ai/tree/main/setup-env).
 
 ```python
 from google.colab import auth
@@ -67,7 +68,7 @@ from google.colab import auth
 auth.authenticate_user()
 ```
 
-### ☁ Set Your Google Cloud Project
+### ☁ Set your Google cloud project
 
 Set your Google Cloud project so that you can leverage Google Cloud resources within this notebook.
 
@@ -86,7 +87,7 @@ PROJECT_ID = "my-project-id"  # @param {type:"string"}
 !gcloud config set project {PROJECT_ID}
 ```
 
-### 💡 API Enablement
+### 💡 API enablement
 
 The `langchain-google-cloud-sql-mssql` package requires that you [enable the Cloud SQL Admin API](https://console.cloud.google.com/flows/enableapi?apiid=sqladmin.googleapis.com) in your Google Cloud Project.
 
@@ -95,9 +96,9 @@ The `langchain-google-cloud-sql-mssql` package requires that you [enable the Clo
 !gcloud services enable sqladmin.googleapis.com
 ```
 
-## Basic Usage
+## Basic usage
 
-### MSSQLEngine Connection Pool
+### MSSQLEngine connection pool
 
 Before saving or loading documents from MSSQL table, we need first configures a connection pool to Cloud SQL database. The `MSSQLEngine` configures a [SQLAlchemy connection pool](https://docs.sqlalchemy.org/en/20/core/pooling.html#module-sqlalchemy.pool) to your Cloud SQL database, enabling successful connections from your application and following industry best practices.
 
@@ -196,7 +197,7 @@ onedoc = loader.load()
 onedoc
 ```
 
-The view generated from SQL query can have different schema than default table. In such cases, the behavior of MSSQLLoader is the same as loading from table with non-default schema. Please refer to section [Load documents with customized document page content & metadata](#load-documents-with-customized-document-page-content--metadata).
+The view generated from SQL query can have different schema than default table. In such cases, the behavior of MSSQLLoader is the same as loading from table with non-default schema. Please refer to section [Load documents with customized document page content & metadata](#load-documents-with-customized-document-page-content-and-metadata).
 
 ### Delete documents
 
@@ -219,9 +220,9 @@ saver.delete(onedoc)
 print("Documents after delete:", loader.load())
 ```
 
-## Advanced Usage
+## Advanced usage
 
-### Load documents with customized document page content & metadata
+### Load documents with customized document page content and metadata
 
 First we prepare an example table with non-default schema, and populate it with some arbitrary data.
 
@@ -384,9 +385,11 @@ print("Documents after delete:", loader.load())
 
 ---
 
-<Callout icon="pen-to-square" iconType="regular">
-    [Edit the source of this page on GitHub.](https://github.com/langchain-ai/docs/edit/main/src/oss/python/integrations/document_loaders/google_cloud_sql_mssql.mdx)
+<div className="source-links">
+<Callout icon="terminal-2">
+    [Connect these docs](/use-these-docs) to Claude, VSCode, and more via MCP for real-time answers.
 </Callout>
-<Tip icon="terminal" iconType="regular">
-    [Connect these docs programmatically](/use-these-docs) to Claude, VSCode, and more via MCP for    real-time answers.
-</Tip>
+<Callout icon="edit">
+    [Edit this page on GitHub](https://github.com/langchain-ai/docs/edit/main/src/oss/python/integrations/document_loaders/google_cloud_sql_mssql.mdx) or [file an issue](https://github.com/langchain-ai/docs/issues/new/choose).
+</Callout>
+</div>

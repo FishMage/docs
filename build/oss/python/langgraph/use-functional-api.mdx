@@ -3,9 +3,10 @@ title: Use the functional API
 sidebarTitle: Use the Functional API
 ---
 
+import LanggraphFunctionalApiStreamCustomDataPy from '/snippets/code-samples/langgraph-functional-api-stream-custom-data-py.mdx';
+import LanggraphFunctionalApiStreamCustomDataJs from '/snippets/code-samples/langgraph-functional-api-stream-custom-data-js.mdx';
 
-
-The [**Functional API**](/oss/python/langgraph/functional-api) allows you to add LangGraph's key features — [persistence](/oss/python/langgraph/persistence), [memory](/oss/python/langgraph/add-memory), [human-in-the-loop](/oss/python/langgraph/interrupts), and [streaming](/oss/python/langgraph/streaming) — to your applications with minimal changes to your existing code.
+The [**Functional API**](/oss/python/langgraph/functional-api) allows you to add LangGraph's key features ([persistence](/oss/python/langgraph/persistence), [memory](/oss/python/langgraph/add-memory), [human-in-the-loop](/oss/python/langgraph/interrupts), and [streaming](/oss/python/langgraph/streaming)) to your applications with minimal changes to your existing code.
 
 <Tip>
 For conceptual information on the functional API, see [Functional API](/oss/python/langgraph/functional-api).
@@ -30,7 +31,7 @@ my_workflow.invoke({"value": 1, "another_value": 2})
 
 <Accordion title="Extended example: simple workflow">
   ```python
-  import uuid
+  from langchain_core.utils.uuid import uuid7
   from langgraph.func import entrypoint, task
   from langgraph.checkpoint.memory import InMemorySaver
 
@@ -54,7 +55,7 @@ my_workflow.invoke({"value": 1, "another_value": 2})
       return format_message(even).result()
 
   # Run the workflow with a unique thread ID
-  config = {"configurable": {"thread_id": str(uuid.uuid4())}}
+  config = {"configurable": {"thread_id": str(uuid7())}}
   result = workflow.invoke({"number": 7}, config=config)
   print(result)
   ```
@@ -94,7 +95,7 @@ my_workflow.invoke({"value": 1, "another_value": 2})
       return compose_essay(topic).result()
 
   # Execute the workflow
-  config = {"configurable": {"thread_id": str(uuid.uuid4())}}
+  config = {"configurable": {"thread_id": str(uuid7())}}
   result = workflow.invoke("the history of flight", config=config)
   print(result)
   ```
@@ -153,7 +154,7 @@ def graph(numbers: list[int]) -> list[str]:
       return "\n\n".join(paragraphs)
 
   # Run the workflow
-  config = {"configurable": {"thread_id": str(uuid.uuid4())}}
+  config = {"configurable": {"thread_id": str(uuid7())}}
   result = workflow.invoke(["quantum computing", "climate change", "history of aviation"], config=config)
   print(result)
   ```
@@ -222,7 +223,7 @@ def some_workflow(some_input: dict) -> int:
       return {"bar": result["foo"]}
 
   # Execute the workflow
-  config = {"configurable": {"thread_id": str(uuid.uuid4())}}
+  config = {"configurable": {"thread_id": str(uuid7())}}
   print(workflow.invoke(5, config=config))  # Output: {'bar': 10}
   ```
 
@@ -269,7 +270,7 @@ def my_workflow(inputs: dict) -> int:
       return {"product": result}
 
   # Execute the main workflow
-  config = {"configurable": {"thread_id": str(uuid.uuid4())}}
+  config = {"configurable": {"thread_id": str(uuid7())}}
   print(main.invoke({"x": 6, "y": 7}, config=config))  # Output: {'product': 42}
   ```
 
@@ -282,51 +283,20 @@ def my_workflow(inputs: dict) -> int:
 The **Functional API** uses the same streaming mechanism as the **Graph API**. Please
 read the [**streaming guide**](/oss/python/langgraph/streaming) section for more details.
 
-Example of using the streaming API to stream both updates and custom data.
+Example of using the streaming API to stream value chunks from a workflow run.
 
-```python
-from langgraph.func import entrypoint
-from langgraph.checkpoint.memory import InMemorySaver
-from langgraph.config import get_stream_writer   # [!code highlight]
+<LanggraphFunctionalApiStreamCustomDataPy />
 
-checkpointer = InMemorySaver()
-
-@entrypoint(checkpointer=checkpointer)
-def main(inputs: dict) -> int:
-    writer = get_stream_writer()   # [!code highlight]
-    writer("Started processing")   # [!code highlight]
-    result = inputs["x"] * 2
-    writer(f"Result is {result}")   # [!code highlight]
-    return result
-
-config = {"configurable": {"thread_id": "abc"}}
-
-for mode, chunk in main.stream(   # [!code highlight]
-    {"x": 5},
-    stream_mode=["custom", "updates"],   # [!code highlight]
-    config=config
-):
-    print(f"{mode}: {chunk}")
-```
-
-1. Import [`get_stream_writer`](https://reference.langchain.com/python/langgraph/config/#langgraph.config.get_stream_writer) from `langgraph.config`.
+1. Import [`get_stream_writer`](https://reference.langchain.com/python/langgraph/config/get_stream_writer) from `langgraph.config`.
 2. Obtain a stream writer instance within the entrypoint.
 3. Emit custom data before computation begins.
 4. Emit another custom message after computing the result.
-5. Use `.stream()` to process streamed output.
-6. Specify which streaming modes to use.
-
-```pycon
-('updates', {'add_one': 2})
-('updates', {'add_two': 3})
-('custom', 'hello')
-('custom', 'world')
-('updates', {'main': 5})
-```
+5. Use `stream_events()` to process streamed output.
+6. Iterate over `(mode, chunk)` pairs from `interleave("values")`.
 
 <Warning>
 **Async with Python < 3.11**
-If using Python < 3.11 and writing async code, using [`get_stream_writer`](https://reference.langchain.com/python/langgraph/config/#langgraph.config.get_stream_writer) will not work. Instead please
+If using Python < 3.11 and writing async code, using [`get_stream_writer`](https://reference.langchain.com/python/langgraph/config/get_stream_writer) will not work. Instead please
 use the `StreamWriter` class directly. See [Async with Python < 3.11](/oss/python/langgraph/streaming#async) for more details.
 
 ```python
@@ -387,7 +357,45 @@ main.invoke({'any_input': 'foobar'}, config=config)
 
 
 
-## Caching Tasks
+## Set task and entrypoint timeouts
+
+Use the `timeout` parameter with `@task` or `@entrypoint` to limit how long a single async attempt can run. Provide the timeout in seconds or as a `datetime.timedelta`.
+
+```python
+import asyncio
+
+from langgraph.errors import NodeTimeoutError
+from langgraph.func import entrypoint, task
+from langgraph.types import RetryPolicy
+
+
+@task(
+    timeout=1.0,
+    retry_policy=RetryPolicy(retry_on=NodeTimeoutError),
+)
+async def call_api(url: str) -> str:
+    await asyncio.sleep(2)
+    return f"result from {url}"
+
+
+@entrypoint(timeout=5.0)
+async def workflow(inputs: dict) -> str:
+    return await call_api(inputs["url"])
+
+
+try:
+    await workflow.ainvoke({"url": "https://example.com"})
+except NodeTimeoutError:
+    print("Task timed out")
+```
+
+Timeouts are supported only for async tasks and entrypoints. If you set `timeout` on a sync function, LangGraph raises an error when the task or entrypoint is declared.
+
+When a task or entrypoint exceeds its timeout, LangGraph raises `NodeTimeoutError`, which subclasses Python's built-in `TimeoutError`. If a retry policy retries `TimeoutError` or `NodeTimeoutError`, the timed-out attempt is retried. The timeout applies to each attempt independently, so the timer resets for every retry.
+
+
+
+## Caching tasks
 
 ```python
 import time
@@ -409,12 +417,9 @@ def main(inputs: dict) -> dict[str, int]:
     return {"result1": result1, "result2": result2}
 
 
-for chunk in main.stream({"x": 5}, stream_mode="updates"):
-    print(chunk)
-
-#> {'slow_add': 10}
-#> {'slow_add': 10, '__metadata__': {'cached': True}}
-#> {'main': {'result1': 10, 'result2': 10}}
+stream = main.stream_events({"x": 5}, version="v3")
+for snapshot in stream.values:
+    print(snapshot)
 ```
 
 1. `ttl` is specified in seconds. The cache will be invalidated after this time.
@@ -504,7 +509,7 @@ main.invoke(None, config=config)
 
 ## Human-in-the-loop
 
-The functional API supports [human-in-the-loop](/oss/python/langgraph/interrupts) workflows using the [`interrupt`](https://reference.langchain.com/python/langgraph/types/#langgraph.types.interrupt) function and the `Command` primitive.
+The functional API supports [human-in-the-loop](/oss/python/langgraph/interrupts) workflows using the [`interrupt`](https://reference.langchain.com/python/langgraph/types/interrupt) function and the `Command` primitive.
 
 ### Basic human-in-the-loop workflow
 
@@ -561,28 +566,30 @@ def graph(input_query):
 
 
 
-[interrupt()](/oss/python/langgraph/interrupts#pause-using-interrupt) is called inside a task, enabling a human to review and edit the output of the previous task. The results of prior tasks-- in this case `step_1`-- are persisted, so that they are not run again following the [`interrupt`](https://reference.langchain.com/python/langgraph/types/#langgraph.types.interrupt).
+[interrupt()](/oss/python/langgraph/interrupts#pause-using-interrupt) is called inside a task, enabling a human to review and edit the output of the previous task. The results of prior tasks-- in this case `step_1`-- are persisted, so that they are not run again following the [`interrupt`](https://reference.langchain.com/python/langgraph/types/interrupt).
 
 Let's send in a query string:
 
 ```python
 config = {"configurable": {"thread_id": "1"}}
 
-for event in graph.stream("foo", config):
-    print(event)
-    print("\n")
+stream = graph.stream_events("foo", config, version="v3")
+for message in stream.messages:
+    for token in message.text:
+        print(token, end="", flush=True)
 ```
 
 
 
 
-Note that we've paused with an [`interrupt`](https://reference.langchain.com/python/langgraph/types/#langgraph.types.interrupt) after `step_1`. The interrupt provides instructions to resume the run. To resume, we issue a [`Command`](/oss/python/langgraph/interrupts#resuming-interrupts) containing the data expected by the `human_feedback` task.
+Note that we've paused with an [`interrupt`](https://reference.langchain.com/python/langgraph/types/interrupt) after `step_1`. The interrupt provides instructions to resume the run. To resume, we issue a [`Command`](/oss/python/langgraph/interrupts#resuming-interrupts) containing the data expected by the `human_feedback` task.
 
 ```python
 # Continue execution
-for event in graph.stream(Command(resume="baz"), config):
-    print(event)
-    print("\n")
+stream = graph.stream_events(Command(resume="baz"), config, version="v3")
+for message in stream.messages:
+    for token in message.text:
+        print(token, end="", flush=True)
 ```
 
 
@@ -594,7 +601,7 @@ After resuming, the run proceeds through the remaining step and terminates as ex
 
 To review tool calls before execution, we add a `review_tool_call` function that calls [`interrupt`](/oss/python/langgraph/interrupts#pause-using-interrupt). When this function is called, execution will be paused until we issue a command to resume it.
 
-Given a tool call, our function will [`interrupt`](https://reference.langchain.com/python/langgraph/types/#langgraph.types.interrupt) for human review. At that point we can either:
+Given a tool call, our function will [`interrupt`](https://reference.langchain.com/python/langgraph/types/interrupt) for human review. At that point we can either:
 
 * Accept the tool call
 * Revise the tool call and continue
@@ -627,7 +634,7 @@ def review_tool_call(tool_call: ToolCall) -> Union[ToolCall, ToolMessage]:
 
 
 
-We can now update our [entrypoint](/oss/python/langgraph/functional-api#entrypoint) to review the generated tool calls. If a tool call is accepted or revised, we execute in the same way as before. Otherwise, we just append the [`ToolMessage`](https://reference.langchain.com/python/langchain/messages/#langchain.messages.ToolMessage) supplied by the human. The results of prior tasks — in this case the initial model call — are persisted, so that they are not run again following the [`interrupt`](https://reference.langchain.com/python/langgraph/types/#langgraph.types.interrupt).
+We can now update our [entrypoint](/oss/python/langgraph/functional-api#entrypoint) to review the generated tool calls. If a tool call is accepted or revised, we execute in the same way as before. Otherwise, we just append the [`ToolMessage`](https://reference.langchain.com/python/langchain-core/messages/tool/ToolMessage) supplied by the human. The results of prior tasks—in this case the initial model call—are persisted, so that they are not run again following the [`interrupt`](https://reference.langchain.com/python/langgraph/types/interrupt).
 
 ```python
 from langgraph.checkpoint.memory import InMemorySaver
@@ -849,7 +856,7 @@ from langgraph.func import entrypoint, task
 from langgraph.checkpoint.memory import InMemorySaver
 from langchain_anthropic import ChatAnthropic
 
-model = ChatAnthropic(model="claude-sonnet-4-5-20250929")
+model = ChatAnthropic(model="claude-sonnet-4-6")
 
 @task
 def call_model(messages: list[BaseMessage]):
@@ -868,12 +875,14 @@ def workflow(inputs: list[BaseMessage], *, previous: list[BaseMessage]):
 
 config = {"configurable": {"thread_id": "1"}}
 input_message = {"role": "user", "content": "hi! I'm bob"}
-for chunk in workflow.stream([input_message], config, stream_mode="values"):
-    chunk.pretty_print()
+stream = workflow.stream_events([input_message], config, version="v3")
+for snapshot in stream.values:
+    print(snapshot)
 
 input_message = {"role": "user", "content": "what's my name?"}
-for chunk in workflow.stream([input_message], config, stream_mode="values"):
-    chunk.pretty_print()
+stream = workflow.stream_events([input_message], config, version="v3")
+for snapshot in stream.values:
+    print(snapshot)
 ```
 
 
@@ -889,13 +898,15 @@ for chunk in workflow.stream([input_message], config, stream_mode="values"):
 
 ## Integrate with other libraries
 
-* [Add LangGraph's features to other frameworks using the functional API](/langsmith/autogen-integration): Add LangGraph features like persistence, memory and streaming to other agent frameworks that do not provide them out of the box.
+* [Add LangGraph's features to other frameworks using the functional API](/langsmith/deploy-other-frameworks): Add LangGraph features like persistence, memory and streaming to other agent frameworks that do not provide them out of the box.
 
 ---
 
-<Callout icon="pen-to-square" iconType="regular">
-    [Edit the source of this page on GitHub.](https://github.com/langchain-ai/docs/edit/main/src/oss/langgraph/use-functional-api.mdx)
+<div className="source-links">
+<Callout icon="terminal-2">
+    [Connect these docs](/use-these-docs) to Claude, VSCode, and more via MCP for real-time answers.
 </Callout>
-<Tip icon="terminal" iconType="regular">
-    [Connect these docs programmatically](/use-these-docs) to Claude, VSCode, and more via MCP for    real-time answers.
-</Tip>
+<Callout icon="edit">
+    [Edit this page on GitHub](https://github.com/langchain-ai/docs/edit/main/src/oss/langgraph/use-functional-api.mdx) or [file an issue](https://github.com/langchain-ai/docs/issues/new/choose).
+</Callout>
+</div>
