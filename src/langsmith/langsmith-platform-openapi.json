@@ -10585,7 +10585,7 @@
           "feedback"
         ],
         "summary": "Eagerly Create Feedback",
-        "description": "Create a new feedback.\n\nThis method is invoked under the assumption that the run\nis already visible in the app, thus already present in DB",
+        "description": "Deprecated: use POST /feedback instead.\n\nThis method is invoked under the assumption that the run\nis already visible in the app, thus already present in DB",
         "operationId": "eagerly_create_feedback_api_v1_feedback_eager_post",
         "requestBody": {
           "content": {
@@ -10619,6 +10619,7 @@
             }
           }
         },
+        "deprecated": true,
         "security": [
           {
             "API Key": []
@@ -13197,7 +13198,7 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "default": true,
+              "default": false,
               "title": "Extend Trace Retention"
             }
           }
@@ -13430,7 +13431,7 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "default": true,
+              "default": false,
               "title": "Extend Trace Retention"
             }
           }
@@ -25837,10 +25838,10 @@
             "name": "limit",
             "in": "query",
             "schema": {
-              "minimum": 1,
               "type": "integer",
-              "maximum": 100,
               "default": 20,
+              "minimum": 1,
+              "maximum": 100,
               "title": "Limit"
             }
           },
@@ -25849,9 +25850,9 @@
             "name": "offset",
             "in": "query",
             "schema": {
-              "minimum": 0,
               "type": "integer",
               "default": 0,
+              "minimum": 0,
               "title": "Offset"
             }
           },
@@ -27772,10 +27773,10 @@
             "name": "limit",
             "in": "query",
             "schema": {
-              "minimum": 1,
               "type": "integer",
-              "maximum": 100,
               "default": 50,
+              "minimum": 1,
+              "maximum": 100,
               "title": "Limit"
             }
           },
@@ -27783,9 +27784,9 @@
             "name": "offset",
             "in": "query",
             "schema": {
-              "minimum": 0,
               "type": "integer",
               "default": 0,
+              "minimum": 0,
               "title": "Offset"
             }
           }
@@ -39977,10 +39978,10 @@
             "name": "page_size",
             "in": "query",
             "schema": {
-              "minimum": 1,
               "type": "integer",
-              "maximum": 100,
               "default": 20,
+              "minimum": 1,
+              "maximum": 100,
               "title": "Page Size"
             }
           },
@@ -46528,6 +46529,66 @@
         ],
         "title": "CustomChartCreatePreview"
       },
+      "CustomChartFeedbackScoreMetricScalar": {
+        "properties": {
+          "type": {
+            "anyOf": [
+              {
+                "type": "string",
+                "const": "max"
+              },
+              {
+                "type": "string",
+                "const": "min"
+              },
+              {
+                "type": "string",
+                "const": "avg"
+              }
+            ],
+            "title": "Type"
+          },
+          "field": {
+            "type": "string",
+            "const": "feedback_score",
+            "title": "Field"
+          },
+          "filter": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Filter"
+          },
+          "params": {
+            "$ref": "#/components/schemas/CustomChartFeedbackScoreMetricScalarParams"
+          }
+        },
+        "type": "object",
+        "required": [
+          "type",
+          "field",
+          "params"
+        ],
+        "title": "CustomChartFeedbackScoreMetricScalar"
+      },
+      "CustomChartFeedbackScoreMetricScalarParams": {
+        "properties": {
+          "feedback_key": {
+            "type": "string",
+            "title": "Feedback Key"
+          }
+        },
+        "type": "object",
+        "required": [
+          "feedback_key"
+        ],
+        "title": "CustomChartFeedbackScoreMetricScalarParams"
+      },
       "CustomChartFilterByDataset": {
         "properties": {
           "source_type": {
@@ -46733,7 +46794,8 @@
           "completion_tokens",
           "total_cost",
           "prompt_cost",
-          "completion_cost"
+          "completion_cost",
+          "feedback_score"
         ],
         "title": "CustomChartMetricField"
       },
@@ -46798,6 +46860,9 @@
                 "$ref": "#/components/schemas/CustomChartMetricCount"
               },
               {
+                "$ref": "#/components/schemas/CustomChartFeedbackScoreMetricScalar"
+              },
+              {
                 "$ref": "#/components/schemas/CustomChartMetricScalar"
               },
               {
@@ -46810,6 +46875,9 @@
             "anyOf": [
               {
                 "$ref": "#/components/schemas/CustomChartMetricCount"
+              },
+              {
+                "$ref": "#/components/schemas/CustomChartFeedbackScoreMetricScalar"
               },
               {
                 "$ref": "#/components/schemas/CustomChartMetricScalar"
@@ -46842,6 +46910,9 @@
                 "$ref": "#/components/schemas/CustomChartMetricCount"
               },
               {
+                "$ref": "#/components/schemas/CustomChartFeedbackScoreMetricScalar"
+              },
+              {
                 "$ref": "#/components/schemas/CustomChartMetricScalar"
               },
               {
@@ -46854,6 +46925,9 @@
             "anyOf": [
               {
                 "$ref": "#/components/schemas/CustomChartMetricCount"
+              },
+              {
+                "$ref": "#/components/schemas/CustomChartFeedbackScoreMetricScalar"
               },
               {
                 "$ref": "#/components/schemas/CustomChartMetricScalar"
@@ -47071,6 +47145,9 @@
                 "$ref": "#/components/schemas/CustomChartMetricCount"
               },
               {
+                "$ref": "#/components/schemas/CustomChartFeedbackScoreMetricScalar"
+              },
+              {
                 "$ref": "#/components/schemas/CustomChartMetricScalar"
               },
               {
@@ -47215,6 +47292,9 @@
                 "$ref": "#/components/schemas/CustomChartMetricCount"
               },
               {
+                "$ref": "#/components/schemas/CustomChartFeedbackScoreMetricScalar"
+              },
+              {
                 "$ref": "#/components/schemas/CustomChartMetricScalar"
               },
               {
@@ -47357,6 +47437,9 @@
             "anyOf": [
               {
                 "$ref": "#/components/schemas/CustomChartMetricCount"
+              },
+              {
+                "$ref": "#/components/schemas/CustomChartFeedbackScoreMetricScalar"
               },
               {
                 "$ref": "#/components/schemas/CustomChartMetricScalar"
@@ -47542,6 +47625,9 @@
             "anyOf": [
               {
                 "$ref": "#/components/schemas/CustomChartMetricCount"
+              },
+              {
+                "$ref": "#/components/schemas/CustomChartFeedbackScoreMetricScalar"
               },
               {
                 "$ref": "#/components/schemas/CustomChartMetricScalar"
@@ -58608,7 +58694,7 @@
           "extend_trace_retention": {
             "type": "boolean",
             "title": "Extend Trace Retention",
-            "default": true
+            "default": false
           }
         },
         "type": "object",
@@ -73196,6 +73282,10 @@
           },
           "id": {
             "type": "string"
+          },
+          "is_managed": {
+            "description": "IsManaged marks a LangChain-managed evaluator (currently the managed\nPerceived Error judge). NULL in the DB is read as false via COALESCE.",
+            "type": "boolean"
           },
           "llm_evaluator": {
             "description": "Embedded child evaluator (populated based on type)",
