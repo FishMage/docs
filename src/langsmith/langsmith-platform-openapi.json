@@ -9723,8 +9723,9 @@
           "feedback"
         ],
         "summary": "Create Feedback Formula Ep",
-        "description": "Create a new feedback formula",
+        "description": "Create a new feedback formula\n\nDeprecated: use POST /api/v1/feedback/composite-evaluators instead to create a code evaluator from the feedback formula.",
         "operationId": "create_feedback_formula_ep_api_v1_feedback_formulas_post",
+        "deprecated": true,
         "security": [
           {
             "API Key": []
@@ -9775,8 +9776,9 @@
           "feedback"
         ],
         "summary": "List Feedback Formula Ep",
-        "description": "List feedback formulas for a given dataset or tracing project",
+        "description": "List feedback formulas for a given dataset or tracing project\n\nDeprecated: superseded by composite-feedback v2, where composites are code evaluators with run rules.",
         "operationId": "list_feedback_formula_ep_api_v1_feedback_formulas_get",
+        "deprecated": true,
         "security": [
           {
             "API Key": []
@@ -9879,8 +9881,9 @@
           "feedback"
         ],
         "summary": "Get Feedback Formula Ep",
-        "description": "Get a feedback formula by id",
+        "description": "Get a feedback formula by id\n\nDeprecated: superseded by composite-feedback v2, where composites are code evaluators with run rules",
         "operationId": "get_feedback_formula_ep_api_v1_feedback_formulas__feedback_formula_id__get",
+        "deprecated": true,
         "security": [
           {
             "API Key": []
@@ -9933,8 +9936,9 @@
           "feedback"
         ],
         "summary": "Update Feedback Formula Ep",
-        "description": "Update a feedback formula",
+        "description": "Update a feedback formula\n\nDeprecated: superseded by composite-feedback v2, where composites are code evaluators with run rules",
         "operationId": "update_feedback_formula_ep_api_v1_feedback_formulas__feedback_formula_id__put",
+        "deprecated": true,
         "security": [
           {
             "API Key": []
@@ -9997,8 +10001,9 @@
           "feedback"
         ],
         "summary": "Delete Feedback Formula Endpoint",
-        "description": "Delete a feedback formula by id",
+        "description": "Delete a feedback formula by id\n\nDeprecated: superseded by composite-feedback v2, where composites are run\nrules (see DELETE /api/v1/runs/rules/{rule_id}). Tenants on v2 receive HTTP 410.",
         "operationId": "delete_feedback_formula_endpoint_api_v1_feedback_formulas__feedback_formula_id__delete",
+        "deprecated": true,
         "security": [
           {
             "API Key": []
@@ -10465,6 +10470,22 @@
             }
           },
           {
+            "name": "feedback_thread_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Feedback Thread Id"
+            }
+          },
+          {
             "name": "include_user_names",
             "in": "query",
             "required": false,
@@ -10585,7 +10606,7 @@
           "feedback"
         ],
         "summary": "Eagerly Create Feedback",
-        "description": "Create a new feedback.\n\nThis method is invoked under the assumption that the run\nis already visible in the app, thus already present in DB",
+        "description": "Deprecated: use POST /feedback instead.\n\nThis method is invoked under the assumption that the run\nis already visible in the app, thus already present in DB",
         "operationId": "eagerly_create_feedback_api_v1_feedback_eager_post",
         "requestBody": {
           "content": {
@@ -10619,6 +10640,7 @@
             }
           }
         },
+        "deprecated": true,
         "security": [
           {
             "API Key": []
@@ -11837,6 +11859,22 @@
             }
           },
           {
+            "name": "sort_by_feedback_source",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Sort By Feedback Source"
+            }
+          },
+          {
             "name": "offset",
             "in": "query",
             "required": false,
@@ -11867,6 +11905,68 @@
               "type": "boolean",
               "default": false,
               "title": "Facets"
+            }
+          },
+          {
+            "name": "use_approx_stats",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false,
+              "title": "Use Approx Stats"
+            }
+          },
+          {
+            "name": "stats_start_time",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Stats Start Time"
+            }
+          },
+          {
+            "name": "stats_select",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Stats Select"
+            }
+          },
+          {
+            "name": "stats_filter",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Stats Filter"
             }
           },
           {
@@ -13197,7 +13297,7 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "default": true,
+              "default": false,
               "title": "Extend Trace Retention"
             }
           }
@@ -13430,7 +13530,7 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "default": true,
+              "default": false,
               "title": "Extend Trace Retention"
             }
           }
@@ -15271,16 +15371,6 @@
         ],
         "summary": "Read Model Price Map",
         "operationId": "read_model_price_map_api_v1_model_price_map_get",
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          }
-        },
         "security": [
           {
             "API Key": []
@@ -15292,6 +15382,74 @@
             "Bearer Auth": []
           }
         ],
+        "parameters": [
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0,
+              "title": "Offset"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "default": 100,
+              "title": "Limit"
+            }
+          },
+          {
+            "name": "q",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 200
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Q"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ModelPriceMapSchema"
+                  },
+                  "title": "Response Read Model Price Map Api V1 Model Price Map Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
         "x-public": true
       },
       "post": {
@@ -15300,15 +15458,26 @@
         ],
         "summary": "Create New Model Price",
         "operationId": "create_new_model_price_api_v1_model_price_map_post",
+        "security": [
+          {
+            "API Key": []
+          },
+          {
+            "Tenant ID": []
+          },
+          {
+            "Bearer Auth": []
+          }
+        ],
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/ModelPriceMapCreateSchema"
               }
             }
-          },
-          "required": true
+          }
         },
         "responses": {
           "200": {
@@ -15330,17 +15499,6 @@
             }
           }
         },
-        "security": [
-          {
-            "API Key": []
-          },
-          {
-            "Tenant ID": []
-          },
-          {
-            "Bearer Auth": []
-          }
-        ],
         "x-public": true
       }
     },
@@ -25296,6 +25454,29 @@
         "parameters": []
       }
     },
+    "/.well-known/openid-configuration": {
+      "get": {
+        "description": "Returns the OpenID Connect discovery document (OpenID Connect Discovery 1.0), advertising the authorization, token, userinfo, and JWKS endpoints plus supported scopes, response types, and signing algorithms.",
+        "tags": [
+          "oauth"
+        ],
+        "summary": "Get OpenID Connect provider configuration",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/oauth.OIDCProviderMetadata"
+                }
+              }
+            }
+          }
+        },
+        "x-public": true,
+        "parameters": []
+      }
+    },
     "/api/v1/hub/environments": {
       "get": {
         "security": [
@@ -25798,7 +25979,7 @@
             "Bearer Auth": []
           }
         ],
-        "description": "Lists all commits for a repository with pagination support.\nThis endpoint supports both authenticated and unauthenticated access.\nAuthenticated users can access private repos, while unauthenticated users can only access public repos.\nThe include_stats parameter controls whether download and view statistics are computed (defaults to true).",
+        "description": "List commits for a repository, with pagination support.\nThis endpoint supports both authenticated and unauthenticated access.\nAuthenticated users can access private repositories; unauthenticated users can only access public repositories.\nThe include_stats parameter controls whether download and view statistics are computed (defaults to true).",
         "tags": [
           "commits"
         ],
@@ -25827,8 +26008,8 @@
             "name": "include_stats",
             "in": "query",
             "schema": {
-              "type": "boolean",
               "default": true,
+              "type": "boolean",
               "title": "Include Stats"
             }
           },
@@ -25837,10 +26018,10 @@
             "name": "limit",
             "in": "query",
             "schema": {
-              "minimum": 1,
-              "type": "integer",
-              "maximum": 100,
               "default": 20,
+              "maximum": 100,
+              "type": "integer",
+              "minimum": 1,
               "title": "Limit"
             }
           },
@@ -25849,9 +26030,9 @@
             "name": "offset",
             "in": "query",
             "schema": {
-              "minimum": 0,
-              "type": "integer",
               "default": 0,
+              "type": "integer",
+              "minimum": 0,
               "title": "Offset"
             }
           },
@@ -26061,8 +26242,8 @@
             "name": "get_examples",
             "in": "query",
             "schema": {
-              "type": "boolean",
               "default": false,
+              "type": "boolean",
               "title": "Get Examples"
             }
           },
@@ -26080,8 +26261,8 @@
             "name": "include_model",
             "in": "query",
             "schema": {
-              "type": "boolean",
               "default": false,
+              "type": "boolean",
               "title": "Include Model"
             }
           },
@@ -26089,8 +26270,8 @@
             "name": "is_view",
             "in": "query",
             "schema": {
-              "type": "boolean",
               "default": false,
+              "type": "boolean",
               "title": "Is View"
             }
           }
@@ -26725,7 +26906,7 @@
             "Bearer Auth": []
           }
         ],
-        "description": "Returns one flat row per (tenant, session) pair in the\ncaller's organization that has Engine spend in the\nwindow, each carrying its workspace name, project\n(session) name, and Engine LCU spend. The caller groups\nrows by tenant for display and sums the `lcu_total`\nfield across items for the org-wide total (the UI tile\ndoes both). The window defaults to the current calendar\nmonth (UTC) and can be overridden with `start` and `end`\n(RFC 3339, capped at 31 days). Hours where the rate card\ndid not price a (provider, model) pair are excluded from\neach row's `lcu_total` and surfaced as\n`lcu_unpriced_row_count` so callers can detect billing\ncoverage gaps without inflating the spend number.",
+        "description": "Returns the authoritative Engine LCU spend for the caller's\norganization in the window (`total_lcu`, independent of\npagination). Set `group_by=tenant` for a workspace breakdown or\n`group_by=session` for a (tenant, session) breakdown — each\nspend-ranked and cursor-paginated (`page_size`, `cursor`); omit\n`group_by` for the total only. The window defaults to the current\ncalendar month (UTC) and can be overridden with `start`/`end`\n(RFC 3339, capped at 31 days). Hours the rate card did not price\nare excluded from LCU and surfaced via the `*_unpriced_row_count`\nfields so callers can detect coverage gaps without inflating spend.",
         "tags": [
           "issues-agent"
         ],
@@ -26747,6 +26928,51 @@
             "schema": {
               "type": "string",
               "title": "End"
+            }
+          },
+          {
+            "description": "Optional workspace filter (UUID).",
+            "name": "tenant_id",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "title": "Tenant Id"
+            }
+          },
+          {
+            "description": "Optional project filter (UUID).",
+            "name": "session_id",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "title": "Session Id"
+            }
+          },
+          {
+            "description": "`tenant` (workspace breakdown) or `session` ((tenant, session) breakdown); omit for the total only.",
+            "name": "group_by",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "title": "Group By"
+            }
+          },
+          {
+            "description": "Breakdown page size (default 20, max 100). Only applies with group_by.",
+            "name": "page_size",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "title": "Page Size"
+            }
+          },
+          {
+            "description": "Opaque pagination cursor from a prior response. Only applies with group_by.",
+            "name": "cursor",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "title": "Cursor"
             }
           }
         ],
@@ -27648,10 +27874,111 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": {
-                    "type": "string"
-                  }
+                  "$ref": "#/components/schemas/data_planes.ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/data_planes.ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "BYOC not enabled or insufficient permissions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/data_planes.ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Name already exists for this organization",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/data_planes.ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/data_planes.ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "x-public": true,
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/data_planes.CreateDataPlaneRequestAws"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/orgs/current/data-planes/{id}": {
+      "delete": {
+        "security": [
+          {
+            "API Key": []
+          },
+          {
+            "Organization ID": []
+          },
+          {
+            "Bearer Auth": []
+          }
+        ],
+        "description": "Verifies that the stored customer AWS role has delete permissions, removes linked workspaces, and starts asynchronous deprovisioning for a data plane owned by the caller's organization. Requires BYOC to be enabled for the org and org admin permissions.",
+        "tags": [
+          "data_planes"
+        ],
+        "summary": "Delete a data plane",
+        "parameters": [
+          {
+            "description": "Data plane ID",
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "Data plane deprovisioning started",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/data_planes.PublicDataPlane"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid data plane ID or confirmed missing delete permissions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/data_planes.ErrorResponse"
                 }
               }
             }
@@ -27682,8 +28009,21 @@
               }
             }
           },
+          "404": {
+            "description": "Data plane not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
           "409": {
-            "description": "Name already exists for this organization",
+            "description": "Data plane is already in a terminal status",
             "content": {
               "application/json": {
                 "schema": {
@@ -27709,17 +28049,7 @@
             }
           }
         },
-        "x-public": true,
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/data_planes.CreateDataPlaneRequestAws"
-              }
-            }
-          }
-        }
+        "x-public": true
       }
     },
     "/repos/{owner}/{repo}/tags/{tag_name}/history": {
@@ -27772,10 +28102,10 @@
             "name": "limit",
             "in": "query",
             "schema": {
-              "minimum": 1,
-              "type": "integer",
-              "maximum": 100,
               "default": 50,
+              "maximum": 100,
+              "type": "integer",
+              "minimum": 1,
               "title": "Limit"
             }
           },
@@ -27783,9 +28113,9 @@
             "name": "offset",
             "in": "query",
             "schema": {
-              "minimum": 0,
-              "type": "integer",
               "default": 0,
+              "type": "integer",
+              "minimum": 0,
               "title": "Offset"
             }
           }
@@ -28344,6 +28674,44 @@
             }
           }
         }
+      }
+    },
+    "/userinfo": {
+      "get": {
+        "security": [
+          {
+            "Bearer Auth": []
+          }
+        ],
+        "description": "Returns identity claims for the user represented by a LangSmith access token whose audience is the identity resource or the API resource. The token is passed as a Bearer credential in the Authorization header (OpenID Connect Core 1.0 §5.3).",
+        "tags": [
+          "oauth"
+        ],
+        "summary": "Get OpenID Connect userinfo",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/oauth.UserinfoResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/oauth.TokenErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "x-public": true,
+        "parameters": []
       }
     },
     "/v1/agent-builder/integrations": {
@@ -30324,8 +30692,8 @@
             "name": "limit",
             "in": "query",
             "schema": {
-              "type": "integer",
               "default": 100,
+              "type": "integer",
               "title": "Limit"
             }
           },
@@ -30334,8 +30702,8 @@
             "name": "offset",
             "in": "query",
             "schema": {
-              "type": "integer",
               "default": 0,
+              "type": "integer",
               "title": "Offset"
             }
           }
@@ -31439,7 +31807,7 @@
             "Bearer Auth": []
           }
         ],
-        "description": "Returns every gateway policy in the current organization.\nThe response includes both admin-created policies and\nruntime-materialized children of `default_spend_cap`\npolicies (children carry `parent_policy_id`).\n\n**Spend tracking:** each spend-cap policy carries\n`current_spend_usd` — the spend accumulated in the policy's\nactive window.\n\n**Filters** (all optional):\n- `policy_type` — `spend_cap`, `default_spend_cap`, `guard`, or `route_config`\n- `subject_matcher_key` + `subject_matcher_value` — narrow to\npolicies whose subject_matchers contain `{key, value}`\n\nFor batch lookups by a set of subject values (e.g. many\nrun_rule_ids at once), use POST\n`/v1/platform/gateway-policies/search`; it accepts the\nvalues in a JSON body and avoids the URL-length ceiling\nthat a repeated query param would hit at scale.",
+        "description": "Returns every gateway policy in the current organization.\nThe response includes both admin-created policies and\nruntime-materialized children of `default_spend_cap` and\n`default_rate_limit` policies (children carry `parent_policy_id`).\n\n**Spend tracking:** each spend-cap policy carries\n`current_spend_usd` — the spend accumulated in the policy's\nactive window.\n\n**Filters** (all optional):\n- `policy_type` — `spend_cap`, `default_spend_cap`, `guard`, `route_config`, `rate_limit`, or `default_rate_limit`\n- `subject_matcher_key` + `subject_matcher_value` — narrow to\npolicies whose subject_matchers contain `{key, value}`\n\nFor batch lookups by a set of subject values (e.g. many\nrun_rule_ids at once), use POST\n`/v1/platform/gateway-policies/search`; it accepts the\nvalues in a JSON body and avoids the URL-length ceiling\nthat a repeated query param would hit at scale.",
         "tags": [
           "gateway-policies"
         ],
@@ -31529,7 +31897,7 @@
             "Bearer Auth": []
           }
         ],
-        "description": "Creates a gateway policy for the calling organization.\n\n**policy_type** is one of `spend_cap`, `default_spend_cap`,\n`guard`, or `route_config`. The shape of `config` depends on policy_type:\n- `spend_cap` / `default_spend_cap`:\n`{\"window\": \"hourly\"|\"daily\"|\"weekly\"|\"monthly\", \"limit_usd\": <number>}`\n- `guard`:\n`{\"version\": 1, \"detect\": {\"pii\": <bool>, \"secrets\": <bool>}, \"timeout_seconds\": <number>, \"timeout_action\": \"allow\"|\"block\"}`\n`timeout_seconds` (optional, 0.1–30) caps guard pipeline execution time; defaults to 2s. `timeout_action` defaults to `allow`.\n- `route_config`:\n`{\"strategy\": \"priority_fallback\", \"triggers\": {\"status_codes\": [<int>]}, \"fallbacks\": [{\"model_configs\": [{\"model_config_id\": \"<playground-settings-uuid>\"}]}]}`\n`triggers` is required, with no default: `status_codes` must be a non-empty list (include 502 and 504 for upstream transport failures). `fallbacks` contains an entry whose `model_configs` are tried in priority order (1–5). `subject_matchers` must be a single `workspace_id` entry.\n\n**subject_matchers** is a list of `{key, value}` pairs.\n`key` is one of `organization_id`, `workspace_id`, `user_id`,\n`api_key_id`, or `run_rule_id`. Multiple matchers AND together. A\n`default_spend_cap` uses `{key, value: \"\"}` so the runtime\nmaterializes a per-subject child for every distinct subject\nof that kind it sees in request metadata.\n\n**action** is currently always `block`. Spend caps reject the\nrequest with 402 when the limit is hit; guard policies redact\nmatched content in-place before forwarding upstream.\n\n**Upsert by matchers:** for `spend_cap`, `default_spend_cap`, and\n`guard`, if a policy with the same `subject_matchers` already exists\nin this organization, the existing policy is updated in place instead\nof a duplicate being created. `id` is preserved. `route_config` does\nnot upsert by matchers — name must be unique per organization (409 on\nconflict). Returns 201 either way.",
+        "description": "Creates a gateway policy for the calling organization.\n\n**policy_type** is one of `spend_cap`, `default_spend_cap`,\n`guard`, `route_config`, `rate_limit`, or `default_rate_limit`.\nThe shape of `config` depends on policy_type:\n- `spend_cap` / `default_spend_cap`:\n`{\"window\": \"hourly\"|\"daily\"|\"weekly\"|\"monthly\", \"limit_usd\": <number>}`\n- `guard`:\n`{\"version\": 1, \"detect\": {\"pii\": <bool>, \"secrets\": <bool>}, \"timeout_seconds\": <number>, \"timeout_action\": \"allow\"|\"block\"}`\n`timeout_seconds` (optional, 0.1–30) caps guard pipeline execution time; defaults to 2s. `timeout_action` defaults to `allow`.\n- `route_config`:\n`{\"strategy\": \"priority_fallback\", \"triggers\": {\"status_codes\": [<int>]}, \"fallbacks\": [{\"model_configs\": [{\"model_config_id\": \"<playground-settings-uuid>\"}]}]}`\n`triggers` is required, with no default: `status_codes` must be a non-empty list (include 502 and 504 for upstream transport failures). `fallbacks` contains an entry whose `model_configs` are tried in priority order (1–5). `subject_matchers` must be a single `workspace_id` entry.\n- `rate_limit` / `default_rate_limit`:\n`{\"version\": 1, \"limits\": [{\"metric\": \"requests\"|\"tokens\", \"window\": \"minute\"|\"hour\", \"value\": <integer>}]}`\n`limits` must be non-empty; each `metric`/`window` pair may appear at most once. `value` is 1..1000000000000000.\n\n**subject_matchers** is a list of `{key, value}` pairs.\n`key` is one of `organization_id`, `workspace_id`, `user_id`,\n`api_key_id`, or `run_rule_id`. Multiple matchers AND together. A\n`default_spend_cap` or `default_rate_limit` uses `{key, value: \"\"}`\nso the runtime materializes a per-subject child for every distinct\nsubject of that kind it sees in request metadata.\n\n**action** is currently always `block`. Spend caps reject the\nrequest with 402 when the limit is hit; rate limits reject with\n429 (with a `Retry-After` hint) when a limit is exceeded; guard\npolicies redact matched content in-place before forwarding upstream.\n\n**Upsert by matchers:** for `spend_cap`, `default_spend_cap`,\n`rate_limit`, `default_rate_limit`, and `guard`, if a policy with\nthe same `subject_matchers` already exists in this organization,\nthe existing policy is updated in place instead of a duplicate\nbeing created. `id` is preserved. `route_config` does not upsert\nby matchers — name must be unique per organization (409 on\nconflict). Returns 201 either way.",
         "tags": [
           "gateway-policies"
         ],
@@ -31547,7 +31915,7 @@
             }
           },
           "400": {
-            "description": "validation failure (bad matchers, unknown policy_type, missing required field)",
+            "description": "validation error",
             "content": {
               "application/json": {
                 "schema": {
@@ -31658,7 +32026,7 @@
             }
           },
           "400": {
-            "description": "Bad Request",
+            "description": "validation error",
             "content": {
               "application/json": {
                 "schema": {
@@ -31749,6 +32117,16 @@
               }
             }
           },
+          "400": {
+            "description": "validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/gateway_policies.errorResponse"
+                }
+              }
+            }
+          },
           "401": {
             "description": "Unauthorized",
             "content": {
@@ -31801,7 +32179,7 @@
             "Bearer Auth": []
           }
         ],
-        "description": "Deletes a gateway policy. Subsequent reads return 404.\n\n**default_spend_cap cascade:** deleting a `default_spend_cap`\nalso deletes every child policy materialized from it.",
+        "description": "Deletes a gateway policy. Subsequent reads return 404.\n\n**default cascade:** deleting a `default_spend_cap` or\n`default_rate_limit` also deletes every child policy\nmaterialized from it.",
         "tags": [
           "gateway-policies"
         ],
@@ -31821,6 +32199,16 @@
         "responses": {
           "204": {
             "description": "No Content"
+          },
+          "400": {
+            "description": "validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/gateway_policies.errorResponse"
+                }
+              }
+            }
           },
           "401": {
             "description": "Unauthorized",
@@ -31874,7 +32262,7 @@
             "Bearer Auth": []
           }
         ],
-        "description": "Partially updates a gateway policy. Only fields present in\nthe request body are applied; absent fields are left\nunchanged. `policy_type` is immutable — to change a\npolicy's type, delete it and create a new one.\n\n**config** if supplied must match the policy's type:\n- spend-cap: `{\"window\": ..., \"limit_usd\": ...}`\n- guard:     `{\"version\": 1, \"detect\": {...}, \"timeout_seconds\": <number>, \"timeout_action\": \"allow\"|\"block\"}`\nMismatched shapes are rejected with 400.\n\n**default_spend_cap cascade:** editing a `default_spend_cap`\nupdates the config/action/enabled/priority on every\nattached child policy so the template stays the source of\ntruth across rollouts.",
+        "description": "Partially updates a gateway policy. Only fields present in\nthe request body are applied; absent fields are left\nunchanged. `policy_type` is immutable — to change a\npolicy's type, delete it and create a new one.\n\n**config** if supplied must match the policy's type:\n- spend-cap:  `{\"window\": ..., \"limit_usd\": ...}`\n- guard:      `{\"version\": 1, \"detect\": {...}, \"timeout_seconds\": <number>, \"timeout_action\": \"allow\"|\"block\"}`\n- rate-limit: `{\"version\": 1, \"limits\": [{\"metric\": \"requests\"|\"tokens\", \"window\": \"minute\"|\"hour\", \"value\": <integer>}]}`\nMismatched shapes are rejected with 400.\n\n**default cascade:** editing a `default_spend_cap` or\n`default_rate_limit` updates the config/action/enabled/priority\non every attached child policy so the template stays the source\nof truth across rollouts.",
         "tags": [
           "gateway-policies"
         ],
@@ -31903,7 +32291,7 @@
             }
           },
           "400": {
-            "description": "validation failure",
+            "description": "validation error",
             "content": {
               "application/json": {
                 "schema": {
@@ -31973,6 +32361,11 @@
             "label": "guard",
             "lang": "json",
             "source": "{\n  \"config\": {\"version\": 1, \"detect\": {\"pii\": true, \"secrets\": true}, \"timeout_seconds\": 5},\n  \"enabled\": true\n}"
+          },
+          {
+            "label": "rate_limit",
+            "lang": "json",
+            "source": "{\n  \"config\": {\"version\": 1, \"limits\": [{\"metric\": \"requests\", \"window\": \"minute\", \"value\": 100}]},\n  \"enabled\": true\n}"
           }
         ],
         "x-public": true,
@@ -32407,12 +32800,12 @@
             "name": "status",
             "in": "query",
             "schema": {
-              "type": "string",
               "enum": [
                 "open",
                 "completed",
                 "ignored"
               ],
+              "type": "string",
               "title": "Status"
             }
           },
@@ -32421,13 +32814,13 @@
             "name": "severity",
             "in": "query",
             "schema": {
-              "type": "integer",
               "enum": [
                 0,
                 1,
                 2,
                 3
               ],
+              "type": "integer",
               "title": "Severity"
             }
           },
@@ -32454,12 +32847,12 @@
             "name": "sort_by",
             "in": "query",
             "schema": {
-              "type": "string",
               "enum": [
                 "created_at",
                 "updated_at",
                 "severity"
               ],
+              "type": "string",
               "title": "Sort By"
             }
           },
@@ -33694,6 +34087,438 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/mcp_vendors.ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "x-public": true
+      }
+    },
+    "/v1/platform/oauth/authorized-apps": {
+      "get": {
+        "security": [
+          {
+            "API Key": []
+          },
+          {
+            "Tenant ID": []
+          },
+          {
+            "Bearer Auth": []
+          }
+        ],
+        "description": "Lists the third-party applications the authenticated user has authorized to sign in with LangSmith.",
+        "tags": [
+          "oauth"
+        ],
+        "summary": "List authorized applications",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/oauth.AuthorizedAppView"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/oauth.TokenErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "x-public": true,
+        "parameters": []
+      }
+    },
+    "/v1/platform/oauth/authorized-apps/{clientID}": {
+      "delete": {
+        "security": [
+          {
+            "API Key": []
+          },
+          {
+            "Tenant ID": []
+          },
+          {
+            "Bearer Auth": []
+          }
+        ],
+        "description": "Revokes the authenticated user's authorization for an application and invalidates that application's active tokens for the user.",
+        "tags": [
+          "oauth"
+        ],
+        "summary": "Revoke an authorized application",
+        "parameters": [
+          {
+            "description": "OAuth client ID",
+            "name": "clientID",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/oauth.TokenErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/errutil.UserError"
+                }
+              }
+            }
+          }
+        },
+        "x-public": true
+      }
+    },
+    "/v1/platform/oauth/clients": {
+      "get": {
+        "security": [
+          {
+            "API Key": []
+          },
+          {
+            "Tenant ID": []
+          },
+          {
+            "Bearer Auth": []
+          }
+        ],
+        "description": "Lists the OAuth clients owned by the caller's organization.",
+        "tags": [
+          "oauth"
+        ],
+        "summary": "List OAuth clients",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/oauth.OAuthClientListResponse"
+                }
+              }
+            }
+          }
+        },
+        "x-public": true,
+        "parameters": []
+      },
+      "post": {
+        "security": [
+          {
+            "API Key": []
+          },
+          {
+            "Tenant ID": []
+          },
+          {
+            "Bearer Auth": []
+          }
+        ],
+        "description": "Registers a new OAuth 2.0 / OIDC client owned by the caller's organization. For confidential clients the response includes a client_secret that is shown only once.",
+        "tags": [
+          "oauth"
+        ],
+        "summary": "Create an OAuth client",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/oauth.OAuthClientCredentialsResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/errutil.UserError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/errutil.UserError"
+                }
+              }
+            }
+          }
+        },
+        "x-public": true,
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/oauth.CreateOAuthClientRequest"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/platform/oauth/clients/{id}": {
+      "get": {
+        "security": [
+          {
+            "API Key": []
+          },
+          {
+            "Tenant ID": []
+          },
+          {
+            "Bearer Auth": []
+          }
+        ],
+        "tags": [
+          "oauth"
+        ],
+        "summary": "Get an OAuth client",
+        "parameters": [
+          {
+            "description": "Client UUID",
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/oauth.OAuthClientView"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/errutil.UserError"
+                }
+              }
+            }
+          }
+        },
+        "x-public": true
+      },
+      "delete": {
+        "security": [
+          {
+            "API Key": []
+          },
+          {
+            "Tenant ID": []
+          },
+          {
+            "Bearer Auth": []
+          }
+        ],
+        "tags": [
+          "oauth"
+        ],
+        "summary": "Delete an OAuth client",
+        "parameters": [
+          {
+            "description": "Client UUID",
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/errutil.UserError"
+                }
+              }
+            }
+          }
+        },
+        "x-public": true
+      },
+      "patch": {
+        "security": [
+          {
+            "API Key": []
+          },
+          {
+            "Tenant ID": []
+          },
+          {
+            "Bearer Auth": []
+          }
+        ],
+        "tags": [
+          "oauth"
+        ],
+        "summary": "Update an OAuth client",
+        "parameters": [
+          {
+            "description": "Client UUID",
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/oauth.OAuthClientView"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/errutil.UserError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/errutil.UserError"
+                }
+              }
+            }
+          }
+        },
+        "x-public": true,
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/oauth.UpdateOAuthClientRequest"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/platform/oauth/clients/{id}/rotate-secret": {
+      "post": {
+        "security": [
+          {
+            "API Key": []
+          },
+          {
+            "Tenant ID": []
+          },
+          {
+            "Bearer Auth": []
+          }
+        ],
+        "description": "Generates a new client secret for a confidential client, invalidating the previous one. The new secret is shown only once.",
+        "tags": [
+          "oauth"
+        ],
+        "summary": "Rotate an OAuth client secret",
+        "parameters": [
+          {
+            "description": "Client UUID",
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/oauth.OAuthClientCredentialsResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/errutil.UserError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/errutil.UserError"
                 }
               }
             }
@@ -36767,6 +37592,16 @@
               }
             }
           },
+          "501": {
+            "description": "no V2 backend configured and no V1 proxy fallback",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/shared.ProblemDetails"
+                }
+              }
+            }
+          },
           "503": {
             "description": "service unavailable",
             "content": {
@@ -36859,6 +37694,16 @@
           },
           "500": {
             "description": "internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/shared.ProblemDetails"
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "no V2 backend configured and no V1 proxy fallback",
             "content": {
               "application/json": {
                 "schema": {
@@ -37053,7 +37898,7 @@
             "Tenant ID": []
           }
         ],
-        "description": "**Alpha:** The request and response contract may change;\nReturns one run by ID for the given session and start_time. Use the `selects` query parameter (repeatable) to select fields to return.",
+        "description": "**Alpha:** The request and response contract may change;\nReturns one run by ID for the given session. Use the `selects` query parameter (repeatable) to select fields to return.",
         "tags": [
           "runs"
         ],
@@ -37139,6 +37984,7 @@
                   "ATTACHMENTS",
                   "THREAD_EVALUATION_TIME",
                   "IS_IN_DATASET",
+                  "LAST_QUEUED_AT",
                   "SHARE_URL",
                   "FEEDBACK_STATS"
                 ],
@@ -37149,10 +37995,9 @@
             }
           },
           {
-            "description": "`start_time` is the run's `start_time` (RFC3339 date-time), used together with `project_id` to locate the run.",
+            "description": "`start_time` is the run's `start_time` (RFC3339 date-time). Providing it speeds up retrieval.",
             "name": "start_time",
             "in": "query",
-            "required": true,
             "schema": {
               "type": "string",
               "format": "date-time",
@@ -37223,6 +38068,16 @@
           },
           "500": {
             "description": "internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/shared.ProblemDetails"
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "not implemented",
             "content": {
               "application/json": {
                 "schema": {
@@ -37370,6 +38225,217 @@
         }
       }
     },
+    "/v2/runs/{run_id}/url": {
+      "get": {
+        "security": [
+          {
+            "API Key": [],
+            "Tenant ID": []
+          },
+          {
+            "Bearer Auth": [],
+            "Tenant ID": []
+          }
+        ],
+        "description": "Returns the URL to view a specific run in the LangSmith UI. The caller must supply the\nrun's project_id and trace_id as query parameters; start_time is optional.",
+        "tags": [
+          "runs"
+        ],
+        "summary": "Get the LangSmith UI URL for a run",
+        "parameters": [
+          {
+            "description": "Run UUID",
+            "name": "run_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "description": "Project (session) UUID",
+            "name": "project_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Project Id"
+            }
+          },
+          {
+            "description": "Trace UUID",
+            "name": "trace_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Trace Id"
+            }
+          },
+          {
+            "description": "Run start time in RFC3339 format; omit if unknown",
+            "name": "start_time",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "title": "Start Time"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/query.RunURLResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "missing or invalid query parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/shared.ProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "missing or invalid authentication",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/shared.ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/shared.ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "project not found or does not belong to this workspace",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/shared.ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "x-public": true
+      }
+    },
+    "/v2/runs/{trace_id}/share": {
+      "delete": {
+        "security": [
+          {
+            "API Key": []
+          },
+          {
+            "Tenant ID": []
+          },
+          {
+            "Bearer Auth": []
+          }
+        ],
+        "description": "Deletes the share token for the trace identified by trace_id and session_id. Idempotent: returns 204 whether or not a share token existed.",
+        "tags": [
+          "runs"
+        ],
+        "summary": "Unshare a run",
+        "parameters": [
+          {
+            "description": "Trace root UUID",
+            "name": "trace_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/shared.ProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/shared.ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/shared.ProblemDetails"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request Entity Too Large",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/shared.ProblemDetails"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/shared.ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "x-public": true,
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/share.DeleteShareTokenRequestBody"
+              }
+            }
+          }
+        }
+      }
+    },
     "/v2/sandboxes/boxes": {
       "get": {
         "security": [
@@ -37397,8 +38463,8 @@
             "name": "limit",
             "in": "query",
             "schema": {
-              "type": "integer",
               "default": 50,
+              "type": "integer",
               "title": "Limit"
             }
           },
@@ -37407,8 +38473,8 @@
             "name": "offset",
             "in": "query",
             "schema": {
-              "type": "integer",
               "default": 0,
+              "type": "integer",
               "title": "Offset"
             }
           },
@@ -37440,12 +38506,26 @@
             }
           },
           {
+            "description": "Filter by label. Repeatable; all must match. Use 'key' to match on key presence or 'key=value' for equality.",
+            "name": "label",
+            "in": "query",
+            "style": "form",
+            "explode": true,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array",
+              "title": "Label"
+            }
+          },
+          {
             "description": "Sort column (name, status, created_at)",
             "name": "sort_by",
             "in": "query",
             "schema": {
-              "type": "string",
               "default": "created_at",
+              "type": "string",
               "title": "Sort By"
             }
           },
@@ -37454,8 +38534,8 @@
             "name": "sort_direction",
             "in": "query",
             "schema": {
-              "type": "string",
               "default": "desc",
+              "type": "string",
               "title": "Sort Direction"
             }
           }
@@ -38779,8 +39859,8 @@
             "name": "limit",
             "in": "query",
             "schema": {
-              "type": "integer",
               "default": 50,
+              "type": "integer",
               "title": "Limit"
             }
           },
@@ -38789,8 +39869,8 @@
             "name": "offset",
             "in": "query",
             "schema": {
-              "type": "integer",
               "default": 0,
+              "type": "integer",
               "title": "Offset"
             }
           },
@@ -38822,12 +39902,26 @@
             }
           },
           {
+            "description": "Filter by label. Repeatable; all must match. Use 'key' to match on key presence or 'key=value' for equality.",
+            "name": "label",
+            "in": "query",
+            "style": "form",
+            "explode": true,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array",
+              "title": "Label"
+            }
+          },
+          {
             "description": "Sort column (name, status, created_at)",
             "name": "sort_by",
             "in": "query",
             "schema": {
-              "type": "string",
               "default": "created_at",
+              "type": "string",
               "title": "Sort By"
             }
           },
@@ -38836,8 +39930,8 @@
             "name": "sort_direction",
             "in": "query",
             "schema": {
-              "type": "string",
               "default": "desc",
+              "type": "string",
               "title": "Sort Direction"
             }
           }
@@ -39423,6 +40517,194 @@
         "x-public": true
       }
     },
+    "/v2/sandboxes/{sandbox_id}/glob": {
+      "post": {
+        "security": [
+          {
+            "API Key": []
+          },
+          {
+            "Tenant ID": []
+          },
+          {
+            "Bearer Auth": []
+          }
+        ],
+        "description": "Find files under a root path matching a glob pattern (supports **). Entries are returned in lexical order by path.",
+        "tags": [
+          "sandboxes"
+        ],
+        "summary": "Glob a sandbox filesystem",
+        "parameters": [
+          {
+            "description": "Sandbox ID or name",
+            "name": "sandbox_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/sandboxes.GlobResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/sandboxes.ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/sandboxes.ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/sandboxes.ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/sandboxes.ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "x-public": true,
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/sandboxes.GlobRequest"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/sandboxes/{sandbox_id}/grep": {
+      "post": {
+        "security": [
+          {
+            "API Key": []
+          },
+          {
+            "Tenant ID": []
+          },
+          {
+            "Bearer Auth": []
+          }
+        ],
+        "description": "Search files under a root path for a literal text pattern (not a regex).",
+        "tags": [
+          "sandboxes"
+        ],
+        "summary": "Grep a sandbox filesystem",
+        "parameters": [
+          {
+            "description": "Sandbox ID or name",
+            "name": "sandbox_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/sandboxes.GrepResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/sandboxes.ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/sandboxes.ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/sandboxes.ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/sandboxes.ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "x-public": true,
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/sandboxes.GrepRequest"
+              }
+            }
+          }
+        }
+      }
+    },
     "/v2/sandboxes/{sandbox_id}/tunnel": {
       "get": {
         "security": [
@@ -39977,10 +41259,10 @@
             "name": "page_size",
             "in": "query",
             "schema": {
-              "minimum": 1,
-              "type": "integer",
-              "maximum": 100,
               "default": 20,
+              "maximum": 100,
+              "type": "integer",
+              "minimum": 1,
               "title": "Page Size"
             }
           },
@@ -40020,6 +41302,9 @@
                   "FIRST_TOKEN_TIME",
                   "INPUTS_PREVIEW",
                   "OUTPUTS_PREVIEW",
+                  "INPUTS",
+                  "OUTPUTS",
+                  "ERROR",
                   "PROMPT_COST",
                   "COMPLETION_COST",
                   "TOTAL_COST",
@@ -40391,6 +41676,7 @@
                   "ATTACHMENTS",
                   "THREAD_EVALUATION_TIME",
                   "IS_IN_DATASET",
+                  "LAST_QUEUED_AT",
                   "SHARE_URL",
                   "FEEDBACK_STATS"
                 ],
@@ -42794,6 +44080,7 @@
           "delete_tracer_sessions",
           "delete_runs",
           "share_run",
+          "unshare_run",
           "create_dataset",
           "create_csv_dataset",
           "create_experiment_via_upload",
@@ -42882,6 +44169,10 @@
           "trigger_forge_configuration",
           "add_annotation_queue_reviewer",
           "remove_annotation_queue_reviewer",
+          "add_items_to_annotation_queue",
+          "delete_annotation_queue_item",
+          "update_annotation_queue_item",
+          "get_annotation_queue_items",
           "submit_nps_response",
           "create_mcp_server",
           "update_mcp_server",
@@ -42943,6 +44234,7 @@
           "update_sandbox_registry",
           "delete_sandbox_registry",
           "create_data_plane",
+          "delete_data_plane",
           "create_annotation_queue",
           "populate_annotation_queue",
           "delete_annotation_queue",
@@ -43086,8 +44378,10 @@
           "stream_feedback_delta",
           "read_comparative_experiments",
           "stream_grouped_experiments",
+          "get_run_url",
           "query_run",
           "query_runs",
+          "batch_query_runs",
           "query_trace",
           "query_traces",
           "query_trace_messages",
@@ -43115,6 +44409,11 @@
           "get_self_hosted_customer",
           "get_provisioned_saas_org",
           "update_provisioned_saas_org",
+          "create_oauth_client",
+          "update_oauth_client",
+          "delete_oauth_client",
+          "rotate_oauth_client_secret",
+          "revoke_oauth_grant",
           "test_op_generic"
         ],
         "title": "AuditLogOperation",
@@ -45177,14 +46476,17 @@
           "disabled",
           "developer",
           "developer_01_2026",
+          "developer_07_2026",
           "plus",
           "plus_01_2026",
           "plus_07_2026",
           "startup",
           "startup_v0",
+          "startup_07_2026",
           "partner",
           "premier",
-          "free"
+          "free",
+          "free_07_2026"
         ],
         "title": "ChangePaymentPlanReq",
         "description": "Enum for payment plans that the user can change to. Developer plans are permanent and enterprise plans will be changed manually."
@@ -46528,6 +47830,66 @@
         ],
         "title": "CustomChartCreatePreview"
       },
+      "CustomChartFeedbackScoreMetricScalar": {
+        "properties": {
+          "type": {
+            "anyOf": [
+              {
+                "type": "string",
+                "const": "max"
+              },
+              {
+                "type": "string",
+                "const": "min"
+              },
+              {
+                "type": "string",
+                "const": "avg"
+              }
+            ],
+            "title": "Type"
+          },
+          "field": {
+            "type": "string",
+            "const": "feedback_score",
+            "title": "Field"
+          },
+          "filter": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Filter"
+          },
+          "params": {
+            "$ref": "#/components/schemas/CustomChartFeedbackScoreMetricScalarParams"
+          }
+        },
+        "type": "object",
+        "required": [
+          "type",
+          "field",
+          "params"
+        ],
+        "title": "CustomChartFeedbackScoreMetricScalar"
+      },
+      "CustomChartFeedbackScoreMetricScalarParams": {
+        "properties": {
+          "feedback_key": {
+            "type": "string",
+            "title": "Feedback Key"
+          }
+        },
+        "type": "object",
+        "required": [
+          "feedback_key"
+        ],
+        "title": "CustomChartFeedbackScoreMetricScalarParams"
+      },
       "CustomChartFilterByDataset": {
         "properties": {
           "source_type": {
@@ -46733,7 +48095,8 @@
           "completion_tokens",
           "total_cost",
           "prompt_cost",
-          "completion_cost"
+          "completion_cost",
+          "feedback_score"
         ],
         "title": "CustomChartMetricField"
       },
@@ -46798,6 +48161,9 @@
                 "$ref": "#/components/schemas/CustomChartMetricCount"
               },
               {
+                "$ref": "#/components/schemas/CustomChartFeedbackScoreMetricScalar"
+              },
+              {
                 "$ref": "#/components/schemas/CustomChartMetricScalar"
               },
               {
@@ -46810,6 +48176,9 @@
             "anyOf": [
               {
                 "$ref": "#/components/schemas/CustomChartMetricCount"
+              },
+              {
+                "$ref": "#/components/schemas/CustomChartFeedbackScoreMetricScalar"
               },
               {
                 "$ref": "#/components/schemas/CustomChartMetricScalar"
@@ -46842,6 +48211,9 @@
                 "$ref": "#/components/schemas/CustomChartMetricCount"
               },
               {
+                "$ref": "#/components/schemas/CustomChartFeedbackScoreMetricScalar"
+              },
+              {
                 "$ref": "#/components/schemas/CustomChartMetricScalar"
               },
               {
@@ -46854,6 +48226,9 @@
             "anyOf": [
               {
                 "$ref": "#/components/schemas/CustomChartMetricCount"
+              },
+              {
+                "$ref": "#/components/schemas/CustomChartFeedbackScoreMetricScalar"
               },
               {
                 "$ref": "#/components/schemas/CustomChartMetricScalar"
@@ -47012,6 +48387,18 @@
             "type": "string",
             "title": "Name"
           },
+          "metadata": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Metadata"
+          },
           "filters": {
             "anyOf": [
               {
@@ -47069,6 +48456,9 @@
             "anyOf": [
               {
                 "$ref": "#/components/schemas/CustomChartMetricCount"
+              },
+              {
+                "$ref": "#/components/schemas/CustomChartFeedbackScoreMetricScalar"
               },
               {
                 "$ref": "#/components/schemas/CustomChartMetricScalar"
@@ -47156,6 +48546,18 @@
             "type": "string",
             "title": "Name"
           },
+          "metadata": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Metadata"
+          },
           "filters": {
             "anyOf": [
               {
@@ -47213,6 +48615,9 @@
             "anyOf": [
               {
                 "$ref": "#/components/schemas/CustomChartMetricCount"
+              },
+              {
+                "$ref": "#/components/schemas/CustomChartFeedbackScoreMetricScalar"
               },
               {
                 "$ref": "#/components/schemas/CustomChartMetricScalar"
@@ -47300,6 +48705,18 @@
             "type": "string",
             "title": "Name"
           },
+          "metadata": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Metadata"
+          },
           "filters": {
             "anyOf": [
               {
@@ -47357,6 +48774,9 @@
             "anyOf": [
               {
                 "$ref": "#/components/schemas/CustomChartMetricCount"
+              },
+              {
+                "$ref": "#/components/schemas/CustomChartFeedbackScoreMetricScalar"
               },
               {
                 "$ref": "#/components/schemas/CustomChartMetricScalar"
@@ -47485,6 +48905,18 @@
             "type": "string",
             "title": "Name"
           },
+          "metadata": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Metadata"
+          },
           "filters": {
             "anyOf": [
               {
@@ -47542,6 +48974,9 @@
             "anyOf": [
               {
                 "$ref": "#/components/schemas/CustomChartMetricCount"
+              },
+              {
+                "$ref": "#/components/schemas/CustomChartFeedbackScoreMetricScalar"
               },
               {
                 "$ref": "#/components/schemas/CustomChartMetricScalar"
@@ -48028,6 +49463,16 @@
               }
             ],
             "title": "Sub Sections"
+          },
+          "layout": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DashboardLayout-Output"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "type": "object",
@@ -48253,6 +49698,23 @@
             "default": {
               "__missing__": "__missing__"
             }
+          },
+          "layout": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DashboardLayout-Input"
+              },
+              {
+                "$ref": "#/components/schemas/Missing"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Layout",
+            "default": {
+              "__missing__": "__missing__"
+            }
           }
         },
         "type": "object",
@@ -48337,6 +49799,148 @@
         ],
         "title": "CustomerVisiblePlanInfo",
         "description": "Customer visible plan information."
+      },
+      "DashboardBreakpointLayout-Input": {
+        "properties": {
+          "rows": {
+            "items": {
+              "$ref": "#/components/schemas/DashboardLayoutRow"
+            },
+            "type": "array",
+            "title": "Rows"
+          }
+        },
+        "type": "object",
+        "required": [
+          "rows"
+        ],
+        "title": "DashboardBreakpointLayout"
+      },
+      "DashboardBreakpointLayout-Output": {
+        "properties": {
+          "rows": {
+            "items": {
+              "$ref": "#/components/schemas/DashboardLayoutRow"
+            },
+            "type": "array",
+            "title": "Rows"
+          }
+        },
+        "type": "object",
+        "required": [
+          "rows"
+        ],
+        "title": "DashboardBreakpointLayout"
+      },
+      "DashboardLayout-Input": {
+        "properties": {
+          "version": {
+            "type": "integer",
+            "const": 1,
+            "title": "Version"
+          },
+          "breakpoints": {
+            "$ref": "#/components/schemas/DashboardLayoutBreakpoints-Input"
+          }
+        },
+        "type": "object",
+        "required": [
+          "version",
+          "breakpoints"
+        ],
+        "title": "DashboardLayout"
+      },
+      "DashboardLayout-Output": {
+        "properties": {
+          "version": {
+            "type": "integer",
+            "const": 1,
+            "title": "Version"
+          },
+          "breakpoints": {
+            "$ref": "#/components/schemas/DashboardLayoutBreakpoints-Output"
+          }
+        },
+        "type": "object",
+        "required": [
+          "version",
+          "breakpoints"
+        ],
+        "title": "DashboardLayout"
+      },
+      "DashboardLayoutBreakpoints-Input": {
+        "properties": {
+          "sm": {
+            "$ref": "#/components/schemas/DashboardBreakpointLayout-Input"
+          },
+          "md": {
+            "$ref": "#/components/schemas/DashboardBreakpointLayout-Input"
+          }
+        },
+        "type": "object",
+        "required": [
+          "sm",
+          "md"
+        ],
+        "title": "DashboardLayoutBreakpoints"
+      },
+      "DashboardLayoutBreakpoints-Output": {
+        "properties": {
+          "sm": {
+            "$ref": "#/components/schemas/DashboardBreakpointLayout-Output"
+          },
+          "md": {
+            "$ref": "#/components/schemas/DashboardBreakpointLayout-Output"
+          }
+        },
+        "type": "object",
+        "required": [
+          "sm",
+          "md"
+        ],
+        "title": "DashboardLayoutBreakpoints"
+      },
+      "DashboardLayoutItem": {
+        "properties": {
+          "chart_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Chart Id"
+          },
+          "width_units": {
+            "type": "integer",
+            "minimum": 20.0,
+            "title": "Width Units"
+          }
+        },
+        "type": "object",
+        "required": [
+          "chart_id",
+          "width_units"
+        ],
+        "title": "DashboardLayoutItem"
+      },
+      "DashboardLayoutRow": {
+        "properties": {
+          "height_units": {
+            "type": "integer",
+            "title": "Height Units"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/DashboardLayoutItem"
+            },
+            "type": "array",
+            "minItems": 1,
+            "title": "Items"
+          }
+        },
+        "type": "object",
+        "required": [
+          "height_units",
+          "items"
+        ],
+        "title": "DashboardLayoutRow"
       },
       "DataType": {
         "type": "string",
@@ -50953,6 +52557,17 @@
             ],
             "title": "Start Time"
           },
+          "feedback_thread_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Feedback Thread Id"
+          },
           "extend_trace_retention": {
             "type": "boolean",
             "title": "Extend Trace Retention",
@@ -53548,7 +55163,8 @@
           "lg_run_count",
           "responses_per_second",
           "error_responses_per_second",
-          "p95_latency"
+          "p95_latency",
+          "run_queue_wait_time"
         ],
         "title": "HostProjectChartMetric",
         "description": "LGP Metrics you can chart."
@@ -54795,6 +56411,117 @@
         ],
         "title": "ModelPriceMapCreateSchema",
         "description": "Model price map create schema."
+      },
+      "ModelPriceMapSchema": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "start_time": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Start Time"
+          },
+          "tenant_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tenant Id"
+          },
+          "match_path": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Match Path",
+            "default": [
+              "model",
+              "model_name",
+              "model_id",
+              "model_path",
+              "endpoint_name"
+            ]
+          },
+          "match_pattern": {
+            "type": "string",
+            "title": "Match Pattern"
+          },
+          "prompt_cost": {
+            "type": "string",
+            "title": "Prompt Cost"
+          },
+          "completion_cost": {
+            "type": "string",
+            "title": "Completion Cost"
+          },
+          "prompt_cost_details": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Prompt Cost Details"
+          },
+          "completion_cost_details": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Completion Cost Details"
+          },
+          "provider": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Provider"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "match_pattern",
+          "prompt_cost",
+          "completion_cost"
+        ],
+        "title": "ModelPriceMapSchema",
+        "description": "Model price map schema."
       },
       "ModelPriceMapUpdateSchema": {
         "properties": {
@@ -56438,6 +58165,22 @@
             "title": "Fleet Builtin Models Enabled",
             "default": false
           },
+          "dev_zero_deployments_enabled": {
+            "type": "boolean",
+            "title": "Dev Zero Deployments Enabled",
+            "default": false
+          },
+          "fleet_lcu_spend_limit_monthly": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fleet Lcu Spend Limit Monthly"
+          },
           "max_agent_builder_assistants": {
             "type": "integer",
             "title": "Max Agent Builder Assistants",
@@ -57460,6 +59203,7 @@
           "no_plan",
           "developer",
           "developer_01_2026",
+          "developer_07_2026",
           "plus",
           "plus_01_2026",
           "plus_07_2026",
@@ -57467,9 +59211,11 @@
           "developer_legacy",
           "plus_legacy",
           "free",
+          "free_07_2026",
           "enterprise_legacy",
           "startup",
           "startup_v0",
+          "startup_07_2026",
           "partner",
           "premier"
         ],
@@ -58608,7 +60354,7 @@
           "extend_trace_retention": {
             "type": "boolean",
             "title": "Extend Trace Retention",
-            "default": true
+            "default": false
           }
         },
         "type": "object",
@@ -61080,6 +62826,18 @@
             ],
             "title": "Run Session Id"
           },
+          "run_trace_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Run Trace Id"
+          },
           "start_time": {
             "type": "string",
             "format": "date-time",
@@ -62935,6 +64693,11 @@
             "title": "Extend Only",
             "default": false
           },
+          "is_tracing_disabled": {
+            "type": "boolean",
+            "title": "Is Tracing Disabled",
+            "default": false
+          },
           "extend_evaluator_trace_retention": {
             "type": "boolean",
             "title": "Extend Evaluator Trace Retention",
@@ -63433,6 +65196,11 @@
             "title": "Is Managed Evaluator",
             "default": false
           },
+          "is_tracing_disabled": {
+            "type": "boolean",
+            "title": "Is Tracing Disabled",
+            "default": false
+          },
           "extend_evaluator_trace_retention": {
             "anyOf": [
               {
@@ -63758,6 +65526,17 @@
             "title": "Extend Only",
             "default": false
           },
+          "is_tracing_disabled": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Is Tracing Disabled"
+          },
           "extend_evaluator_trace_retention": {
             "anyOf": [
               {
@@ -64058,6 +65837,11 @@
           "extend_only": {
             "type": "boolean",
             "title": "Extend Only",
+            "default": false
+          },
+          "is_tracing_disabled": {
+            "type": "boolean",
+            "title": "Is Tracing Disabled",
             "default": false
           },
           "extend_evaluator_trace_retention": {
@@ -66771,6 +68555,18 @@
               }
             ],
             "title": "Select"
+          },
+          "reference_dataset_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reference Dataset Id"
           },
           "include_details": {
             "type": "boolean",
@@ -69568,6 +71364,10 @@
           "evaluator_count": {
             "type": "integer",
             "title": "Evaluator Count"
+          },
+          "custom_app_count": {
+            "type": "integer",
+            "title": "Custom App Count"
           }
         },
         "type": "object",
@@ -69579,7 +71379,8 @@
           "annotation_queue_count",
           "deployment_count",
           "dashboards_count",
-          "evaluator_count"
+          "evaluator_count",
+          "custom_app_count"
         ],
         "title": "TenantStats",
         "description": "Stats for a tenant."
@@ -72055,6 +73856,10 @@
             "description": "DemoLgpNewGraphEnabled indicates whether this org can use the demo page for creating new graphs.",
             "type": "boolean"
           },
+          "dev_zero_deployments_enabled": {
+            "description": "DevZeroDeploymentsEnabled indicates whether the org can create development deployments that scale to zero.",
+            "type": "boolean"
+          },
           "enable_align_evaluators": {
             "description": "EnableAlignEvaluators indicates whether to enable the align evaluators flow for this org.",
             "type": "boolean"
@@ -72115,6 +73920,10 @@
             "description": "FleetBuiltinModelsEnabled indicates whether the org can use Fleet's served\nbuilt-in models (the Fast/Pro/Max tiers). Resolved from the Metronome\nplan/customer custom field, falling back to organizations.config; code\ndefault false (paid feature, fail-closed).",
             "type": "boolean"
           },
+          "fleet_lcu_spend_limit_monthly": {
+            "description": "FleetLCUSpendLimitMonthly caps an org's monthly Fleet LCU spend, resolved from\nMetronome custom fields. nil or negative means unlimited; 0 blocks all runs.",
+            "type": "number"
+          },
           "ip_allowlist_enabled": {
             "description": "IPAllowlistEnabled indicates whether this org can configure and enforce IP allowlists.\nSet by Metronome entitlement, not admin-patchable.",
             "type": "boolean"
@@ -72126,6 +73935,10 @@
           "kv_dataset_message_support": {
             "description": "KvDatasetMessageSupport indicates whether to use the new messages experience for KV datasets.",
             "type": "boolean"
+          },
+          "langchain_provider_spend_limit_monthly": {
+            "description": "LangChainProviderSpendLimitMonthly overrides the per-plan-tier monthly at-cost\nspend cap (USD) for the /langchain gateway resell provider, resolved from plan/\nMetronome config like FleetLCUSpendLimitMonthly. nil falls back to the tier\ndefault; this is how a cap raised on request is applied. Permission to use the\nprovider is still governed by plan tier, not this value.",
+            "type": "number"
           },
           "langgraph_deploy_own_cloud_enabled": {
             "description": "LangGraphDeployOwnCloudEnabled indicates whether the org can deploy LangGraph cloud to their own cloud.",
@@ -72179,7 +73992,7 @@
             "type": "integer"
           },
           "max_prompt_webhooks": {
-            "description": "MaxPromptWebhooks is the maximum number of prompt webhooks allowed for this org.",
+            "description": "MaxPromptWebhooks independently limits each org's Prompt Hub and Context Hub webhook collections.",
             "type": "integer"
           },
           "max_sandbox_cpu": {
@@ -72802,6 +74615,23 @@
           }
         }
       },
+      "data_planes.ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "error": {
+            "type": "string"
+          },
+          "missing_permissions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/data_planes.MissingPermission"
+            }
+          }
+        }
+      },
       "data_planes.ListPublicDataPlanesResponse": {
         "type": "object",
         "properties": {
@@ -72810,6 +74640,20 @@
             "items": {
               "$ref": "#/components/schemas/data_planes.PublicDataPlane"
             }
+          }
+        }
+      },
+      "data_planes.MissingPermission": {
+        "type": "object",
+        "properties": {
+          "action": {
+            "type": "string"
+          },
+          "decision": {
+            "type": "string"
+          },
+          "resource_arn": {
+            "type": "string"
           }
         }
       },
@@ -73055,6 +74899,10 @@
           },
           "parent_commit": {
             "type": "string"
+          },
+          "skip_webhooks": {
+            "description": "SkipWebhooks, when true, suppresses Context Hub commit webhooks for this\ncommit. Deliberately a plain bool, not the any (bool | []string) shape of\nthe prompt-hub CreateCommitReq.SkipWebhooks: Context Hub v1 has no\nper-webhook filtering, so a bool is the correct shape.",
+            "type": "boolean"
           }
         }
       },
@@ -73072,6 +74920,9 @@
             "additionalProperties": {}
           }
         }
+      },
+      "errutil.UserError": {
+        "type": "object"
       },
       "evaluators.BulkDeleteEvaluatorFailedItem": {
         "type": "object",
@@ -73159,6 +75010,10 @@
           "commit_hash_or_tag": {
             "type": "string"
           },
+          "playground_settings_id": {
+            "description": "Model Configuration ID",
+            "type": "string"
+          },
           "prompt_repo_handle": {
             "type": "string"
           },
@@ -73196,6 +75051,10 @@
           },
           "id": {
             "type": "string"
+          },
+          "is_managed": {
+            "description": "IsManaged marks a LangChain-managed evaluator (currently the managed\nPerceived Error judge). NULL in the DB is read as false via COALESCE.",
+            "type": "boolean"
           },
           "llm_evaluator": {
             "description": "Embedded child evaluator (populated based on type)",
@@ -73467,6 +75326,10 @@
           },
           "num_few_shot_examples": {
             "type": "integer"
+          },
+          "playground_settings_id": {
+            "description": "Model Configuration ID",
+            "type": "string"
           },
           "prompt_repo_handle": {
             "type": "string"
@@ -73768,6 +75631,13 @@
             "description": "CurrentSpendUSD is the spend in the policy's current window. Set for\nany spend_cap policy regardless of enabled state — disabled policies\nstill surface usage so users can see what would have been counted.\nNil for non-spend_cap policies or when the spend lookup failed.",
             "type": "number"
           },
+          "current_usage": {
+            "description": "CurrentUsage is the consumed units in each configured limit's current\nwindow. Set for any rate_limit policy regardless of enabled state, one\nentry per limit in the config. Nil for non-rate_limit policies or when\nthe usage lookup failed.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/gateway_policies.RateLimitUsage"
+            }
+          },
           "description": {
             "type": "string"
           },
@@ -73787,7 +75657,7 @@
             "type": "string"
           },
           "parent_policy_id": {
-            "description": "ParentPolicyID is set on materialized children of a default_spend_cap\nto the default's id, and cleared (NULL) only when an admin Create\nwith the same matchers takes over the materialized row. Update on a\nchild preserves the link; Delete on the parent cascade-soft-deletes\nevery child rather than detaching them.",
+            "description": "ParentPolicyID is set on materialized children of a default_spend_cap\nto the default's id. An explicit Update or a Create with the same\nmatchers clears the link and takes ownership of the materialized row.\nDelete on the parent cascade-soft-deletes children still attached.",
             "type": "string"
           },
           "policy_type": {
@@ -73806,6 +75676,53 @@
             "type": "string"
           }
         }
+      },
+      "gateway_policies.RateLimitMetric": {
+        "type": "string",
+        "enum": [
+          "requests",
+          "tokens"
+        ],
+        "x-enum-varnames": [
+          "RateLimitMetricRequests",
+          "RateLimitMetricTokens"
+        ]
+      },
+      "gateway_policies.RateLimitUsage": {
+        "type": "object",
+        "properties": {
+          "metric": {
+            "description": "Metric is the counted usage dimension: requests or tokens.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/gateway_policies.RateLimitMetric"
+              }
+            ]
+          },
+          "value": {
+            "description": "Value is the units consumed so far in the current window.",
+            "type": "integer"
+          },
+          "window": {
+            "description": "Window is the time window the usage is measured over.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/gateway_policies.RateLimitWindow"
+              }
+            ]
+          }
+        }
+      },
+      "gateway_policies.RateLimitWindow": {
+        "type": "string",
+        "enum": [
+          "minute",
+          "hour"
+        ],
+        "x-enum-varnames": [
+          "RateLimitWindowMinute",
+          "RateLimitWindowHour"
+        ]
       },
       "gateway_policies.SearchGatewayPoliciesRequest": {
         "type": "object",
@@ -74077,6 +75994,9 @@
               "$ref": "#/components/schemas/issues_agent_usage.LCUSpendItem"
             }
           },
+          "next_cursor": {
+            "type": "string"
+          },
           "organization_id": {
             "type": "string"
           },
@@ -74089,6 +76009,12 @@
           "resolved_monthly_spend_limit_lcu": {
             "description": "ResolvedMonthlySpendLimitLCU is the effective monthly LCU spend limit enforced for\nthis org — the minimum of the finance, plan, and admin layers — or null when\nunlimited. Surfaced so the UI can render spend against the true enforced limit\nrather than the admin layer alone. Serialized as a string for NUMERIC precision.",
             "type": "string"
+          },
+          "total_lcu": {
+            "type": "string"
+          },
+          "total_unpriced_row_count": {
+            "type": "integer"
           }
         }
       },
@@ -74421,6 +76347,32 @@
           }
         }
       },
+      "oauth.AuthorizedAppView": {
+        "type": "object",
+        "properties": {
+          "authorized_at": {
+            "type": "string"
+          },
+          "client_id": {
+            "type": "string"
+          },
+          "client_name": {
+            "type": "string"
+          },
+          "client_uri": {
+            "type": "string"
+          },
+          "logo_uri": {
+            "type": "string"
+          },
+          "scopes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
       "oauth.ClientPublicMetadata": {
         "type": "object",
         "properties": {
@@ -74535,6 +76487,48 @@
           }
         }
       },
+      "oauth.CreateOAuthClientRequest": {
+        "type": "object",
+        "properties": {
+          "allowed_scopes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "client_name": {
+            "type": "string"
+          },
+          "client_type": {
+            "description": "\"public\" or \"confidential\"",
+            "type": "string"
+          },
+          "client_uri": {
+            "type": "string"
+          },
+          "grant_types": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "logo_uri": {
+            "type": "string"
+          },
+          "policy_uri": {
+            "type": "string"
+          },
+          "redirect_uris": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "tos_uri": {
+            "type": "string"
+          }
+        }
+      },
       "oauth.DeviceCodeResponse": {
         "type": "object",
         "properties": {
@@ -74551,6 +76545,152 @@
             "type": "string"
           },
           "verification_uri": {
+            "type": "string"
+          }
+        }
+      },
+      "oauth.OAuthClientCredentialsResponse": {
+        "type": "object",
+        "properties": {
+          "client": {
+            "$ref": "#/components/schemas/oauth.OAuthClientView"
+          },
+          "client_secret": {
+            "type": "string"
+          }
+        }
+      },
+      "oauth.OAuthClientListResponse": {
+        "type": "object",
+        "properties": {
+          "clients": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/oauth.OAuthClientView"
+            }
+          }
+        }
+      },
+      "oauth.OAuthClientView": {
+        "type": "object",
+        "properties": {
+          "allowed_scopes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "client_id": {
+            "type": "string"
+          },
+          "client_name": {
+            "type": "string"
+          },
+          "client_type": {
+            "type": "string"
+          },
+          "client_uri": {
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string"
+          },
+          "disabled": {
+            "type": "boolean"
+          },
+          "grant_types": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "id": {
+            "type": "string"
+          },
+          "logo_uri": {
+            "type": "string"
+          },
+          "policy_uri": {
+            "type": "string"
+          },
+          "redirect_uris": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "tos_uri": {
+            "type": "string"
+          },
+          "updated_at": {
+            "type": "string"
+          }
+        }
+      },
+      "oauth.OIDCProviderMetadata": {
+        "type": "object",
+        "properties": {
+          "authorization_endpoint": {
+            "type": "string"
+          },
+          "claims_supported": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "code_challenge_methods_supported": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "grant_types_supported": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "id_token_signing_alg_values_supported": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "issuer": {
+            "type": "string"
+          },
+          "jwks_uri": {
+            "type": "string"
+          },
+          "response_types_supported": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "scopes_supported": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "subject_types_supported": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "token_endpoint": {
+            "type": "string"
+          },
+          "token_endpoint_auth_methods_supported": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "userinfo_endpoint": {
             "type": "string"
           }
         }
@@ -74575,6 +76715,9 @@
           "expires_in": {
             "type": "integer"
           },
+          "id_token": {
+            "type": "string"
+          },
           "refresh_token": {
             "type": "string"
           },
@@ -74582,6 +76725,67 @@
             "type": "string"
           },
           "workspace_id": {
+            "type": "string"
+          }
+        }
+      },
+      "oauth.UpdateOAuthClientRequest": {
+        "type": "object",
+        "properties": {
+          "allowed_scopes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "client_name": {
+            "type": "string"
+          },
+          "client_uri": {
+            "type": "string"
+          },
+          "disabled": {
+            "type": "boolean"
+          },
+          "logo_uri": {
+            "type": "string"
+          },
+          "policy_uri": {
+            "type": "string"
+          },
+          "redirect_uris": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "tos_uri": {
+            "type": "string"
+          }
+        }
+      },
+      "oauth.UserinfoResponse": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string"
+          },
+          "email_verified": {
+            "type": "boolean"
+          },
+          "ls_org_id": {
+            "type": "string"
+          },
+          "ls_org_name": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "picture": {
+            "type": "string"
+          },
+          "sub": {
             "type": "string"
           }
         }
@@ -74882,7 +77086,8 @@
                 "COMPLETION_COST_DETAILS",
                 "PRICE_MODEL_ID",
                 "TAGS",
-                "THREAD_EVALUATION_TIME"
+                "THREAD_EVALUATION_TIME",
+                "FEEDBACK_STATS"
               ]
             },
             "example": [
@@ -75403,6 +77608,12 @@
             "type": "boolean",
             "example": true
           },
+          "last_queued_at": {
+            "description": "`last_queued_at` is the most recent time this run was added to an annotation queue.",
+            "type": "string",
+            "format": "date-time",
+            "example": "2024-01-15T10:31:00Z"
+          },
           "latency_seconds": {
             "description": "`latency_seconds` is wall-clock duration from start to end in seconds.",
             "type": "number",
@@ -75605,6 +77816,7 @@
           "ATTACHMENTS",
           "THREAD_EVALUATION_TIME",
           "IS_IN_DATASET",
+          "LAST_QUEUED_AT",
           "SHARE_URL",
           "FEEDBACK_STATS"
         ],
@@ -75651,6 +77863,7 @@
           "RunSelectAttachments",
           "RunSelectThreadEvaluationTime",
           "RunSelectIsInDataset",
+          "RunSelectLastQueuedAt",
           "RunSelectShareURL",
           "RunSelectFeedbackStats"
         ]
@@ -75688,6 +77901,14 @@
           "RunTypePrompt",
           "RunTypeParser"
         ]
+      },
+      "query.RunURLResponse": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string"
+          }
+        }
       },
       "query.Trace": {
         "type": "object",
@@ -75833,6 +78054,39 @@
           }
         }
       },
+      "sandboxapi.ContextHubMountSpec": {
+        "type": "object",
+        "required": [
+          "repo"
+        ],
+        "properties": {
+          "initial_pull_only": {
+            "description": "InitialPullOnly syncs the repo once at startup instead of polling for\nupdates for the sandbox's lifetime.",
+            "type": "boolean"
+          },
+          "repo": {
+            "description": "Repo is the Context Hub repository to sync, as \"owner/repo\"\n(e.g. \"-/my-agent\", where \"-\" is the current workspace). The repo's\nlatest commit tree is mirrored into the mount path.",
+            "type": "string"
+          }
+        }
+      },
+      "sandboxapi.FileInfo": {
+        "type": "object",
+        "properties": {
+          "is_dir": {
+            "type": "boolean"
+          },
+          "modified_at": {
+            "type": "string"
+          },
+          "path": {
+            "type": "string"
+          },
+          "size_bytes": {
+            "type": "integer"
+          }
+        }
+      },
       "sandboxapi.GCSMountSpec": {
         "type": "object",
         "required": [
@@ -75884,6 +78138,20 @@
           }
         }
       },
+      "sandboxapi.GrepMatch": {
+        "type": "object",
+        "properties": {
+          "line": {
+            "type": "integer"
+          },
+          "path": {
+            "type": "string"
+          },
+          "text": {
+            "type": "string"
+          }
+        }
+      },
       "sandboxapi.MountCacheSpec": {
         "type": "object",
         "properties": {
@@ -75902,12 +78170,14 @@
         "enum": [
           "s3",
           "gcs",
-          "git"
+          "git",
+          "contexthub"
         ],
         "x-enum-varnames": [
           "MountKindS3",
           "MountKindGCS",
-          "MountKindGit"
+          "MountKindGit",
+          "MountKindContextHub"
         ]
       },
       "sandboxapi.MountSpec": {
@@ -75920,6 +78190,9 @@
         "properties": {
           "cache": {
             "$ref": "#/components/schemas/sandboxapi.MountCacheSpec"
+          },
+          "contexthub": {
+            "$ref": "#/components/schemas/sandboxapi.ContextHubMountSpec"
           },
           "gcs": {
             "$ref": "#/components/schemas/sandboxapi.GCSMountSpec"
@@ -75944,7 +78217,8 @@
             "enum": [
               "s3",
               "gcs",
-              "git"
+              "git",
+              "contexthub"
             ],
             "allOf": [
               {
@@ -75957,7 +78231,8 @@
           "mapping": {
             "s3": "#/components/schemas/sandboxapi.S3BucketMountSpec",
             "gcs": "#/components/schemas/sandboxapi.GCSBucketMountSpec",
-            "git": "#/components/schemas/sandboxapi.GitRepoMountSpec"
+            "git": "#/components/schemas/sandboxapi.GitRepoMountSpec",
+            "contexthub": "#/components/schemas/sandboxapi.ContextHubRepoMountSpec"
           },
           "propertyName": "type"
         },
@@ -75970,6 +78245,9 @@
           },
           {
             "$ref": "#/components/schemas/sandboxapi.GitRepoMountSpec"
+          },
+          {
+            "$ref": "#/components/schemas/sandboxapi.ContextHubRepoMountSpec"
           }
         ]
       },
@@ -76109,6 +78387,14 @@
             "description": "IncludeMemory, when true, captures a full VM memory snapshot\nalongside the filesystem clone. Only honored when the sandbox is running\nAND Checkpoint is omitted (i.e. a fresh in-VM checkpoint is requested).\nDefaults to false to keep snapshots small unless memory restore is\nexplicitly desired.",
             "type": "boolean"
           },
+          "labels": {
+            "description": "Labels seed the captured snapshot's labels.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/sandboxes.Labels"
+              }
+            ]
+          },
           "name": {
             "type": "string"
           }
@@ -76159,6 +78445,14 @@
           "idle_ttl_seconds": {
             "type": "integer"
           },
+          "labels": {
+            "description": "Labels are free-form key/value metadata persisted with the sandbox and returned on reads. Labels from the source snapshot are inherited unless overridden here.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/sandboxes.Labels"
+              }
+            ]
+          },
           "mem_bytes": {
             "type": "integer"
           },
@@ -76167,6 +78461,10 @@
           },
           "name": {
             "type": "string"
+          },
+          "preserve_memory_on_stop": {
+            "description": "PreserveMemoryOnStop, when true, suspends the sandbox's memory on a\nvoluntary stop (idle timeout or explicit stop) so the next start resumes\nfrom where it left off. Default false discards memory and keeps only the\nfilesystem, so the next start is a cold boot. Restarts triggered by\ninfrastructure maintenance always preserve memory regardless of this setting.",
+            "type": "boolean"
           },
           "proxy_config": {
             "$ref": "#/components/schemas/sandboxes.ProxyConfig"
@@ -76205,6 +78503,14 @@
           },
           "fs_capacity_bytes": {
             "type": "integer"
+          },
+          "labels": {
+            "description": "Labels seed the snapshot's labels, overriding any label of the same key derived from the Docker image.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/sandboxes.Labels"
+              }
+            ]
           },
           "name": {
             "type": "string"
@@ -76274,6 +78580,65 @@
           }
         }
       },
+      "sandboxes.GlobRequest": {
+        "type": "object",
+        "properties": {
+          "limit": {
+            "type": "integer"
+          },
+          "path": {
+            "type": "string"
+          },
+          "pattern": {
+            "type": "string"
+          }
+        }
+      },
+      "sandboxes.GlobResponse": {
+        "type": "object",
+        "properties": {
+          "matches": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/sandboxapi.FileInfo"
+            }
+          },
+          "truncated": {
+            "type": "boolean"
+          }
+        }
+      },
+      "sandboxes.GrepRequest": {
+        "type": "object",
+        "properties": {
+          "glob": {
+            "type": "string"
+          },
+          "limit": {
+            "type": "integer"
+          },
+          "path": {
+            "type": "string"
+          },
+          "pattern": {
+            "type": "string"
+          }
+        }
+      },
+      "sandboxes.GrepResponse": {
+        "type": "object",
+        "properties": {
+          "matches": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/sandboxapi.GrepMatch"
+            }
+          },
+          "truncated": {
+            "type": "boolean"
+          }
+        }
+      },
       "sandboxes.HeaderType": {
         "type": "string",
         "enum": [
@@ -76286,6 +78651,12 @@
           "HeaderTypeOpaque",
           "HeaderTypeWorkspaceSecret"
         ]
+      },
+      "sandboxes.Labels": {
+        "type": "object",
+        "additionalProperties": {
+          "type": "string"
+        }
       },
       "sandboxes.ProxyAWSConfig": {
         "type": "object",
@@ -76388,6 +78759,13 @@
           },
           "enabled": {
             "type": "boolean"
+          },
+          "env_vars": {
+            "description": "EnvVars are plaintext env vars set for every command in the sandbox while this rule is enabled. Use them for tools that refuse to run unless a credential env var is present (e.g. gh needs GH_TOKEN) even though this rule injects the real credential on the wire — set a dummy value here so the command starts. Explicit per-sandbox env_vars win over these, and provider-managed (AWS/GCP) vars win over both.",
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
           },
           "gcp": {
             "$ref": "#/components/schemas/sandboxes.ProxyGCPConfig"
@@ -76577,6 +78955,9 @@
           "idle_ttl_seconds": {
             "type": "integer"
           },
+          "labels": {
+            "$ref": "#/components/schemas/sandboxes.Labels"
+          },
           "mem_bytes": {
             "type": "integer"
           },
@@ -76585,6 +78966,9 @@
           },
           "name": {
             "type": "string"
+          },
+          "preserve_memory_on_stop": {
+            "type": "boolean"
           },
           "proxy_config": {
             "$ref": "#/components/schemas/sandboxes.ProxyConfig"
@@ -76691,6 +79075,9 @@
           },
           "image_digest": {
             "type": "string"
+          },
+          "labels": {
+            "$ref": "#/components/schemas/sandboxes.Labels"
           },
           "memory_snapshot_size_bytes": {
             "description": "MemorySnapshotSizeBytes is non-nil iff the snapshot was captured with\nVM memory state. A non-nil value is the canonical signal that this\nsnapshot can warm-restore from memory; nil means rootfs only.",
@@ -76992,6 +79379,17 @@
           }
         }
       },
+      "share.DeleteShareTokenRequestBody": {
+        "type": "object",
+        "properties": {
+          "session_id": {
+            "description": "session_id is the tracing project UUID containing the trace.",
+            "type": "string",
+            "format": "uuid",
+            "example": "018e4c7e-a9fb-7ef0-a5b6-6ea3a82e9327"
+          }
+        }
+      },
       "shared.ProblemDetails": {
         "description": "RFC 7807 problem details returned on V2 API errors.",
         "type": "object",
@@ -77262,12 +79660,12 @@
             "type": "string"
           },
           "max_start_time": {
-            "description": "`max_start_time` is the exclusive upper bound on thread activity (RFC3339 date-time).",
+            "description": "`max_start_time` is the exclusive upper bound on thread activity (RFC3339 date-time). Defaults to now (UTC) when omitted.",
             "type": "string",
             "format": "date-time"
           },
           "min_start_time": {
-            "description": "`min_start_time` is the inclusive lower bound on thread activity (RFC3339 date-time).",
+            "description": "`min_start_time` is the inclusive lower bound on thread activity (RFC3339 date-time). Defaults to 1 day before now (UTC) when omitted.",
             "type": "string",
             "format": "date-time"
           },
@@ -77491,6 +79889,11 @@
             "format": "date-time",
             "example": "2025-01-15T12:00:01.500Z"
           },
+          "error": {
+            "description": "`error` is the full root run error message when the run failed. Omitted unless included in `selects`.",
+            "type": "string",
+            "example": "context deadline exceeded"
+          },
           "error_preview": {
             "description": "`error_preview` is a short error summary when the run failed. Omitted unless included in `selects`.",
             "type": "string"
@@ -77500,6 +79903,10 @@
             "type": "string",
             "format": "date-time",
             "example": "2024-01-15T10:30:00.312Z"
+          },
+          "inputs": {
+            "description": "`inputs` is the full root run input payload. Omitted unless included in `selects`.",
+            "type": "object"
           },
           "inputs_preview": {
             "description": "`inputs_preview` is a truncated text preview of inputs. Omitted unless included in `selects`.",
@@ -77516,6 +79923,10 @@
           "op": {
             "description": "`op` is a numeric code identifying the root run's `run_type` (for example LLM vs. tool vs. chain). Encoded as a number for compatibility with legacy clients; prefer the string `run_type` on `RunResponse` when available. Omitted unless included in `selects`.",
             "type": "number"
+          },
+          "outputs": {
+            "description": "`outputs` is the full root run output payload. Omitted unless included in `selects`.",
+            "type": "object"
           },
           "outputs_preview": {
             "description": "`outputs_preview` is a truncated text preview of outputs. Omitted unless included in `selects`.",
@@ -77588,6 +79999,9 @@
           "FIRST_TOKEN_TIME",
           "INPUTS_PREVIEW",
           "OUTPUTS_PREVIEW",
+          "INPUTS",
+          "OUTPUTS",
+          "ERROR",
           "PROMPT_COST",
           "COMPLETION_COST",
           "TOTAL_COST",
@@ -77611,6 +80025,9 @@
           "ThreadTraceSelectFirstTokenTime",
           "ThreadTraceSelectInputsPreview",
           "ThreadTraceSelectOutputsPreview",
+          "ThreadTraceSelectInputs",
+          "ThreadTraceSelectOutputs",
+          "ThreadTraceSelectError",
           "ThreadTraceSelectPromptCost",
           "ThreadTraceSelectCompletionCost",
           "ThreadTraceSelectTotalCost",
@@ -77874,6 +80291,10 @@
               "type": "object"
             }
           },
+          "recurrences_since_watching": {
+            "description": "RecurrencesSinceWatching counts linked traces whose run start_time is after\nwatching_since — i.e. recurrences observed during the current watch period.",
+            "type": "integer"
+          },
           "session_id": {
             "type": "string"
           },
@@ -77896,6 +80317,9 @@
             "type": "object"
           },
           "updated_at": {
+            "type": "string"
+          },
+          "watching_since": {
             "type": "string"
           }
         }
@@ -77966,11 +80390,15 @@
         "type": "string",
         "enum": [
           "open",
+          "fixing",
+          "watching",
           "completed",
           "ignored"
         ],
         "x-enum-varnames": [
           "StatusOpen",
+          "StatusFixing",
+          "StatusWatching",
           "StatusCompleted",
           "StatusIgnored"
         ]
@@ -78189,6 +80617,13 @@
           "id": {
             "type": "string"
           },
+          "issue_statuses": {
+            "description": "IssueStatuses scopes delivery to issues in one of these statuses. Nil/empty\n(the default) fires for every status.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
           "organization_id": {
             "description": "OrganizationID is derived from the tenant on fetch (no stored column); the\nrow carries it so Slack delivery can address the org-scoped install.",
             "type": "string"
@@ -78347,6 +80782,11 @@
               "required": [
                 "git"
               ]
+            },
+            {
+              "required": [
+                "contexthub"
+              ]
             }
           ]
         }
@@ -78398,6 +80838,11 @@
               "required": [
                 "git"
               ]
+            },
+            {
+              "required": [
+                "contexthub"
+              ]
             }
           ]
         }
@@ -78445,6 +80890,64 @@
             {
               "required": [
                 "gcs"
+              ]
+            },
+            {
+              "required": [
+                "contexthub"
+              ]
+            }
+          ]
+        }
+      },
+      "sandboxapi.ContextHubRepoMountSpec": {
+        "type": "object",
+        "required": [
+          "id",
+          "mount_path",
+          "type",
+          "contexthub"
+        ],
+        "properties": {
+          "contexthub": {
+            "$ref": "#/components/schemas/sandboxapi.ContextHubMountSpec"
+          },
+          "id": {
+            "type": "string",
+            "maxLength": 64
+          },
+          "mount_path": {
+            "type": "string"
+          },
+          "read_only": {
+            "type": "boolean"
+          },
+          "type": {
+            "enum": [
+              "contexthub"
+            ],
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/sandboxapi.MountKind"
+              }
+            ]
+          }
+        },
+        "not": {
+          "anyOf": [
+            {
+              "required": [
+                "s3"
+              ]
+            },
+            {
+              "required": [
+                "gcs"
+              ]
+            },
+            {
+              "required": [
+                "git"
               ]
             }
           ]
